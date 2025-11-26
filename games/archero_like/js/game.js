@@ -51,6 +51,12 @@ const MONSTERS = {
     ]
 };
 
+/* --- 自定义倍率配置 --- */
+const CONFIG = {
+    expRate: 5.0,    // 经验变为10倍
+    dmgRate: 1.8     // 伤害提升80%
+};
+
 /* --- 2. 工具函数 (Utils) --- */
 const Utils = {
     rand(min, max) { return Math.random() * (max - min) + min; },
@@ -168,7 +174,8 @@ class Player {
     shoot(x, y, angle, isExtra = false) {
         // 计算暴击
         const isCrit = Math.random() < this.critRate;
-        const finalDmg = this.dmg * (isCrit ? 2.0 : 1.0);
+        const finalDmg = this.dmg * CONFIG.dmgRate * (isCrit ? 2.0 : 1.0);
+
 
         // 剑心积累
         if (!isExtra) {
@@ -187,6 +194,7 @@ class Player {
     }
 
     gainExp(val) {
+        val *= CONFIG.expRate;   // ⭐ 加经验倍率
         this.exp += val;
         const nextRealm = REALMS[this.realmIdx];
 
@@ -275,7 +283,7 @@ class FlyingSword {
             const target = Game.getNearestEnemy(this.x, this.y, 200);
             if (target) {
                 const a = Math.atan2(target.y - this.y, target.x - this.x);
-                Game.bullets.push(new Bullet(this.x, this.y, a, player.dmg * 0.5, 10, false, false));
+                Game.bullets.push(new Bullet(this.x, this.y, a, player.dmg * 0.5 * CONFIG.dmgRate, 10, false, false));
                 this.cooldown = this.maxCooldown; // 1秒一发
             }
         }
