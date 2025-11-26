@@ -43,11 +43,11 @@ const MONSTERS = {
         { name: "风狼", hp: 30, speed: 3.0, color: "#708090", size: 18, score: 20, exp: 10 }
     ],
     elite: [
-        { name: "千年树妖", hp: 500, speed: 1.0, color: "#228B22", size: 35, score: 200, exp: 100 },
-        { name: "赤炎兽", hp: 400, speed: 2.5, color: "#FF4500", size: 30, score: 250, exp: 120 }
+        { name: "千年树妖", hp: 50, speed: 1.0, color: "#228B22", size: 35, score: 200, exp: 100 },
+        { name: "赤炎兽", hp: 100, speed: 2.5, color: "#FF4500", size: 30, score: 250, exp: 120 }
     ],
     boss: [
-        { name: "九幽魔尊", hp: 50000, speed: 1.8, color: "#000000", size: 60, score: 10000, exp: 5000 }
+        { name: "九幽魔尊", hp: 300, speed: 1.8, color: "#000000", size: 60, score: 10000, exp: 5000 }
     ]
 };
 
