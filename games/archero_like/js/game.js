@@ -112,7 +112,7 @@ class Player {
         this.dmg = 15;
         this.atkSpeed = 30; // 帧间隔 (越小越快)
         this.critRate = 0.05;
-        this.pickupRange = 80;
+        this.pickupRange = 200; // 默认吸取范围
 
         // 状态
         this.exp = 0;
