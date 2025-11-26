@@ -7,13 +7,13 @@
 
 // 境界体系 (Realm System)
 const REALMS = [
-    { name: "练气初期", exp: 100 }, { name: "练气中期", exp: 250 }, { name: "练气后期", exp: 500 },
-    { name: "筑基初期", exp: 1000 }, { name: "筑基中期", exp: 2000 }, { name: "筑基后期", exp: 3500 },
-    { name: "结丹初期", exp: 6000 }, { name: "结丹中期", exp: 9000 }, { name: "结丹后期", exp: 13000 },
-    { name: "元婴初期", exp: 20000 }, { name: "元婴中期", exp: 30000 }, { name: "元婴后期", exp: 45000 },
-    { name: "化神初期", exp: 70000 }, { name: "化神中期", exp: 100000 }, { name: "化神后期", exp: 150000 },
-    { name: "炼虚", exp: 250000 }, { name: "合体", exp: 400000 }, { name: "大乘", exp: 700000 },
-    { name: "渡劫", exp: 1000000 }, { name: "真仙", exp: Infinity }
+    { name: "练气初期", exp: 100 }, { name: "练气中期", exp: 200 }, { name: "练气后期", exp: 300 },
+    { name: "筑基初期", exp: 500 }, { name: "筑基中期", exp: 1000 }, { name: "筑基后期", exp: 1500 },
+    { name: "结丹初期", exp: 2000 }, { name: "结丹中期", exp: 3000 }, { name: "结丹后期", exp: 5000 },
+    { name: "元婴初期", exp: 10000 }, { name: "元婴中期", exp: 15000 }, { name: "元婴后期", exp: 30000 },
+    { name: "化神初期", exp: 50000 }, { name: "化神中期", exp: 70000 }, { name: "化神后期", exp: 100000 },
+    { name: "炼虚", exp: 150000 }, { name: "合体", exp: 300000 }, { name: "大乘", exp: 500000 },
+    { name: "渡劫", exp: 700000 }, { name: "真仙", exp: Infinity }
 ];
 
 // 技能库 (Skill Pool)
