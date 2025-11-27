@@ -54,7 +54,7 @@ const MONSTERS = {
 /* --- 自定义倍率配置 --- */
 const CONFIG = {
     expRate: 10.0,    // 经验变为10倍
-    dmgRate: 1.8     // 伤害提升80%
+    dmgRate: 3    // 伤害提升3倍
 };
 
 /* --- 2. 工具函数 (Utils) --- */
