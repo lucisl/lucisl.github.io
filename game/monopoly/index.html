@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>大富翁 · 云栖之城 — DevKit 小游戏</title>
+    <meta name="description" content="云栖之城是一款纯浏览器本地的单人大富翁游戏：买地、建楼、收租、道具博弈，对抗三位 AI 对手。">
+    <meta name="theme-color" content="#101815">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../assets/styles.css">
+    <link rel="stylesheet" href="../../assets/monopoly.css">
+  </head>
+  <body class="game-body">
+    <a class="skip-link" href="#game-main">跳到主要内容</a>
+
+    <div class="game-shell">
+      <header class="game-topbar">
+        <a class="back-link" href="../../index.html" aria-label="返回 DevKit 工具箱">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>返回工具箱</span>
+        </a>
+        <div class="game-title">
+          <p class="eyebrow">DEVELOPER TOOLBOX · GAME</p>
+          <h1>大富翁 · 云栖之城</h1>
+          <p class="tagline">一点运气，一整座城市的野心。</p>
+        </div>
+        <div class="top-controls">
+          <button type="button" data-action="toggle-sound" aria-pressed="false" aria-label="开启音效" title="开启音效">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/></svg>
+          </button>
+          <button type="button" data-action="toggle-speed" aria-label="当前 1 倍速，点击切换" title="切换速度">×1</button>
+          <button type="button" data-action="toggle-pause" aria-label="暂停游戏" title="暂停" disabled>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" data-action="open-rules" aria-label="玩法说明" title="玩法说明">?</button>
+          <button type="button" data-action="save-game" aria-label="保存对局" title="保存对局" disabled>保存对局</button>
+          <button type="button" data-action="new-game" aria-label="新一局" title="新一局">新一局</button>
+        </div>
+      </header>
+
+      <p id="game-status" class="game-status" role="status" aria-live="polite">等待开始游戏</p>
+
+      <main id="game-main" class="game-main" tabindex="-1">
+        <section id="player-rail" class="player-rail" aria-label="玩家资产概览"></section>
+
+        <section class="board-area">
+          <div id="board" class="board" role="group" aria-label="城市棋盘，从右下角起点顺时针前进"></div>
+        </section>
+
+        <aside id="management" class="management" aria-label="经营面板">
+          <div id="save-panel" class="mp-card" aria-label="当前对局存档"></div>
+          <div id="market-panel" class="mp-card" aria-label="城市风向"></div>
+          <div id="bag-panel" class="mp-card" aria-label="策略背包"></div>
+          <div class="mp-tabs">
+            <div role="tablist" aria-label="动态与地产">
+              <button role="tab" id="tab-log" aria-selected="true" aria-controls="panel-log" data-tab="log" type="button">动态</button>
+              <button role="tab" id="tab-props" aria-selected="false" aria-controls="panel-props" data-tab="props" type="button">地产 <span id="prop-count" class="chip-count">0</span></button>
+            </div>
+            <div role="tabpanel" id="panel-log" aria-labelledby="tab-log" tabindex="0">
+              <p class="log-title">城市里的新鲜事</p>
+              <ul id="log-list" class="log-list"></ul>
+              <p id="log-empty" class="log-empty">故事即将开始，每次交易、奇遇与道具都会记录在这里。</p>
+            </div>
+            <div role="tabpanel" id="panel-props" aria-labelledby="tab-props" tabindex="0" hidden>
+              <p class="log-title">我的城市版图</p>
+              <ul id="props-list" class="props-list"></ul>
+              <p id="props-empty" class="log-empty">暂无地产。停在无主地块即可买下。</p>
+            </div>
+          </div>
+          <p class="mp-foot">无需登录 · 本地游玩 · 仅保存当前对局</p>
+        </aside>
+      </main>
+    </div>
+
+    <!-- 规则说明弹窗 -->
+    <div class="modal" id="rules-modal" role="dialog" aria-modal="true" aria-labelledby="rules-title" hidden>
+      <div class="modal-card">
+        <header>
+          <h2 id="rules-title">城市梦想家的经营指南</h2>
+          <button type="button" class="modal-x" data-action="close-rules" aria-label="关闭">×</button>
+        </header>
+        <div class="modal-body">
+          <p>周稳安偏好稳健收租，秦逐积极投资建设，苏妙擅长道具博弈。他们与你争夺同一座城市。</p>
+          <h3>你的回合，你来规划</h3>
+          <p>掷骰前可使用 1 张道具、付费升级 1 处地产，顺序不限。掷骰移动后处理买地、租金或事件，再结束回合。经过新启程广场领取 800 城市币。</p>
+          <h3>从小地块到收租版图</h3>
+          <p>地块可建到三级，租金依次为基础的 1 / 2 / 3.5 / 5.5 倍。集齐同色地段租金再加 50%；持有两座车站时车站基础租金翻倍。城市风向每 4 轮重新抽取，买地、建楼和租金价格随之变化。</p>
+          <h3>手里有牌，心里有底</h3>
+          <p>商店每次限购 1 张，背包最多 6 张；公园和事件能获得赠卡，赠卡放不下时折算 180 城市币。定点骰精准控步，迁跃卡替代掷骰且不领过路奖励，路障卡只拦下一位步行经过的对手。</p>
+          <h3>现金流比看起来重要</h3>
+          <p>掷骰前或欠款时可变卖资产：先逐层出售建筑（原建造费的 60%），再出售地块（原地价的 65%）。欠款可自动筹款；全部变现仍不够则破产，剩余现金交给债权人，地产归银行。</p>
+          <h3>谁是这座城的大富翁？</h3>
+          <p>全员行动一次为一轮。达到指定轮数后，存活玩家按现金 + 地产和建筑原值排名，同资产时现金多者胜。若只剩一位玩家则提前获胜。</p>
+          <h3>九种道具</h3>
+          <dl id="card-legend" class="card-legend"></dl>
+          <p class="privacy">当前对局自动保存在当前浏览器，仅保留 1 份，开新局会覆盖。所有城市币仅用于游戏，不上传服务器。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 动态模态框容器（买地/商店/选目标/结算） -->
+    <div class="modal" id="dialog-modal" role="dialog" aria-modal="true" hidden>
+      <div class="modal-card" id="dialog-card"></div>
+    </div>
+
+    <noscript><p class="noscript">本游戏需要启用 JavaScript 才能运行。</p></noscript>
+
+    <script type="module" src="../../assets/js/monopoly-app.mjs"></script>
+  </body>
+</html>

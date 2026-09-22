@@ -29,9 +29,14 @@ test('build script creates a deployable artifact without development files', asy
     'assets/js/app.mjs',
     'assets/js/json-core.mjs',
     'assets/js/json-history.mjs',
+    'assets/js/monopoly-ai.mjs',
+    'assets/js/monopoly-app.mjs',
+    'assets/js/monopoly-core.mjs',
     'assets/js/router-core.mjs',
     'assets/js/timestamp-core.mjs',
+    'assets/monopoly.css',
     'assets/styles.css',
+    'game/monopoly/index.html',
     'index.html',
   ]);
 });
