@@ -200,7 +200,7 @@ function renderBoard() {
     const { col, row } = gridPos(tile.index);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'tile';
+    btn.className = 'tile kind-' + tile.kind;
     btn.dataset.tile = tile.index;
     btn.style.gridColumn = col;
     btn.style.gridRow = row;
@@ -217,6 +217,7 @@ function renderBoard() {
     const subEl = document.createElement('span');
     subEl.className = 'g-sub';
     if (prop && prop.owner >= 0) {
+      btn.classList.add('owned');
       subEl.textContent = `${money(currentRent(state, tile.index))}`;
       const owner = document.createElement('i');
       owner.className = 'owner';
@@ -240,8 +241,7 @@ function renderBoard() {
       flag.title = '路障';
       btn.append(flag);
     }
-    if (tile.kind === 'start') btn.classList.add('start');
-    const here = occupy[tile.index] ?? [];
+    if (tile.kind === 'start') btn.classList.add('start');    const here = occupy[tile.index] ?? [];
     if (here.length) btn.classList.add('here');
     if (targeting?.includes(tile.index)) {
       btn.classList.add('targetable');
@@ -275,9 +275,10 @@ function renderBoard() {
       const slot = same.indexOf(p);
       const cx0 = ((col - 0.5) / 7) * 100;
       const cy0 = ((row - 0.5) / 7) * 100;
-      // 边缘格：把棋子朝棋盘中心内收，避免压住外侧业主色条与价格标签
-      const cx = cx0 + (50 - cx0) * 0.22;
-      const cy = cy0 + (50 - cy0) * 0.22;
+      // 边缘格：棋子向棋盘中心内收固定距离，避开外侧色条但不越出本格
+      const inward = 2.5;
+      const cx = cx0 + Math.sign(50 - cx0) * inward;
+      const cy = cy0 + Math.sign(50 - cy0) * inward;
       const dx = (slot % 2 === 0 ? -1 : 1) * 1.6;
       const dy = (slot < 2 ? -1 : 1) * 1.6;
       const offset = (base, d) => `calc(${base}% ${d >= 0 ? '+' : '-'} ${Math.abs(d)}%)`;

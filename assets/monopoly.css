@@ -160,12 +160,13 @@
   gap: 5px;
   aspect-ratio: 1;
   padding: clamp(10px, 1.4vw, 16px);
-  background: var(--panel);
+  background: #131813;
   border: 1px solid var(--line-dark);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-frame);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), var(--shadow-frame);
 }
 
+/* 深色渐变地块：文字全部反白，色彩只存在于色条、标记与棋子 */
 .tile {
   position: relative;
   display: flex;
@@ -173,25 +174,43 @@
   gap: 2px;
   padding: 12px 5px 9px;
   overflow: hidden;
-  color: var(--ink);
+  color: var(--paper);
   text-align: center;
-  background: var(--paper);
-  border: 0;
+  background: linear-gradient(170deg, #2a332b 0%, #1e261f 100%);
+  border: 1px solid rgba(255, 255, 255, .07);
   border-radius: 9px;
   font: inherit;
   cursor: default;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .22);
 }
-.tile:hover { background: #fbf9f2; }
+.tile:hover {
+  background: linear-gradient(170deg, #313c32 0%, #242d25 100%);
+  border-color: rgba(184, 243, 74, .45);
+}
 .tile .g-name {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #eef0e9;
   font-size: clamp(9px, 1.05vw, 12.5px);
   font-weight: 600;
   line-height: 1.25;
 }
-.tile .g-sub { font-family: var(--font-mono); font-size: clamp(8px, .9vw, 11px); color: var(--text-muted); }
+.tile .g-sub {
+  font-family: var(--font-mono);
+  font-size: clamp(8px, .9vw, 11px);
+  color: #aab5aa;
+  letter-spacing: .02em;
+}
+/* 特殊格用极淡的色相区分类型，保持整盘安静 */
+.tile.kind-event { background: linear-gradient(170deg, #2c2836 0%, #201d28 100%); }
+.tile.kind-shop  { background: linear-gradient(170deg, #23313a 0%, #1a242b 100%); }
+.tile.kind-park  { background: linear-gradient(170deg, #243424 0%, #1a271b 100%); }
+.tile.kind-rest  { background: linear-gradient(170deg, #34301f 0%, #252217 100%); }
+.tile.kind-service, .tile.kind-tax { background: linear-gradient(170deg, #382821 0%, #271d18 100%); }
+.tile.kind-service .g-sub, .tile.kind-tax .g-sub { color: #e4a58f; }
+.tile.owned .g-sub { color: var(--lime); font-weight: 700; }
 .tile .stripe { position: absolute; top: 0; left: 0; right: 0; height: 5px; }
 .tile .owner { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; }
 .tile .level-dots {
@@ -201,13 +220,18 @@
   display: flex;
   gap: 2px;
 }
-.tile .level-dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--ink); opacity: .78; }
+.tile .level-dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--lime); opacity: .9; }
 .tile .road-flag { position: absolute; top: 7px; left: 4px; font-size: 11px; }
-.tile.start .g-sub { color: var(--lime-dark); font-weight: 700; }
-.tile.targetable { cursor: pointer; box-shadow: 0 0 0 2px var(--lime); animation: pulse-target 1.2s ease-in-out infinite; }
-.tile.here { box-shadow: 0 0 0 2px rgba(228, 111, 97, .85); }
+.tile.start {
+  background: linear-gradient(165deg, #3d4d26 0%, #232b1c 100%);
+  border-color: rgba(184, 243, 74, .35);
+}
+.tile.start .g-name, .tile.start .g-sub { color: var(--lime); }
+.tile.start .g-sub { font-weight: 700; }
+.tile.targetable { cursor: pointer; border-color: var(--lime); animation: pulse-target 1.2s ease-in-out infinite; }
+.tile.here { border-color: rgba(243, 240, 231, .3); }
 @keyframes pulse-target {
-  50% { box-shadow: 0 0 0 3px var(--lime), 0 0 14px rgba(184, 243, 74, .55); }
+  50% { box-shadow: 0 0 0 2px var(--lime), 0 0 16px rgba(184, 243, 74, .4); }
 }
 
 /* 棋子 */
