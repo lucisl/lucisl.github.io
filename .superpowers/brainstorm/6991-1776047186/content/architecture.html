@@ -1,0 +1,123 @@
+<h2>整体架构设计</h2>
+<p class="subtitle">基于 Hexo 的静态博客站点架构</p>
+
+<div class="section">
+  <h3>技术栈选择</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>✓ 优势</h4>
+      <ul>
+        <li>Git 仓库管理所有内容</li>
+        <li>Markdown 文件易于编写</li>
+        <li>GitHub Actions 自动部署</li>
+        <li>无需服务器运维成本</li>
+        <li>支持 SEO 和快速加载</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>△ 注意</h4>
+      <ul>
+        <li>每次更新需要重新生成</li>
+        <li>动态功能受限(如评论)</li>
+        <li>需要学习 Hexo 配置</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>系统架构图</h3>
+  <div class="mockup">
+    <div class="mockup-header">Hexo 博客系统架构</div>
+    <div class="mockup-body" style="padding: 24px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;">
+        <div class="placeholder" style="text-align: center; padding: 16px;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 8px;">LOCAL DEV</div>
+          <div style="font-weight: 600;">Markdown 文件</div>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">source/_posts/</div>
+        </div>
+        <div class="placeholder" style="text-align: center; padding: 16px;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 8px;">GENERATOR</div>
+          <div style="font-weight: 600;">Hexo</div>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">node.js</div>
+        </div>
+        <div class="placeholder" style="text-align: center; padding: 16px;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 8px;">CI/CD</div>
+          <div style="font-weight: 600;">GitHub Actions</div>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">自动化部署</div>
+        </div>
+        <div class="placeholder" style="text-align: center; padding: 16px;">
+          <div style="font-size: 11px; color: #888; margin-bottom: 8px;">HOSTING</div>
+          <div style="font-weight: 600;">GitHub Pages</div>
+          <div style="font-size: 12px; color: #888; margin-top: 4px;">静态文件</div>
+        </div>
+      </div>
+      <div style="text-align: center; font-size: 12px; color: #888;">
+        Git Push → Hexo Generate → GitHub Actions → GitHub Pages → User Access
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>目录结构</h3>
+  <div class="mockup">
+    <div class="mockup-header">项目文件结构</div>
+    <div class="mockup-body" style="padding: 16px; font-size: 13px; line-height: 1.6;">
+      <pre style="font-family: 'JetBrains Mono', monospace; color: #666;">
+fred.github.io/
+├── source/              # 内容目录
+│   ├── _posts/         # 博客文章
+│   ├── _data/          # 数据文件(项目、片段等)
+│   ├── about/          # 关于页面
+│   └── projects/       # 项目页面
+├── themes/             # 主题目录
+│   └── butterfly/      # Butterfly 主题
+├── scaffolds/          # 文章模板
+├── public/             # 生成的静态文件
+├── _config.yml         # 站点配置
+└── .github/            # GitHub Actions
+    └── workflows/
+        └── deploy.yml  # 自动部署配置
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>核心功能模块</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="blog" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h4>博客文章系统</h4>
+        <p>Markdown 文章、分类、标签、搜索、归档</p>
+      </div>
+    </div>
+    <div class="option" data-choice="projects" onclick="toggleSelect(this)">
+      <div class="letter">P</div>
+      <div class="content">
+        <h4>项目作品展示</h4>
+        <p>项目列表、详情页、技术栈、GitHub链接</p>
+      </div>
+    </div>
+    <div class="option" data-choice="snippets" onclick="toggleSelect(this)">
+      <div class="letter">S</div>
+      <div class="content">
+        <h4>代码片段集合</h4>
+        <p>代码示例、分类管理、复制功能</p>
+      </div>
+    </div>
+    <div class="option" data-choice="about" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h4>关于我页面</h4>
+        <p>个人介绍、工作经历、技能栈、联系方式</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 32px; font-size: 14px; color: #888;">
+  请查看架构设计，然后告诉我：这个整体架构看起来合理吗？有没有需要调整的地方？
+</p>

@@ -1,0 +1,126 @@
+<h2>视觉设计方案</h2>
+<p class="subtitle">简约技术风格配色与主题定制</p>
+
+<div class="section">
+  <h3>配色方案选择</h3>
+  <div class="cards">
+    <div class="card" data-choice="light" onclick="toggleSelect(this)">
+      <div class="card-image" style="background: linear-gradient(135deg, #f5f7fa 0%, #e8ecef 100%); height: 120px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #2c3e50;">LIGHT</div>
+          <div style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">简约清爽</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>浅色主题</h4>
+        <div style="font-size: 12px; color: #666; line-height: 1.6;">
+          <strong>适合：</strong>技术文档风格<br>
+          <strong>参考：</strong>cxhello.top 的基础配色<br>
+          <strong>特点：</strong>清爽专业、阅读舒适
+        </div>
+      </div>
+    </div>
+
+    <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+      <div class="card-image" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); height: 120px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #e8e8f0;">DARK</div>
+          <div style="font-size: 12px; color: #888; margin-top: 8px;">暗黑极客</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <h4>深色主题</h4>
+        <div style="font-size: 12px; color: #666; line-height: 1.6;">
+          <strong>适合：</strong>开发者博客<br>
+          <strong>参考：</strong>你现有 index.html 的配色<br>
+          <strong>特点：</strong>现代酷炫、眼睛友好
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Hexo 主题选择</h3>
+  <div class="options">
+    <div class="option" data-choice="butterfly" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h4>Butterfly 主题（推荐）</h4>
+        <p>功能强大、外观现代、支持深色模式、配置丰富。可以定制成类似 cxhello.top 的风格。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="fluid" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h4>Fluid 主题</h4>
+        <p>Material Design 风格、简洁美观、中文文档完善。适合追求简洁的用户。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="next" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h4>Next 主题</h4>
+        <p>经典稳定、极简风格、社区活跃。但样式较传统，定制空间有限。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>关键设计定制点</h3>
+  <div class="mockup">
+    <div class="mockup-header">Butterfly 主题定制要点</div>
+    <div class="mockup-body" style="padding: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div style="border: 1px solid #ddd; padding: 12px; border-radius: 4px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">顶部导航</div>
+          <div style="font-size: 13px; color: #888;">
+            Logo、博客、项目、片段、关于<br>
+            类似 cxhello.top 的简洁导航
+          </div>
+        </div>
+        <div style="border: 1px solid #ddd; padding: 12px; border-radius: 4px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">首页布局</div>
+          <div style="font-size: 13px; color: #888;">
+            个人简介卡片<br>
+            最新文章列表<br>
+            项目/片段快速入口
+          </div>
+        </div>
+        <div style="border: 1px solid #ddd; padding: 12px; border-radius: 4px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">文章页面</div>
+          <div style="font-size: 13px; color: #888;">
+            清爽排版<br>
+            代码高亮<br>
+            评论系统（可选）
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Git 部署流程</h3>
+  <div class="mockup">
+    <div class="mockup-header">GitHub Actions 自动部署</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="font-size: 13px; line-height: 1.8; color: #666;">
+        <strong>工作流程：</strong><br>
+        1. 在本地写 Markdown 文章<br>
+        2. Git push 到 GitHub 仓库<br>
+        3. GitHub Actions 自动触发<br>
+        4. 安装 Hexo、生成静态文件<br>
+        5. 部署到 GitHub Pages<br>
+        6. 访问 fred.github.io 查看更新<br>
+        <br>
+        <strong>预计效果：</strong>每次 push 后 2-3 分钟完成部署
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 32px; font-size: 14px; color: #888;">
+  请查看视觉设计和部署方案。选择你喜欢的配色和主题，然后我会写设计文档供你最终确认。
+</p>
