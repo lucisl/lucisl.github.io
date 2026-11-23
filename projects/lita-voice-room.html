@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>语音房与直播 — Lita 生态 — WorkSpace</title>
+    <meta name="description" content="Lita 语音房与直播手册：建房、麦位、连麦、PK、KTV、榜单、声网转推与停留/上麦数据。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita.html">总览</a></li>
+          <li><a class="" href="./lita-activities.html">活动运营</a></li>
+          <li><a class="is-active" href="./lita-voice-room.html">语音房与直播</a></li>
+          <li><a class="" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
+          <li><a class="" href="./lita-companion.html">陪玩与交易</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">这个域解决什么问题</a></li>
+            <li><a href="#chapter-2">角色与状态</a></li>
+            <li><a href="#chapter-3">一次进房链路</a></li>
+            <li><a href="#chapter-4">服务与模块</a></li>
+            <li><a href="#chapter-5">直播与转推</a></li>
+            <li><a href="#chapter-6">基础设施</a></li>
+            <li><a href="#chapter-7">数据与指标</a></li>
+            <li><a href="#chapter-8">阅读路径与排查</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>002 / 语音房与直播</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 002 · VOICE ROOM</p>
+          <div class="ws-title-row">
+            <h1>语音房与直播</h1>
+            <span class="ws-title-code">Voice Room &amp; Live</span>
+          </div>
+          <p class="ws-tagline">产品的主场景：用户进房、上麦、连麦、送礼、打榜，大房间再转推成直播。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>核心服务</span><b>litalive / litaroom</b></li>
+            <li><span>业务模块</span><b>34 + 52</b></li>
+            <li><span>RTC</span><b>Agora 声网</b></li>
+            <li><span>数据</span><b>停留 / 上麦 / 观看</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">这个域解决什么问题</h2>
+<p>语音房是 Lita 的主场景：用户建房、进房、上麦、连麦、送礼、打榜、退出；大房间通过混流转推成「直播」，让非 RTC 观众也能收听。</p>
+<p>这个域同时决定三件事：<strong>实时体验</strong>（音视频、麦位、延迟）、<strong>消费场景</strong>（送礼、游戏、PK）、<strong>数据口径</strong>（停留、上麦、观看）。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">角色与状态</h2>
+<ul>
+<li><strong>房间角色</strong>：房主 <code>owner</code>、主持 <code>host</code>、管理 <code>manage</code>、麦上用户、观众</li>
+<li><strong>业务上的「主播」</strong> = host + manage + owner（数据统计也按这个口径）</li>
+<li><strong>房间状态</strong>：在线、麦位、锁麦、密码房、PK 中、直播中</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">一次进房链路</h2>
+<p>创建房间 → 主播上麦 → 用户进房 → 连麦 / 互动 → 送礼 → 房间榜更新 → 退出并记录停留。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">服务与模块</h2>
+<h3>litalive：在线侧</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agoramixcdn</code></td>
+<td>声网混流转推 CDN</td>
+</tr>
+<tr>
+<td><code>miclink</code></td>
+<td>连麦</td>
+</tr>
+<tr>
+<td><code>liveonline</code> / <code>liveonlinelist</code></td>
+<td>在线状态 / 在线列表</td>
+</tr>
+<tr>
+<td><code>liverank</code> / <code>livestreamrank</code></td>
+<td>房间榜 / 直播榜</td>
+</tr>
+<tr>
+<td><code>livewatchcount</code></td>
+<td>观看计数</td>
+</tr>
+<tr>
+<td><code>livetimestats</code></td>
+<td>停留 / 时长统计</td>
+</tr>
+<tr>
+<td><code>livepk</code></td>
+<td>直播 PK</td>
+</tr>
+<tr>
+<td><code>livestreamconverter</code></td>
+<td>流转码</td>
+</tr>
+<tr>
+<td><code>liveauth</code> / <code>livebaner</code> / <code>livecategory</code></td>
+<td>鉴权 / 横幅 / 分类</td>
+</tr>
+<tr>
+<td><code>quickchat</code></td>
+<td>快速匹配聊天</td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td>房间消息</td>
+</tr>
+<tr>
+<td><code>roominfo</code></td>
+<td>房间信息</td>
+</tr>
+</tbody></table></div>
+<h3>litaroom：玩法侧</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>createroom</code></td>
+<td>建房</td>
+</tr>
+<tr>
+<td><code>pkv1</code></td>
+<td>房间 PK</td>
+</tr>
+<tr>
+<td><code>ktv</code></td>
+<td>K 歌</td>
+</tr>
+<tr>
+<td><code>gamecenter</code> / <code>gameroom</code></td>
+<td>游戏中心 / 房内游戏</td>
+</tr>
+<tr>
+<td><code>guild</code></td>
+<td>家族</td>
+</tr>
+<tr>
+<td><code>giftpack</code> / <code>luckybag</code> / <code>luckycoin</code></td>
+<td>礼物包 / 福袋 / 幸运币</td>
+</tr>
+<tr>
+<td><code>dress</code> / <code>themestyle</code> / <code>topcard</code></td>
+<td>装扮 / 主题 / 头卡</td>
+</tr>
+<tr>
+<td><code>onlineduration</code></td>
+<td>在线时长</td>
+</tr>
+<tr>
+<td><code>roompush</code> / <code>roomquery</code></td>
+<td>房间推送 / 查询</td>
+</tr>
+<tr>
+<td><code>hostlevel</code></td>
+<td>主持等级</td>
+</tr>
+<tr>
+<td><code>roomad</code> / <code>popup</code> / <code>welcome</code></td>
+<td>房间广告 / 弹窗 / 欢迎</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">直播与转推</h2>
+<ul>
+<li><strong>Agora（声网）</strong>负责实时音视频，凭证走 Nacos <code>thd-agora.yaml</code></li>
+<li><code>agoramixcdn</code> 把房间音频混流转推到 CDN，形成直播形态</li>
+<li>非 RTC 观众通过 CDN 收听，直播间数据与语音房分开统计</li>
+<li>直播间送礼在数仓里用 <code>room_source = 'liveroom'</code> 区分，语音房是 <code>'voiceroom'</code></li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">基础设施</h2>
+<ul>
+<li><strong>多个独立 Redis</strong>：在线状态、签名、房间状态分别部署，避免一个大 Key 拖垮全部</li>
+<li><strong>ES 双云</strong>：AWS / 阿里云两套 ES，用开关切换</li>
+<li><strong>Kafka</strong>：房间事件分发</li>
+<li><strong>WebSocket / 长连接</strong>：在线状态与房间消息</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">数据与指标</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>单次停留</td>
+<td><code>dwd_once_room_stay_time</code></td>
+</tr>
+<tr>
+<td>停留时长</td>
+<td><code>dws_voice_room_stay_time</code></td>
+</tr>
+<tr>
+<td>上麦时长</td>
+<td><code>dws_voice_room_mic_time</code></td>
+</tr>
+<tr>
+<td>直播间用户详情</td>
+<td><code>dws_live_room_user_detail</code></td>
+</tr>
+<tr>
+<td>首次进房 / 首次成为主播</td>
+<td><code>dim_user_first_last_action</code></td>
+</tr>
+<tr>
+<td>直播间送礼</td>
+<td><code>dwd_gift_send</code>（<code>room_source = &#39;liveroom&#39;</code>）</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">阅读路径与排查</h2>
+<ul>
+<li><strong>进房失败</strong>：<code>litalive</code> 的 <code>liveauth</code> / <code>liveonline</code> + 房间状态 Redis</li>
+<li><strong>麦位 / 连麦问题</strong>：<code>miclink</code></li>
+<li><strong>直播看不到 / 卡顿</strong>：<code>agoramixcdn</code>、<code>livestreamconverter</code></li>
+<li><strong>榜单不对</strong>：<code>liverank</code> + 结算定时任务</li>
+<li><strong>停留数据核对</strong>：<code>dwd_once_room_stay_time</code> → <code>dws_voice_room_stay_time</code></li>
+</ul>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-voice-room.md">lita-voice-room.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

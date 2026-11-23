@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>送礼与虚拟礼物 — Lita 生态 — WorkSpace</title>
+    <meta name="description" content="Lita 送礼手册：礼物配置、送礼链路、特效广播、宝箱盲盒、榜单与家族积分、送礼数据口径。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita.html">总览</a></li>
+          <li><a class="" href="./lita-activities.html">活动运营</a></li>
+          <li><a class="" href="./lita-voice-room.html">语音房与直播</a></li>
+          <li><a class="is-active" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
+          <li><a class="" href="./lita-companion.html">陪玩与交易</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">这个域解决什么问题</a></li>
+            <li><a href="#chapter-2">一次送礼链路</a></li>
+            <li><a href="#chapter-3">服务与模块</a></li>
+            <li><a href="#chapter-4">礼物类型</a></li>
+            <li><a href="#chapter-5">数据与指标</a></li>
+            <li><a href="#chapter-6">技术难点</a></li>
+            <li><a href="#chapter-7">阅读路径</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>002 / 送礼与虚拟礼物</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 002 · GIFTING</p>
+          <div class="ws-title-row">
+            <h1>送礼与虚拟礼物</h1>
+            <span class="ws-title-code">Gifting</span>
+          </div>
+          <p class="ws-tagline">平台最核心的消费动作：从礼物配置到送出、广播、开箱、打榜与分成。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>核心服务</span><b>lita-basic / litaroom</b></li>
+            <li><span>关键模块</span><b>礼物 / 宝箱 / 盲盒</b></li>
+            <li><span>场景</span><b>语音房 / 直播</b></li>
+            <li><span>数据</span><b>送礼明细 / 宝箱开启</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">这个域解决什么问题</h2>
+<p>送礼是平台最核心的消费动作：用户用虚拟货币购买礼物，在语音房 / 直播间送出，触发特效、广播、榜单、家族积分、宝箱奖励，最终形成主播 / 陪玩师收益。</p>
+<p>它同时是「钱」和「体验」：扣费必须准，特效和广播必须快，榜单必须实时，开奖必须可审计。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">一次送礼链路</h2>
+<p>礼物配置 → 用户购买 / 持有 → 房间内送出 → 扣费与幂等 → 全屏特效 / 广播 → 榜单 / 家族积分 → 宝箱 / 盲盒开奖 → 收益结算。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">服务与模块</h2>
+<h3>lita-basic：礼物主逻辑</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>appgiftcache</code></td>
+<td>礼物配置缓存</td>
+</tr>
+<tr>
+<td><code>giftevent</code></td>
+<td>送礼事件</td>
+</tr>
+<tr>
+<td><code>giftbroadcast</code></td>
+<td>礼物广播</td>
+</tr>
+<tr>
+<td><code>giftpackage</code></td>
+<td>礼物包</td>
+</tr>
+<tr>
+<td><code>blindpack</code></td>
+<td>盲盒</td>
+</tr>
+<tr>
+<td><code>effect</code></td>
+<td>全屏特效</td>
+</tr>
+<tr>
+<td><code>equip</code></td>
+<td>装扮 / 佩戴</td>
+</tr>
+<tr>
+<td><code>diamond</code></td>
+<td>钻石账户</td>
+</tr>
+<tr>
+<td><code>collectbox</code></td>
+<td>宝箱 / 收集</td>
+</tr>
+<tr>
+<td><code>chatlottery</code></td>
+<td>聊天抽奖</td>
+</tr>
+<tr>
+<td><code>billionareclub</code></td>
+<td>富豪榜 / 大 R 玩法</td>
+</tr>
+</tbody></table></div>
+<h3>litaroom：房内玩法</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>giftpack</code></td>
+<td>房内礼物包</td>
+</tr>
+<tr>
+<td><code>luckybag</code></td>
+<td>福袋</td>
+</tr>
+<tr>
+<td><code>luckycoin</code></td>
+<td>幸运币</td>
+</tr>
+<tr>
+<td><code>newusergift</code></td>
+<td>新人礼</td>
+</tr>
+<tr>
+<td><code>welcome</code></td>
+<td>欢迎 / 进场特效</td>
+</tr>
+<tr>
+<td><code>celebration</code></td>
+<td>庆祝 / 全服广播</td>
+</tr>
+<tr>
+<td><code>weekwinner</code></td>
+<td>周榜 / 周冠军</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">礼物类型</h2>
+<ul>
+<li><strong>普通礼物</strong>：直接送出，计入榜单</li>
+<li><strong>盲盒 / 礼物包</strong>：送出后开奖</li>
+<li><strong>宝箱</strong>：送礼累计 / 活动产出，开启得奖励</li>
+<li><strong>福袋 / 幸运币</strong>：房间内互动玩法</li>
+<li><strong>装扮 / 头卡</strong>：身份展示型消费</li>
+<li><strong>活动礼物</strong>：配合活动任务 / 榜单</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">数据与指标</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>送礼明细</td>
+<td><code>dwd_gift_send</code></td>
+</tr>
+<tr>
+<td>送礼详情</td>
+<td><code>dws_gift_send_detail</code></td>
+</tr>
+<tr>
+<td>用户送礼汇总</td>
+<td><code>dws_gift_send_sender</code></td>
+</tr>
+<tr>
+<td>用户宝箱开启</td>
+<td><code>dws_gift_send_open_user</code></td>
+</tr>
+<tr>
+<td>大区宝箱开启</td>
+<td><code>dws_gift_send_open_locale</code></td>
+</tr>
+</tbody></table></div>
+<p>关键字段：</p>
+<ul>
+<li><code>room_source</code> 区分 <code>voiceroom</code> / <code>liveroom</code></li>
+<li>首次送礼看 <code>dim_user_first_last_action.first_gift_time</code></li>
+<li>首次在语音房送礼看 <code>first_room_gift_time</code></li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">技术难点</h2>
+<ul>
+<li><strong>高频写 + 高价值</strong>：扣费、库存、幂等、事务一致性</li>
+<li><strong>广播与特效</strong>：不能阻塞主链路，失败要降级</li>
+<li><strong>榜单</strong>：实时累计 + 定时结算 + 补发</li>
+<li><strong>宝箱概率</strong>：配置化、可审计、防刷</li>
+<li><strong>多端一致性</strong>：客户端展示与实际扣费要对账</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">阅读路径</h2>
+<ol>
+<li><code>lita-basic</code> 的 <code>gift*</code>、<code>blindpack</code>、<code>effect</code> 模块</li>
+<li><code>litaroom</code> 的 <code>giftpack</code>、<code>luckybag</code>、<code>luckycoin</code></li>
+<li><code>docs/data/knowledge/GIFT.md</code></li>
+<li>活动侧的送礼任务 / 榜单：<code>active-*</code></li>
+</ol>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-gifting.md">lita-gifting.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

@@ -672,6 +672,25 @@ a.ws-table-row:focus-visible {
   font-size: inherit;
 }
 
+.ws-prose pre:not(.ws-diagram) {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: var(--ws-surface-alt);
+  border: 1px solid var(--ws-line);
+  border-radius: var(--ws-radius-sm);
+  font-family: var(--ws-mono);
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.ws-prose pre:not(.ws-diagram) code {
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: inherit;
+}
+
 .ws-table-wrap {
   margin: 0 0 14px;
   overflow-x: auto;
@@ -951,6 +970,99 @@ a.ws-table-row:focus-visible {
 
 .ws-toc-sub:first-of-type {
   margin-top: 0;
+}
+
+.ws-rail-subhead {
+  margin: 2px 0 0;
+  padding-top: 12px;
+  color: var(--ws-muted);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  border-top: 1px solid var(--ws-line-soft);
+}
+
+.ws-topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-topic-list a {
+  display: block;
+  padding: 5px 8px;
+  color: var(--ws-muted);
+  font-size: .82rem;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.ws-topic-list a:hover,
+.ws-topic-list a:focus-visible {
+  color: var(--ws-ink);
+  background: var(--ws-surface-alt);
+}
+
+.ws-topic-list a.is-active {
+  color: var(--ws-accent);
+  font-weight: 600;
+  background: var(--ws-accent-soft);
+}
+
+.ws-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 10px;
+  margin: 4px 0 14px;
+}
+
+.ws-topic-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  text-decoration: none;
+  background: var(--ws-surface-alt);
+  border: 1px solid var(--ws-line);
+  border-radius: var(--ws-radius-sm);
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+}
+
+.ws-topic-card:hover,
+.ws-topic-card:focus-visible {
+  background: #fff;
+  border-color: var(--ws-accent);
+  transform: translateY(-1px);
+}
+
+.ws-topic-index {
+  color: var(--ws-accent);
+  font-family: var(--ws-mono);
+  font-size: .7rem;
+  letter-spacing: .1em;
+}
+
+.ws-topic-card b {
+  font-size: .95rem;
+}
+
+.ws-topic-card small {
+  color: var(--ws-muted);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-topic-card {
+    transition: none;
+  }
+
+  .ws-topic-card:hover {
+    transform: none;
+  }
 }
 
 .ws-route {

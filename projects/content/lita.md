@@ -13,6 +13,33 @@
 
 > 口径说明：代码量、提交数、最近提交时间均来自本地工作区（不含 target/ 与 node_modules）。服务状态按最近提交时间粗分：活跃（2026-10 之后）、维护（2026-06~09）、 低频（2026-01~05）、停滞（2025 及以前）。这是个人视角的整理，细节以仓库为准。
 
+## 业务专题
+
+活动、语音房/直播、送礼、陪玩交易是 Lita 的四个核心域：前三个决定「体验与消费」，陪玩交易决定「服务履约与结算」。这也是海外语音社交/陪玩业务最常被追问的部分，所以单独拆成子手册。
+
+<div class="ws-topic-grid">
+  <a class="ws-topic-card" href="./lita-activities.html">
+    <span class="ws-topic-index">01 / ACTIVITIES</span>
+    <b>活动运营</b>
+    <small>签到、任务、PK、榜单、抽奖、召回与节日活动</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-voice-room.html">
+    <span class="ws-topic-index">02 / VOICE ROOM</span>
+    <b>语音房与直播</b>
+    <small>建房、麦位、连麦、PK、KTV、榜单与转推</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-gifting.html">
+    <span class="ws-topic-index">03 / GIFTING</span>
+    <b>送礼与虚拟礼物</b>
+    <small>礼物配置、特效广播、宝箱盲盒、榜单与分成</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-companion.html">
+    <span class="ws-topic-index">04 / COMPANION</span>
+    <b>陪玩与交易</b>
+    <small>陪玩师技能、下单接单、充值支付与结算</small>
+  </a>
+</div>
+
 ## 一、产品与规模
 
 ### 产品定位

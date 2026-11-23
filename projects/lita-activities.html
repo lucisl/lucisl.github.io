@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>活动运营 — Lita 生态 — WorkSpace</title>
+    <meta name="description" content="Lita 活动体系手册：运营/产品/游戏活动分类、活动服务三代演进、配置与结算链路、代表玩法与数据口径。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita.html">总览</a></li>
+          <li><a class="is-active" href="./lita-activities.html">活动运营</a></li>
+          <li><a class="" href="./lita-voice-room.html">语音房与直播</a></li>
+          <li><a class="" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
+          <li><a class="" href="./lita-companion.html">陪玩与交易</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">这个域解决什么问题</a></li>
+            <li><a href="#chapter-2">服务地图</a></li>
+            <li><a href="#chapter-3">代码怎么组织</a></li>
+            <li><a href="#chapter-4">代表活动（按目录代号）</a></li>
+            <li><a href="#chapter-5">一次活动的生命周期</a></li>
+            <li><a href="#chapter-6">技术点与坑</a></li>
+            <li><a href="#chapter-7">阅读路径</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>002 / 活动运营</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 002 · ACTIVITIES</p>
+          <div class="ws-title-row">
+            <h1>活动运营</h1>
+            <span class="ws-title-code">Activities</span>
+          </div>
+          <p class="ws-tagline">拉收、拉活、拉留存的主战场：签到、任务、PK、榜单、抽奖、召回与节日活动。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>核心服务</span><b>active-main / v3 / lita-active</b></li>
+            <li><span>接口文档</span><b>177 份</b></li>
+            <li><span>活动库</span><b>213 张表</b></li>
+            <li><span>状态</span><b>活跃</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">这个域解决什么问题</h2>
+<p>活动是平台拉收、拉活、拉留存的主要手段：把签到、任务、PK、榜单、抽奖、召回、节日主题这些玩法，组织成有目标、有奖励、有周期的运营动作。</p>
+<p>Lita 的活动分三类（来自 <code>active-main/README.md</code>）：</p>
+<ul>
+<li><strong>运营活动</strong>：周年庆、节日、用户召回、邀请等</li>
+<li><strong>产品活动</strong>：礼物活动、荣耀等级、游戏排行榜等</li>
+<li><strong>游戏活动</strong>：游戏任务、游戏成就、游戏段位等</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">服务地图</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>服务</th>
+<th>定位</th>
+<th>规模</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>active-main</code></td>
+<td>第一代活动单体，业务主力</td>
+<td>1,287 个 Java 文件 / 41 个 Controller / 2,870 次提交</td>
+<td>活跃</td>
+</tr>
+<tr>
+<td><code>active-v3</code></td>
+<td>第三代模块化活动服务</td>
+<td>553 个文件 / 13 个 Controller / 1,402 次提交</td>
+<td>活跃</td>
+</tr>
+<tr>
+<td><code>active-v2</code></td>
+<td>第二代模块化尝试</td>
+<td>255 个文件 / 21 次提交</td>
+<td>已停止</td>
+</tr>
+<tr>
+<td><code>lita-active</code></td>
+<td>老一代活动服务</td>
+<td>2,898 个文件 / 12,521 次提交</td>
+<td>活跃</td>
+</tr>
+<tr>
+<td><code>game-main</code></td>
+<td>由 <code>active-v2</code> 复制的游戏服务</td>
+<td>210 个文件 / 1 次提交</td>
+<td>低频</td>
+</tr>
+</tbody></table></div>
+<p>补充规模：<code>docs/specs/api/active-main/</code> 下有 <strong>177 份接口文档</strong>，是整个文档仓库最大的接口族；活动库 <code>lita_active</code> 约 <strong>213 张表</strong>。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">代码怎么组织</h2>
+<h3>active-main：一活动一目录</h3>
+<pre><code class="language-text">business/
+  dailycheck/       # 每日签到
+  invite/           # 邀请
+  userrecall202508/ # 用户召回
+  pk/               # PK
+  roomrank2026/     # 房间榜
+  monopoly/         # 大富翁
+  ...
+dispatch/           # 活动分发器
+component/          # 数据源、Redis、安全等全局配置
+</code></pre>
+<p>README 里有一份明确的「已废弃包」清单：全局的 <code>controller</code>、<code>consumer</code>、<code>cron</code>、<code>dispatch/bizdispatcher</code> 正在迁入各个活动自己的目录。理解这条改造方向，就能理解 v3 为什么是现在这样。</p>
+<h3>active-v3：五层结构</h3>
+<pre><code class="language-text">business/     # 业务编排
+active/       # 每个活动一个子包（home / pk / halloween / room / giftRank / magicbox …）
+module/       # 可复用模块
+coordinator/  # 协调器
+core/         # 基础设施
+</code></pre>
+<p>活动内部自带接口、消费者、定时任务，避免不同活动互相干扰；支持 GraalVM Native Image，适合活动期弹性扩容。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">代表活动（按目录代号）</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>目录</th>
+<th>玩法方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dailycheck</code></td>
+<td>每日签到</td>
+</tr>
+<tr>
+<td><code>invite</code></td>
+<td>邀请拉新</td>
+</tr>
+<tr>
+<td><code>userrecall202508</code></td>
+<td>用户召回</td>
+</tr>
+<tr>
+<td><code>pk</code></td>
+<td>双阵营 / 家族 PK</td>
+</tr>
+<tr>
+<td><code>roomrank2026</code></td>
+<td>房间排行榜</td>
+</tr>
+<tr>
+<td><code>monopoly</code></td>
+<td>大富翁</td>
+</tr>
+<tr>
+<td><code>dragonslayer</code></td>
+<td>屠龙</td>
+</tr>
+<tr>
+<td><code>goldenfishery</code></td>
+<td>黄金渔场</td>
+</tr>
+<tr>
+<td><code>magic</code></td>
+<td>魔法 / 抽奖</td>
+</tr>
+<tr>
+<td><code>constellation</code></td>
+<td>星座主题</td>
+</tr>
+<tr>
+<td><code>lovecontest</code></td>
+<td>情侣 / 爱心榜</td>
+</tr>
+<tr>
+<td><code>karaoke</code></td>
+<td>K 歌</td>
+</tr>
+<tr>
+<td><code>fest2025</code></td>
+<td>年度盛典 / 节日</td>
+</tr>
+<tr>
+<td><code>halloween</code></td>
+<td>万圣节</td>
+</tr>
+<tr>
+<td><code>familygold202509</code></td>
+<td>家族金币</td>
+</tr>
+<tr>
+<td><code>risingstars</code></td>
+<td>新星 / 新人榜</td>
+</tr>
+<tr>
+<td><code>secretaction</code></td>
+<td>神秘活动</td>
+</tr>
+<tr>
+<td><code>gamebox</code> / <code>gameroom</code> / <code>gamegrade</code></td>
+<td>游戏活动 / 游戏房间 / 游戏段位</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>目录名是代码里的活动代号，具体玩法以活动配置和产品文档为准。</p>
+</blockquote>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">一次活动的生命周期</h2>
+<p>配置活动 → 入口 / 报名 → 任务 / 签到 / 抽奖 → 榜单累计 → 结算 → 发奖 / 补发 → 数据回流。</p>
+<p>几个关键点：</p>
+<ul>
+<li><strong>配置与代码分离</strong>：运营改配置即可调整档位、奖励、时间，不用发版</li>
+<li><strong>榜单</strong>：通常用 Redis ZSet 实时累计，结算落库并补发</li>
+<li><strong>补发与对账</strong>：活动结束必须有补发机制，避免漏奖</li>
+<li><strong>数据</strong>：活动数据进 <code>lita_active</code>，分析走数仓</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">技术点与坑</h2>
+<ul>
+<li><strong>活动即模块</strong>：新活动复制一个目录，自带接口 / 消费者 / 定时任务</li>
+<li><strong>Redis 纪律</strong>：<code>active-main</code> README 要求统一使用全局 Redis 配置，禁止单独配置</li>
+<li><strong>接口收敛</strong>：v3 的 Controller 从 41 降到 13，统一入口分发</li>
+<li><strong>Native Image</strong>：v3 支持，冷启动更快，适合活动峰值</li>
+<li><strong>新老并存</strong>：<code>lita-active</code> 仍在跑，定位一个活动要三处搜</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">阅读路径</h2>
+<ol>
+<li><code>active-main/README.md</code>：三类活动、目录规范、技术债清单</li>
+<li><code>active-v3/src/main/java/gg/lita/active/v3/active</code>：挑一个活动看完整分层</li>
+<li><code>docs/specs/api/active-main/</code>：看接口契约</li>
+<li><code>docs/data/knowledge/</code>：活动相关表与指标口径</li>
+</ol>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-activities.md">lita-activities.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

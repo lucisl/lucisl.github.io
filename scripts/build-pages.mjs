@@ -27,6 +27,14 @@ const PROJECTS = [
   },
 ];
 
+const TOPICS = [
+  { key: 'overview', name: '总览', href: './lita.html' },
+  { key: 'activities', name: '活动运营', href: './lita-activities.html' },
+  { key: 'voice-room', name: '语音房与直播', href: './lita-voice-room.html' },
+  { key: 'gifting', name: '送礼与虚拟礼物', href: './lita-gifting.html' },
+  { key: 'companion', name: '陪玩与交易', href: './lita-companion.html' },
+];
+
 const PAGES = [
   {
     key: 'lita-work',
@@ -53,6 +61,7 @@ const PAGES = [
     key: 'lita',
     source: 'projects/content/lita.md',
     output: 'projects/lita.html',
+    topic: 'overview',
     title: 'Lita 生态总览 — 项目手册 — WorkSpace',
     description:
       'Lita 海外社交平台 40+ 仓库的个人整理手册：产品、架构、业务域、服务目录、数据体系、工程机制与阅读路线。',
@@ -70,6 +79,94 @@ const PAGES = [
       ['数据表文档', '2,451'],
       ['API 文档', '188'],
       ['统计截止', '2026-11-23'],
+    ],
+  },
+  {
+    key: 'activities',
+    source: 'projects/content/lita-activities.md',
+    output: 'projects/lita-activities.html',
+    topic: 'activities',
+    title: '活动运营 — Lita 生态 — WorkSpace',
+    description:
+      'Lita 活动体系手册：运营/产品/游戏活动分类、活动服务三代演进、配置与结算链路、代表玩法与数据口径。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 002 · ACTIVITIES',
+    breadcrumb: '002 / 活动运营',
+    h1: '活动运营',
+    h1Note: 'Activities',
+    tagline:
+      '拉收、拉活、拉留存的主战场：签到、任务、PK、榜单、抽奖、召回与节日活动。',
+    meta: [
+      ['核心服务', 'active-main / v3 / lita-active'],
+      ['接口文档', '177 份'],
+      ['活动库', '213 张表'],
+      ['状态', '活跃'],
+    ],
+  },
+  {
+    key: 'voice-room',
+    source: 'projects/content/lita-voice-room.md',
+    output: 'projects/lita-voice-room.html',
+    topic: 'voice-room',
+    title: '语音房与直播 — Lita 生态 — WorkSpace',
+    description:
+      'Lita 语音房与直播手册：建房、麦位、连麦、PK、KTV、榜单、声网转推与停留/上麦数据。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 002 · VOICE ROOM',
+    breadcrumb: '002 / 语音房与直播',
+    h1: '语音房与直播',
+    h1Note: 'Voice Room & Live',
+    tagline:
+      '产品的主场景：用户进房、上麦、连麦、送礼、打榜，大房间再转推成直播。',
+    meta: [
+      ['核心服务', 'litalive / litaroom'],
+      ['业务模块', '34 + 52'],
+      ['RTC', 'Agora 声网'],
+      ['数据', '停留 / 上麦 / 观看'],
+    ],
+  },
+  {
+    key: 'gifting',
+    source: 'projects/content/lita-gifting.md',
+    output: 'projects/lita-gifting.html',
+    topic: 'gifting',
+    title: '送礼与虚拟礼物 — Lita 生态 — WorkSpace',
+    description:
+      'Lita 送礼手册：礼物配置、送礼链路、特效广播、宝箱盲盒、榜单与家族积分、送礼数据口径。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 002 · GIFTING',
+    breadcrumb: '002 / 送礼与虚拟礼物',
+    h1: '送礼与虚拟礼物',
+    h1Note: 'Gifting',
+    tagline:
+      '平台最核心的消费动作：从礼物配置到送出、广播、开箱、打榜与分成。',
+    meta: [
+      ['核心服务', 'lita-basic / litaroom'],
+      ['关键模块', '礼物 / 宝箱 / 盲盒'],
+      ['场景', '语音房 / 直播'],
+      ['数据', '送礼明细 / 宝箱开启'],
+    ],
+  },
+  {
+    key: 'companion',
+    source: 'projects/content/lita-companion.md',
+    output: 'projects/lita-companion.html',
+    topic: 'companion',
+    title: '陪玩与交易 — Lita 生态 — WorkSpace',
+    description:
+      'Lita 陪玩与交易手册：陪玩师技能、下单接单、充值支付、订单结算与风控。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 002 · COMPANION',
+    breadcrumb: '002 / 陪玩与交易',
+    h1: '陪玩与交易',
+    h1Note: 'Companion & Payment',
+    tagline:
+      '从浏览陪玩师技能到下单、支付、服务完成与平台结算的完整交易链路。',
+    meta: [
+      ['核心服务', 'lita-earth / lita-payment / lita-basic'],
+      ['充值渠道', 'IPA / 第三方'],
+      ['数据', '订单 / 充值'],
+      ['风控', 'risk 模块'],
     ],
   },
 ];
@@ -155,6 +252,24 @@ function renderMeta(meta) {
     .join('\n');
 }
 
+function renderSubpages(page) {
+  if (!page.topic) return '';
+  const items = TOPICS.map(
+    (topic) => `          <li><a class="${topic.key === page.topic ? 'is-active' : ''}" href="${topic.href}">${topic.name}</a></li>`,
+  ).join('\n');
+  return `        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+${items}
+        </ul>`;
+}
+
+function renderActions(page) {
+  if (!page.topic || page.topic === 'overview') return '';
+  return `          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>`;
+}
+
 export async function buildPages() {
   const template = await readFile(templatePath, 'utf8');
 
@@ -174,6 +289,8 @@ export async function buildPages() {
       .replaceAll('{{TAGLINE}}', escapeHtml(page.tagline))
       .replaceAll('{{META_ITEMS}}', renderMeta(page.meta))
       .replaceAll('{{PROJECTS}}', renderProjects(page.key))
+      .replaceAll('{{SUBPAGES}}', renderSubpages(page))
+      .replaceAll('{{ACTIONS}}', renderActions(page))
       .replaceAll('{{TOC}}', toc)
       .replaceAll('{{CONTENT}}', content)
       .replaceAll('{{SOURCE_NAME}}', sourceName);

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>陪玩与交易 — Lita 生态 — WorkSpace</title>
+    <meta name="description" content="Lita 陪玩与交易手册：陪玩师技能、下单接单、充值支付、订单结算与风控。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita.html">总览</a></li>
+          <li><a class="" href="./lita-activities.html">活动运营</a></li>
+          <li><a class="" href="./lita-voice-room.html">语音房与直播</a></li>
+          <li><a class="" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
+          <li><a class="is-active" href="./lita-companion.html">陪玩与交易</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">这个域解决什么问题</a></li>
+            <li><a href="#chapter-2">一次交易链路</a></li>
+            <li><a href="#chapter-3">服务与模块</a></li>
+            <li><a href="#chapter-4">充值与支付</a></li>
+            <li><a href="#chapter-5">订单与结算</a></li>
+            <li><a href="#chapter-6">风控</a></li>
+            <li><a href="#chapter-7">技术点与坑</a></li>
+            <li><a href="#chapter-8">阅读路径</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>002 / 陪玩与交易</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 002 · COMPANION</p>
+          <div class="ws-title-row">
+            <h1>陪玩与交易</h1>
+            <span class="ws-title-code">Companion &amp; Payment</span>
+          </div>
+          <p class="ws-tagline">从浏览陪玩师技能到下单、支付、服务完成与平台结算的完整交易链路。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>核心服务</span><b>lita-earth / lita-payment / lita-basic</b></li>
+            <li><span>充值渠道</span><b>IPA / 第三方</b></li>
+            <li><span>数据</span><b>订单 / 充值</b></li>
+            <li><span>风控</span><b>risk 模块</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">这个域解决什么问题</h2>
+<p>陪玩交易把「用户需求」与「陪玩师服务」连接起来：用户浏览技能、下单、支付，陪玩师接单、履约，平台完成结算与风控。</p>
+<p>它和充值、订单、风控绑在一起，是资金链路最密集的域，也是排查「钱去哪了」时最常进的域。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">一次交易链路</h2>
+<p>浏览陪玩师 / 技能 → 下单（按小时 / 按局）→ 支付 → 陪玩师接单 → 服务进行 → 完成确认 → 平台结算 / 分成。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">服务与模块</h2>
+<h3>lita-earth：陪玩侧</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>playercourse</code></td>
+<td>陪玩师课程 / 技能</td>
+</tr>
+<tr>
+<td><code>users</code></td>
+<td>陪玩师资料</td>
+</tr>
+<tr>
+<td><code>recharge</code></td>
+<td>陪玩相关充值</td>
+</tr>
+<tr>
+<td><code>crowdfunding</code></td>
+<td>众筹玩法</td>
+</tr>
+<tr>
+<td><code>interactive</code></td>
+<td>互动玩法</td>
+</tr>
+<tr>
+<td><code>bingo</code> / <code>eliminate</code> / <code>draw</code> / <code>stairs</code> / <code>uno</code></td>
+<td>独立小游戏</td>
+</tr>
+<tr>
+<td><code>adslink</code> / <code>h5share</code></td>
+<td>投放 / 分享</td>
+</tr>
+</tbody></table></div>
+<h3>lita-basic：交易基础</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>flashorder</code></td>
+<td>闪单 / 速配</td>
+</tr>
+<tr>
+<td><code>coupon</code></td>
+<td>优惠券</td>
+</tr>
+<tr>
+<td><code>apple</code></td>
+<td>Apple 内购校验</td>
+</tr>
+<tr>
+<td><code>chargequery</code></td>
+<td>充值查询</td>
+</tr>
+<tr>
+<td><code>diamond</code></td>
+<td>钻石账户</td>
+</tr>
+<tr>
+<td><code>friend</code></td>
+<td>好友 / 关系</td>
+</tr>
+</tbody></table></div>
+<h3>lita-payment：资金</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>recharge</code></td>
+<td>充值</td>
+</tr>
+<tr>
+<td><code>trans</code></td>
+<td>交易</td>
+</tr>
+<tr>
+<td><code>risk</code></td>
+<td>风控</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">充值与支付</h2>
+<ul>
+<li>应用内购买（IPA）与第三方渠道并存</li>
+<li>数仓里 <code>channel in (1, 2)</code> 表示 IPA 充值</li>
+<li>多币种、多支付厂商；支付回调必须幂等</li>
+<li>支付成功与入账要可对账，异常走补单</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">订单与结算</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>表</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>订单明细</td>
+<td><code>dwd_play_order</code></td>
+</tr>
+<tr>
+<td>订单每日明细</td>
+<td><code>dws_play_order_detail</code></td>
+</tr>
+<tr>
+<td>用户订单汇总</td>
+<td><code>dws_play_order_user</code></td>
+</tr>
+<tr>
+<td>陪玩师订单汇总</td>
+<td><code>dws_play_order_player</code></td>
+</tr>
+<tr>
+<td>充值明细</td>
+<td><code>dwd_recharge</code></td>
+</tr>
+<tr>
+<td>用户充值汇总</td>
+<td><code>dws_recharge_user</code></td>
+</tr>
+<tr>
+<td>用户月充值</td>
+<td><code>dws_recharge_user_month</code></td>
+</tr>
+</tbody></table></div>
+<p>首次下单 / 完单看 <code>dim_user_first_last_action.first_order_time</code>、<code>first_complete_time</code>；首次充值看 <code>first_recharge_time</code>。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">风控</h2>
+<ul>
+<li><strong>支付风控</strong>：异常渠道、频次、金额</li>
+<li><strong>订单风控</strong>：刷单、虚假履约</li>
+<li><strong>退款 / 拒付</strong>：需要状态机与对账</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">技术点与坑</h2>
+<ul>
+<li><strong>回调幂等</strong>：唯一订单号 + 状态机，重复回调不能重复入账</li>
+<li><strong>金额单位</strong>：用最小货币单位，避免浮点</li>
+<li><strong>结算分层</strong>：明细与汇总两层，支持按用户 / 陪玩师 / 天复盘</li>
+<li><strong>海外合规</strong>：多币种、税务、渠道差异</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">阅读路径</h2>
+<ol>
+<li><code>lita-earth</code> 的 <code>playercourse</code> / <code>users</code></li>
+<li><code>lita-basic</code> 的 <code>flashorder</code> / <code>apple</code> / <code>chargequery</code></li>
+<li><code>lita-payment</code> 的 <code>recharge</code> / <code>trans</code> / <code>risk</code></li>
+<li><code>docs/data/knowledge/ORDER.md</code>、<code>RECHARGE.md</code></li>
+</ol>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-companion.md">lita-companion.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+
