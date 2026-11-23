@@ -926,6 +926,21 @@ a.ws-table-row:focus-visible {
   margin: 0;
 }
 
+.ws-prose blockquote {
+  margin: 0 0 12px;
+  padding: 9px 13px;
+  color: #6b5316;
+  font-size: .86rem;
+  background: #fdf8ea;
+  border-left: 3px solid var(--ws-warn);
+  border-radius: 0 var(--ws-radius-sm) var(--ws-radius-sm) 0;
+}
+
+.ws-prose blockquote p {
+  margin: 0;
+  color: inherit;
+}
+
 .ws-toc-sub {
   margin: 10px 0 2px;
   color: var(--ws-muted);

@@ -41,6 +41,8 @@ test('build script creates a deployable artifact without development files', asy
     'devkit/index.html',
     'game/monopoly/index.html',
     'index.html',
+    'projects/content/lita-work.md',
+    'projects/content/lita.md',
     'projects/index.html',
     'projects/lita-work.html',
     'projects/lita.html',

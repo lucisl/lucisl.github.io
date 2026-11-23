@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
+    "pages": "node scripts/build-pages.mjs",
     "build": "node scripts/build.mjs",
     "check": "npm test && npm run build"
   }
