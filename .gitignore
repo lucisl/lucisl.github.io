@@ -1,2 +1,5 @@
 dist/
 .DS_Store
+mysql-table-sync.env
+node_modules/
+.expo/
