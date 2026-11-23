@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>最小代码骨架 — AI 工作中心 — WorkSpace</title>
+    <meta name="description" content="WorkHub 的文件级最小实现清单：后端/前端目录、每个文件职责、建表与启动顺序。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link is-active" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">WorkHub 文档</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita-work.html">总览</a></li>
+          <li><a class="is-active" href="./lita-work-skeleton.html">最小代码骨架</a></li>
+          <li><a class="" href="./lita-work-prompts.html">分阶段提示词</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">这份清单解决什么问题</a></li>
+            <li><a href="#chapter-2">最小目录树</a></li>
+            <li><a href="#chapter-3">后端文件清单</a></li>
+            <li><a href="#chapter-4">前端文件清单</a></li>
+            <li><a href="#chapter-5">最小数据库表</a></li>
+            <li><a href="#chapter-6">建文件顺序</a></li>
+            <li><a href="#chapter-7">每一步的完成标准</a></li>
+            <li><a href="#chapter-8">不要做的事</a></li>
+            <li><a href="#chapter-9">与完整手册的对应关系</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>001 / 最小代码骨架</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 001 · SKELETON</p>
+          <div class="ws-title-row">
+            <h1>最小代码骨架</h1>
+            <span class="ws-title-code">Skeleton</span>
+          </div>
+          <p class="ws-tagline">按文件搭出 MVP：先跑通登录 → 机器人 → 任务 → 验收，再扩展工单、知识库、MCP 与飞书。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>目标</span><b>MVP</b></li>
+            <li><span>后端文件</span><b>约 40 个</b></li>
+            <li><span>前端文件</span><b>约 20 个</b></li>
+            <li><span>参考路线</span><b>M0–M3</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita-work.html">← 返回 AI 工作中心</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">这份清单解决什么问题</h2>
+<p>这是一份<strong>文件级最小实现清单</strong>：不追求功能全，只追求先跑通「登录 → 机器人 → 任务 → 验收」这条主链路。按本清单建文件、写最小实现，再按《分阶段提示词》逐段让 AI 补全。</p>
+<p>目标版本只依赖：PostgreSQL + 一个 opencode 执行器。飞书、工单、知识库、MCP、Appium 都可以后加。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">最小目录树</h2>
+<pre><code class="language-text">work/
+├── backend/
+│   ├── src/
+│   │   ├── main.ts
+│   │   ├── app.module.ts
+│   │   ├── data-source.ts
+│   │   ├── common/
+│   │   │   ├── enums.ts
+│   │   │   ├── frontmatter.ts
+│   │   │   └── paths.ts
+│   │   ├── auth/
+│   │   │   ├── user.entity.ts
+│   │   │   ├── auth.module.ts
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.guard.ts
+│   │   │   └── public.decorator.ts
+│   │   ├── workers/
+│   │   │   ├── worker.entity.ts
+│   │   │   ├── workers.module.ts
+│   │   │   ├── workers.service.ts
+│   │   │   ├── workers.controller.ts
+│   │   │   └── worker-environment.service.ts
+│   │   ├── executors/
+│   │   │   ├── executor.entity.ts
+│   │   │   ├── executors.module.ts
+│   │   │   ├── executors.service.ts
+│   │   │   ├── executors.controller.ts
+│   │   │   ├── opencode-client.ts
+│   │   │   └── opencode-event-hub.service.ts
+│   │   ├── tasks/
+│   │   │   ├── task.entity.ts
+│   │   │   ├── task-template.entity.ts
+│   │   │   ├── task-message.entity.ts
+│   │   │   ├── task-event.entity.ts
+│   │   │   ├── tasks.module.ts
+│   │   │   ├── tasks.service.ts
+│   │   │   ├── task-dispatch.service.ts
+│   │   │   ├── task-loop.service.ts
+│   │   │   ├── task-chat.service.ts
+│   │   │   ├── task-handoff.service.ts
+│   │   │   ├── tasks.controller.ts
+│   │   │   └── task-templates.controller.ts
+│   │   └── migrations/
+│   │       └── 1-init.ts
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── nest-cli.json
+├── frontend/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── context/AuthContext.tsx
+│   │   ├── components/Layout.tsx
+│   │   ├── components/MarkdownViewer.tsx
+│   │   ├── components/agent-chat/DebugChat.tsx
+│   │   ├── lib/api.ts
+│   │   ├── lib/event-source.ts
+│   │   └── pages/
+│   │       ├── LoginPage.tsx
+│   │       ├── TaskListPage.tsx
+│   │       ├── TaskDetailPage.tsx
+│   │       ├── AdminWorkersPage.tsx
+│   │       └── RobotChatPage.tsx
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── vite.config.ts
+└── pnpm-workspace.yaml
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">后端文件清单</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>职责</th>
+<th>最小实现要点</th>
+<th>完成标准</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>main.ts</code></td>
+<td>启动入口</td>
+<td>全局前缀 <code>/api</code>、CORS、静态目录、<code>ValidationPipe</code></td>
+<td><code>GET /api/health</code> 返回 200</td>
+</tr>
+<tr>
+<td><code>app.module.ts</code></td>
+<td>根模块</td>
+<td>注册 ConfigModule、TypeOrmModule、各业务模块、全局 AuthGuard</td>
+<td>启动无循环依赖</td>
+</tr>
+<tr>
+<td><code>data-source.ts</code></td>
+<td>TypeORM 数据源</td>
+<td>从 <code>DB_*</code> 读连接；生产 <code>synchronize:false</code></td>
+<td>迁移命令可执行</td>
+</tr>
+<tr>
+<td><code>common/enums.ts</code></td>
+<td>全量枚举</td>
+<td>先生成任务/机器人/身份相关枚举</td>
+<td>前后端枚举字符串一致</td>
+</tr>
+<tr>
+<td><code>common/frontmatter.ts</code></td>
+<td>Markdown 前置信息</td>
+<td>生成 <code>update</code>（北京时间）、标题等</td>
+<td><code>.md</code> 响应以 <code>---</code> 开头</td>
+</tr>
+<tr>
+<td><code>common/paths.ts</code></td>
+<td>静态目录</td>
+<td>解析 <code>DIR_IMAGE_WEBROOT</code> 等</td>
+<td>图片/文件路径可访问</td>
+</tr>
+<tr>
+<td><code>auth/user.entity.ts</code></td>
+<td>用户表</td>
+<td><code>id, feishuOpenId, unionId, name, avatarUrl, department, role, enabled, lastLoginAt</code></td>
+<td>表自动创建/迁移成功</td>
+</tr>
+<tr>
+<td><code>auth/auth.service.ts</code></td>
+<td>登录与用户</td>
+<td>飞书 OAuth 换 token、按 union_id/open_id upsert、首个登录用户管理员、签发 JWT</td>
+<td>登录后 <code>users</code> 有记录</td>
+</tr>
+<tr>
+<td><code>auth/auth.controller.ts</code></td>
+<td>登录端点</td>
+<td><code>GET /auth/feishu</code> 302、<code>GET /auth/feishu/callback</code>、<code>GET /auth/me</code>、<code>POST /auth/logout</code></td>
+<td>浏览器能完成登录</td>
+</tr>
+<tr>
+<td><code>auth/auth.guard.ts</code></td>
+<td>全局守卫</td>
+<td>读 HttpOnly Cookie → 校验 JWT → 挂 <code>req.user</code>；<code>.md</code> 端点走令牌分支；<code>@Public()</code> 放行</td>
+<td>未登录 JSON 接口 401</td>
+</tr>
+<tr>
+<td><code>auth/public.decorator.ts</code></td>
+<td>放行标记</td>
+<td><code>SetMetadata(IS_PUBLIC_KEY, true)</code></td>
+<td>登录端点可匿名访问</td>
+</tr>
+<tr>
+<td><code>workers/worker.entity.ts</code></td>
+<td>机器人表</td>
+<td>先做 <code>name, intro, runtime, executorId, providerId, modelId, prompt, enabled, maxParallelTasks, humanUserId, agentToken</code></td>
+<td>能存两类机器人</td>
+</tr>
+<tr>
+<td><code>workers/workers.service.ts</code></td>
+<td>机器人 CRUD</td>
+<td>创建/编辑/删除；真人机器人唯一绑定；令牌生成与重置</td>
+<td>能建 AI 机器人与真人机器人</td>
+</tr>
+<tr>
+<td><code>workers/workers.controller.ts</code></td>
+<td>管理接口</td>
+<td><code>GET/POST/PATCH/DELETE /workers</code>；管理员校验</td>
+<td>非管理员 403</td>
+</tr>
+<tr>
+<td><code>workers/worker-environment.service.ts</code></td>
+<td>工位初始化</td>
+<td><code>mkdir</code> 工位；写 <code>AGENTS.md</code>、<code>.agents/.env</code>、<code>.agents/mcp.json</code>、内核 MCP 配置；同步技能/规范</td>
+<td>工位目录结构正确</td>
+</tr>
+<tr>
+<td><code>executors/executor.entity.ts</code></td>
+<td>执行器表</td>
+<td><code>name, ip, port, type, token, enabled, online</code></td>
+<td>能登记 opencode</td>
+</tr>
+<tr>
+<td><code>executors/opencode-client.ts</code></td>
+<td>opencode 客户端</td>
+<td>HTTP Basic；<code>createSession/prompt/interrupt/messages/events</code></td>
+<td>能建会话并收到事件</td>
+</tr>
+<tr>
+<td><code>executors/opencode-event-hub.service.ts</code></td>
+<td>事件中心</td>
+<td>每个执行器一条 SSE；按需 connect；事件总线按 sessionId 分发</td>
+<td>多任务事件不串</td>
+</tr>
+<tr>
+<td><code>executors/executors.controller.ts</code></td>
+<td>执行器管理</td>
+<td>CRUD + 健康检查 + 同步 providers</td>
+<td>管理区可配</td>
+</tr>
+<tr>
+<td><code>tasks/task.entity.ts</code></td>
+<td>任务主表</td>
+<td>状态/子状态、父子树、需求方、执行机器人、会话 id、HANDOFF 版本等（见手册附录 A）</td>
+<td>能表达完整状态机</td>
+</tr>
+<tr>
+<td><code>tasks/task-template.entity.ts</code></td>
+<td>任务定义</td>
+<td><code>name, description, agentIds</code></td>
+<td>能选默认机器人</td>
+</tr>
+<tr>
+<td><code>tasks/task-message.entity.ts</code></td>
+<td>任务对话</td>
+<td><code>taskId, messageKey, role, sender, content, reasoning, status, kind, tools, question</code></td>
+<td>刷新后对话可恢复</td>
+</tr>
+<tr>
+<td><code>tasks/tasks.service.ts</code></td>
+<td>任务 CRUD/查询</td>
+<td>创建任务、列表、详情、子任务、状态更新、权限校验</td>
+<td>任务能被创建和读取</td>
+</tr>
+<tr>
+<td><code>tasks/task-dispatch.service.ts</code></td>
+<td>派发引擎</td>
+<td><code>claimExecution</code> 行锁占容量；<code>offer/dispatch</code>；建/复用会话；prompt；事件终态；释放机器人；申请验收</td>
+<td>机器人能执行并交付</td>
+</tr>
+<tr>
+<td><code>tasks/task-loop.service.ts</code></td>
+<td>调度循环</td>
+<td>每秒扫描：待分配分配、待接受邀约、待继续恢复、待反馈/待验收提醒</td>
+<td>任务能自动推进</td>
+</tr>
+<tr>
+<td><code>tasks/task-chat.service.ts</code></td>
+<td>对话聚合</td>
+<td>合并任务事件与 <code>task_messages</code>；SSE 快照+增量</td>
+<td>页面实时看到对话</td>
+</tr>
+<tr>
+<td><code>tasks/task-handoff.service.ts</code></td>
+<td>交付文档</td>
+<td>首次 <code>baseVersion=0</code>；更新校验版本；409；申请验收锁定</td>
+<td>并发更新不丢内容</td>
+</tr>
+<tr>
+<td><code>tasks/tasks.controller.ts</code></td>
+<td>任务 API</td>
+<td>创建、接受/拒绝、消息、提问答复、HANDOFF、申请验收、验收/驳回/判失败</td>
+<td>主链路 API 完整</td>
+</tr>
+<tr>
+<td><code>tasks/task-templates.controller.ts</code></td>
+<td>任务定义 API</td>
+<td><code>GET/POST/PATCH/DELETE</code></td>
+<td>管理区可配</td>
+</tr>
+<tr>
+<td><code>migrations/1-init.ts</code></td>
+<td>初始迁移</td>
+<td>建上述表与索引</td>
+<td>空库可迁移</td>
+</tr>
+</tbody></table></div>
+<h3>后端最小 API</h3>
+<pre><code class="language-text">GET    /api/health
+GET    /api/auth/feishu
+GET    /api/auth/feishu/callback
+GET    /api/auth/me
+POST   /api/auth/logout
+
+GET    /api/workers
+POST   /api/workers
+PATCH  /api/workers/:id
+DELETE /api/workers/:id
+POST   /api/workers/:id/initialize
+
+GET    /api/executors
+POST   /api/executors
+PATCH  /api/executors/:id
+
+GET    /api/tasks
+GET    /api/tasks/:id
+POST   /api/tasks/create.md
+POST   /api/tasks/:id/accept-task.md
+POST   /api/tasks/:id/refuse.md
+POST   /api/tasks/:id/messages/reply.md
+POST   /api/tasks/:id/questions/ask.md
+POST   /api/tasks/:id/questions/:questionId/answer.md
+POST   /api/tasks/:id/handoff/update.md
+POST   /api/tasks/:id/deliver/apply.md
+POST   /api/tasks/:id/handoff/accept.md
+POST   /api/tasks/:id/handoff/refuse.md
+POST   /api/tasks/:id/fail.md
+GET    /api/tasks/stream
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">前端文件清单</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>职责</th>
+<th>最小实现要点</th>
+<th>完成标准</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>main.tsx</code></td>
+<td>入口</td>
+<td>ThemeProvider、AuthProvider、RouterProvider</td>
+<td>页面能渲染</td>
+</tr>
+<tr>
+<td><code>App.tsx</code></td>
+<td>路由</td>
+<td><code>/login</code>、<code>/tasks</code>、<code>/tasks/:id</code>、<code>/admin/workers</code>；<code>RequireAuth</code></td>
+<td>未登录跳登录</td>
+</tr>
+<tr>
+<td><code>context/AuthContext.tsx</code></td>
+<td>会话</td>
+<td>启动请求 <code>/auth/me</code>；提供 user/refresh/logout</td>
+<td>刷新保持登录</td>
+</tr>
+<tr>
+<td><code>components/Layout.tsx</code></td>
+<td>布局</td>
+<td>顶部导航 + 左侧分区；管理员才显示管理区</td>
+<td>导航正确</td>
+</tr>
+<tr>
+<td><code>lib/api.ts</code></td>
+<td>API 客户端</td>
+<td><code>request()</code> 统一错误；任务/机器人/执行器类型</td>
+<td>类型与后端一致</td>
+</tr>
+<tr>
+<td><code>lib/event-source.ts</code></td>
+<td>SSE 封装</td>
+<td><code>visibleEventSource</code>：隐藏断开、恢复重连</td>
+<td>切换标签页不断流</td>
+</tr>
+<tr>
+<td><code>pages/LoginPage.tsx</code></td>
+<td>登录</td>
+<td>跳 <code>/api/auth/feishu</code></td>
+<td>能登录</td>
+</tr>
+<tr>
+<td><code>pages/TaskListPage.tsx</code></td>
+<td>任务列表</td>
+<td>拉列表 + SSE 增量；状态筛选</td>
+<td>实时更新</td>
+</tr>
+<tr>
+<td><code>pages/TaskDetailPage.tsx</code></td>
+<td>任务详情</td>
+<td>基本信息、对话、HANDOFF、操作按钮</td>
+<td>可完成验收</td>
+</tr>
+<tr>
+<td><code>components/agent-chat/DebugChat.tsx</code></td>
+<td>对话组件</td>
+<td>消息列表、输入框、SSE 增量、提问卡片</td>
+<td>机器人回复流式展示</td>
+</tr>
+<tr>
+<td><code>components/MarkdownViewer.tsx</code></td>
+<td>Markdown 渲染</td>
+<td>react-markdown + remark-gfm + mermaid 回退</td>
+<td>HANDOFF 正常渲染</td>
+</tr>
+<tr>
+<td><code>pages/AdminWorkersPage.tsx</code></td>
+<td>机器人管理</td>
+<td>列表/新建/编辑/初始化</td>
+<td>能配模型与执行器</td>
+</tr>
+<tr>
+<td><code>pages/RobotChatPage.tsx</code></td>
+<td>机器人对话</td>
+<td>选机器人、会话、流式回复</td>
+<td>能多轮聊</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">最小数据库表</h2>
+<p>MVP 只需要 6 张表：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>表</th>
+<th>关键字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>users</code></td>
+<td>id, feishu_open_id, union_id, name, role, enabled, last_login_at</td>
+</tr>
+<tr>
+<td><code>executors</code></td>
+<td>id, name, ip, port, type, token, enabled, online</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td>id, name, runtime, executor_id, provider_id, model_id, prompt, enabled, max_parallel_tasks, human_user_id, agent_token</td>
+</tr>
+<tr>
+<td><code>task_templates</code></td>
+<td>id, name, description, agent_ids</td>
+</tr>
+<tr>
+<td><code>tasks</code></td>
+<td>id, code, title, template_id, parent_id, root_id, status, sub_status, requester_type/id, agent_id, executor_id, opencode_session_id, handoff_path, handoff_version, handoff_submitted_version</td>
+</tr>
+<tr>
+<td><code>task_messages</code></td>
+<td>id, task_id, message_key, role, sender, content, reasoning, status, kind, tools, question</td>
+</tr>
+</tbody></table></div>
+<p>工单、知识库、话题、唤醒、反馈、灵感、提测、缺陷的表在后续里程碑再加。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">建文件顺序</h2>
+<p>按这个顺序写，能保证每一步都可运行、可验证：</p>
+<ol>
+<li><code>pnpm-workspace.yaml</code> + 两个 <code>package.json</code> + tsconfig</li>
+<li><code>main.ts</code> / <code>app.module.ts</code> / <code>data-source.ts</code> + <code>health</code></li>
+<li><code>common/enums.ts</code> + <code>auth/*</code>（先本地假登录也可以，后面换飞书）</li>
+<li><code>workers/*</code> + 管理页</li>
+<li><code>executors/*</code> + opencode 连通性验证</li>
+<li><code>worker-environment.service.ts</code> + 工位初始化</li>
+<li><code>tasks/*</code>（实体 → service → dispatch → loop → controller）</li>
+<li>前端任务列表/详情 + SSE</li>
+<li>对话/HANDOFF/验收</li>
+<li>迁移与测试</li>
+</ol>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">每一步的完成标准</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>完成标准</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>骨架</td>
+<td>前后端能启动，<code>/api/health</code> 200，前端能打开</td>
+</tr>
+<tr>
+<td>登录</td>
+<td>飞书登录成功，<code>/auth/me</code> 返回用户，未登录 401</td>
+</tr>
+<tr>
+<td>机器人</td>
+<td>能建 AI 机器人，工位目录生成，<code>AGENTS.md</code> 与 <code>.agents/.env</code> 正确</td>
+</tr>
+<tr>
+<td>执行器</td>
+<td>能建会话、发 prompt、收到流式事件</td>
+</tr>
+<tr>
+<td>任务</td>
+<td>创建任务 → 分配 → 接受 → 执行 → 提问/答复 → 交付 → 验收</td>
+</tr>
+<tr>
+<td>对话</td>
+<td>刷新页面后对话与工具调用仍在</td>
+</tr>
+<tr>
+<td>验收</td>
+<td>通过/不通过/判失败都能推进状态机</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">不要做的事</h2>
+<ul>
+<li>不要先做飞书、工单、知识库；它们会拖慢主链路</li>
+<li>不要为「以后可能用到」提前抽象；先按单执行器、单机器人写</li>
+<li>不要在 MVP 做权限矩阵；先做管理员/成员两级</li>
+<li>不要把业务逻辑放进 controller；controller 只做参数与权限</li>
+<li>不要依赖数据库级联删除；删除时应用层清理</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">与完整手册的对应关系</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>本清单</th>
+<th>完整手册章节</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>目录树/依赖</td>
+<td>二、技术栈与工程结构</td>
+</tr>
+<tr>
+<td>身份/令牌</td>
+<td>四、身份与鉴权</td>
+</tr>
+<tr>
+<td>表结构</td>
+<td>五、数据模型 + 附录 A</td>
+</tr>
+<tr>
+<td>任务链路</td>
+<td>七、7.1–7.4</td>
+</tr>
+<tr>
+<td>工位/执行器</td>
+<td>七、7.9</td>
+</tr>
+<tr>
+<td>前端</td>
+<td>八、前端</td>
+</tr>
+<tr>
+<td>验收</td>
+<td>十二、验收清单</td>
+</tr>
+</tbody></table></div>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-work-skeleton.md">lita-work-skeleton.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

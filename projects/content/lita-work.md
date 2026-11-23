@@ -14,6 +14,23 @@
 
 <strong>非目标</strong>：像素级还原现有 UI、迁移历史数据、复刻具体业务活动、接入特定公司基础设施。这些都可以按同一套接口替换。
 
+## 延伸阅读
+
+如果准备真的动手重建，再配合这两份材料：
+
+<div class="ws-topic-grid">
+  <a class="ws-topic-card" href="./lita-work-skeleton.html">
+    <span class="ws-topic-index">01 / SKELETON</span>
+    <b>最小代码骨架</b>
+    <small>文件级清单：每个文件放什么、先建哪张表、按什么顺序跑通</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-work-prompts.html">
+    <span class="ws-topic-index">02 / PROMPT PACK</span>
+    <b>分阶段提示词</b>
+    <small>把 M0–M8 拆成可直接投给 AI 的 9 段提示词</small>
+  </a>
+</div>
+
 ## 一、产品定位与功能地图
 
 ### 一句话

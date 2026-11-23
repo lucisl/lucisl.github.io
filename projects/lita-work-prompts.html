@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>分阶段提示词 — AI 工作中心 — WorkSpace</title>
+    <meta name="description" content="给 AI 编码 Agent 的分阶段提示词：从项目初始化到任务中心、工单、知识库、MCP 与飞书。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link is-active" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">WorkHub 文档</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita-work.html">总览</a></li>
+          <li><a class="" href="./lita-work-skeleton.html">最小代码骨架</a></li>
+          <li><a class="is-active" href="./lita-work-prompts.html">分阶段提示词</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">怎么用这套提示词</a></li>
+            <li><a href="#chapter-2">全局约束（每段前先发）</a></li>
+            <li><a href="#chapter-3">P0 项目初始化</a></li>
+            <li><a href="#chapter-4">P1 用户与登录</a></li>
+            <li><a href="#chapter-5">P2 机器人与工位</a></li>
+            <li><a href="#chapter-6">P3 执行器与会话</a></li>
+            <li><a href="#chapter-7">P4 任务中心</a></li>
+            <li><a href="#chapter-8">P5 工单与工作流</a></li>
+            <li><a href="#chapter-9">P6 知识库</a></li>
+            <li><a href="#chapter-10">P7 MCP 开放层</a></li>
+            <li><a href="#chapter-11">P8 飞书集成</a></li>
+            <li><a href="#chapter-12">P9 业务扩展</a></li>
+            <li><a href="#chapter-13">联调/修复提示词</a></li>
+            <li><a href="#chapter-14">验收提示词</a></li>
+            <li><a href="#chapter-15">使用建议</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>001 / 分阶段提示词</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 001 · PROMPTS</p>
+          <div class="ws-title-row">
+            <h1>分阶段提示词</h1>
+            <span class="ws-title-code">Prompt Pack</span>
+          </div>
+          <p class="ws-tagline">按阶段复制给 AI，每个阶段都有范围、交付物、约束和验收标准。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>阶段</span><b>9 个</b></li>
+            <li><span>用法</span><b>顺序执行</b></li>
+            <li><span>节奏</span><b>每阶段自测</b></li>
+            <li><span>参考</span><b>第十节</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita-work.html">← 返回 AI 工作中心</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">怎么用这套提示词</h2>
+<p>这是给 AI 编码 Agent 的分阶段提示词包。用法：</p>
+<ol>
+<li>先把《AI 工作中心手册》和《最小代码骨架》给它（网页或 Markdown 文件都行）</li>
+<li>从 P0 开始，一次只投一段；不要把所有阶段一次性丢给 AI</li>
+<li>每段结束先跑验收命令；通过后再投下一段</li>
+<li>如果 AI 卡住，把「联调/修复提示词」和报错一起给它</li>
+<li>最后用「验收提示词」做整体检查</li>
+</ol>
+<p><strong>每段提示词都自带上下文</strong>，但建议在对话开头加一段全局约束（见下），避免重复交代。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">全局约束（每段前先发）</h2>
+<pre><code class="language-text">你是本项目的主程。请严格按以下约束工作：
+
+技术栈：NestJS 11 + TypeORM + PostgreSQL（后端），React 19 + Vite + Tailwind（前端）。
+代码规范：strict TypeScript；controller 只做参数校验与权限，业务在 service。
+数据库：不使用物理外键和数据库级联删除；时间列用 timestamptz；生产结构变更新增 migration。
+鉴权：全局 AuthGuard；管理接口必须服务端校验管理员；不把令牌写进日志/响应。
+接口：所有 JSON API 带 /api 前缀；.md 端点返回 Markdown + YAML Frontmatter。
+错误处理：失败返回明确 4xx/5xx，不静默吞错。
+测试：每阶段至少补一个能跑的单测或手工验收脚本。
+不要臆造接口或表；以我给你的手册和骨架为准。若信息不足，先提问，不要猜。
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">P0 项目初始化</h2>
+<pre><code class="language-text">目标：搭出可运行的前后端骨架。
+
+参考：手册第二节「技术栈与工程结构」、骨架「最小目录树」。
+
+请完成：
+1. 初始化 pnpm workspace：backend、frontend 两个包。
+2. backend：NestJS 11 + TypeORM + PostgreSQL；main.ts 设置全局 /api 前缀、CORS、ValidationPipe。
+3. backend：ConfigModule 读取 DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME；data-source.ts 生产 synchronize=false。
+4. backend：GET /api/health 返回 { ok: true, ts }。
+5. frontend：Vite + React 19 + react-router；一个空白 Layout 和 /login 路由。
+6. 根目录 pnpm scripts：dev:backend、dev:frontend、build、lint、test。
+
+验收：
+- pnpm install 成功
+- pnpm dev:backend 启动，curl localhost:3100/api/health 返回 200
+- pnpm dev:frontend 启动，浏览器能打开
+- 不写任何业务表
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">P1 用户与登录</h2>
+<pre><code class="language-text">目标：完成飞书 OAuth 登录、用户表、管理员/成员两级角色。
+
+参考：手册第四节「身份与鉴权」。
+
+请完成：
+1. users 表：id, feishu_open_id, union_id, name, avatar_url, email, department, role, enabled, last_login_at, created_at, updated_at。
+2. 飞书 OAuth：GET /api/auth/feishu 302 到授权页；GET /api/auth/feishu/callback 换用户信息、upsert、签 JWT、写 HttpOnly Cookie。
+3. 首次登录且库内无管理员时，该用户为管理员；其余为成员。
+4. AuthGuard：读 Cookie → 校验 JWT → 挂 req.user；@Public() 放行登录端点。
+5. GET /api/auth/me、POST /api/auth/logout。
+6. 前端 AuthContext：启动拉 /me；未登录跳 /login；Layout 根据角色显示管理区。
+
+验收：
+- 未登录访问 /api/auth/me 返回 401
+- 登录后 Cookie 存在，/me 返回用户与角色
+- 成员访问管理接口返回 403
+- 退出后 Cookie 清除
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">P2 机器人与工位</h2>
+<pre><code class="language-text">目标：机器人 CRUD + 工位目录 + 初始化。
+
+参考：手册七、7.9；骨架「workers 文件清单」。
+
+请完成：
+1. executors 表与基础 CRUD（先支持 type=opencode，ip/port/token）。
+2. workers 表：name, intro, runtime, executor_id, provider_id, model_id, prompt, enabled, max_parallel_tasks, human_user_id, agent_token。
+3. 创建 AI 机器人时校验执行器存在；真人机器人由用户唯一绑定。
+4. worker-environment.service：初始化时创建工位目录，写 AGENTS.md、.agents/.env、.agents/mcp.json、.opencode/opencode.json；权限 600。
+5. 机器人初始化接口 POST /api/workers/:id/initialize，异步执行并返回状态。
+6. 管理区前端：机器人列表、新建/编辑、初始化按钮。
+
+验收：
+- 能创建一个 AI 机器人并选择执行器/模型
+- 工位目录出现 AGENTS.md、.agents/.env、.opencode/opencode.json
+- 机器人列表显示初始化状态
+- 非管理员不能访问
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">P3 执行器与会话</h2>
+<pre><code class="language-text">目标：打通 opencode 执行器：建会话、发 prompt、收事件、中断。
+
+参考：手册七、7.9；docs/EXECUTOR_PROTOCOL.md。
+
+请完成：
+1. OpencodeClient：HTTP Basic；createSession、prompt、interrupt、messages、event stream。
+2. OpencodeEventHub：每个执行器一条 /api/event SSE；按需连接；事件按 sessionId 分发。
+3. 机器人对话：POST /api/worker-chats/:workerId/messages 建/复用会话并投递；GET /api/worker-chats/:workerId/stream SSE 推送增量。
+4. 前端 DebugChat：消息列表、输入、流式增量、中断按钮。
+5. 会话 7 天不活跃清理。
+
+验收：
+- 对机器人发一句话，页面逐字出现回复
+- 关闭页面再打开，历史消息还在
+- 中断按钮能停止当前轮
+- 两个机器人同时对话，事件不串
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">P4 任务中心</h2>
+<pre><code class="language-text">目标：实现任务状态机、派发、对话、HANDOFF、验收。
+
+参考：手册七、7.1–7.5；骨架「tasks 文件清单」。
+
+请完成：
+1. task_templates、tasks、task_messages 表；tasks 至少包含状态/子状态、父子树、需求方、执行机器人、executor_id、opencode_session_id、handoff 版本字段。
+2. 创建任务：待分配；按任务定义分配机器人；LOOP 每秒推进。
+3. 派发：claimExecution 行锁占容量 → offer → 接受 → dispatch：
+   - 建/复用 opencode 会话
+   - 写工位文件
+   - prompt 投递任务输入与输出要求
+   - 订阅事件流
+   - 终态后释放机器人 → 待申请验收
+4. 提问/答复：question.asked → 待反馈；答复 → 待继续 → 恢复。
+5. HANDOFF：首次 baseVersion=0；更新必须带 content+baseVersion；冲突 409；申请验收锁定版本。
+6. 验收：通过 → 完成；不通过 → 执行中；判失败 → 失败；停止 → 取消并级联子任务。
+7. 任务列表/详情 SSE：快照 + 增量。
+
+验收：
+- 创建任务后机器人自动接受并执行
+- 执行中提问，需求方能答复并恢复
+- 交付后申请验收，需求方能通过/不通过
+- 不通过退回原机器人，返工后可再次验收
+- 刷新页面状态与对话不丢
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">P5 工单与工作流</h2>
+<pre><code class="language-text">目标：可配置工作流 + 运行时 + 审批/验收/判断节点。
+
+参考：手册七、7.5。
+
+请完成：
+1. workflow_definitions（草稿 + 最新发布版本号）、workflow_definition_versions（不可变）。
+2. 节点类型：start、operation、approval、acceptance、condition、feishu-message。
+3. 发布校验：引用存在、机器人启用且非个人 AGENT、节点可达、路径可结束。
+4. 创建工单：固定用最新发布版本；起始节点校验输入字段。
+5. 运行时：operation/approval 创建任务；condition 按字段条件分流；acceptance 仅发起机器人可操作；feishu-message 发卡片但失败不阻断。
+6. 审批：真人通过/驳回（驳回意见必填）；驳回按 rejected 推进。
+7. 前端：工单列表/详情、审批按钮、流程时间线。
+
+验收：
+- 配置一条「操作 → 审批 → 验收」流程并发布
+- 创建工单后节点任务自动分配
+- 审批通过推进下一节点；驳回结束为失败
+- 判断节点按条件走不同分支
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">P6 知识库</h2>
+<pre><code class="language-text">目标：知识树 + 切片 + 全文/向量混合检索。
+
+参考：手册七、7.8。
+
+请完成：
+1. knowledge_nodes / knowledge_chunks（pgvector）；启动时建表与 GIN 索引。
+2. Markdown 按标题切片；写入时生成 embedding（OpenAI 兼容接口）。
+3. 检索：全文 + 向量并行召回，RRF 融合；向量不可用时降级全文；低相似候选过滤。
+4. /api/docs 目录/文章 CRUD 与 .md 视图。
+5. 前端：知识库列表、文章详情、搜索。
+
+验收：
+- 创建目录和文章后能在列表看到
+- 搜索关键词能命中
+- 配置 embedding 后语义搜索也能命中
+- 未配置 embedding 时搜索不报错
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">P7 MCP 开放层</h2>
+<pre><code class="language-text">目标：对外提供 lita-work 与 lita-bots 两个 MCP 服务。
+
+参考：手册七、7.10；附录 C 工具清单。
+
+请完成：
+1. POST /api/mcp/work：Streamable HTTP + JSON-RPC；支持 initialize、tools/list、tools/call。
+2. 鉴权：Authorization Bearer / X-Worker-Token / X-Agent-Token / ?token=；错误令牌 401。
+3. 先实现 10 个工具：get_task、create_task、list_my_tasks、reply_task_message、apply_task_acceptance、search_projects、get_project、search_knowledge、read_knowledge、list_workers。
+4. POST /api/mcp/bots：list_bots、bot_call、bot_answer、bot_interrupt、bot_reset、get_session。
+5. 每次调用写审计日志（工具名、身份、耗时、结果）。
+
+验收：
+- MCP 客户端 initialize 成功
+- tools/list 返回工具与 schema
+- 用机器人令牌能创建任务、查知识、调另一个机器人
+- 错误令牌 401
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">P8 飞书集成</h2>
+<pre><code class="language-text">目标：飞书登录 + 官方机器人 + 长连接 + 群消息。
+
+参考：手册七、7.11；docs/MCP_BOTS.md。
+
+请完成：
+1. feishu_bot_configs：kind、app_id、secret（AES-256-GCM 加密）、verification_token、encrypt_key、enabled。
+2. tenant token 获取与定时刷新；OAuth 登录复用同一应用。
+3. WebSocket 长连接：接收消息事件、去重、按群策略处理（默认仅 @ 回复）。
+4. 平台名义发送：POST /api/feishu-bot/messages 与 .md；写审计表。
+5. 任务群：根任务建群、同步状态、终态 7 天解散。
+6. 前端：飞书配置页、群策略页、消息审计页。
+
+验收：
+- 配置官方机器人后能换取 tenant token
+- 群里 @ 机器人能收到回复
+- 任务群能创建并同步状态
+- 发送失败有审计记录，不影响主流程
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">P9 业务扩展</h2>
+<pre><code class="language-text">目标：按需补需求池/迭代/Backlog、提测/缺陷、反馈/灵感、模型配置、SSO、Appium、GitHub。
+
+参考：手册一「功能地图」与 AGENTS.md 对应章节。
+
+请按以下顺序逐块实现，每块单独验收：
+1. 需求池 + 飞书同步 + 文档
+2. 迭代（T0/T7/Tx）+ Backlog + 成员
+3. 提测 + 提测工单 + 缺陷
+4. 反馈 + 灵感 + 话题
+5. 模型配置 + 标题/摘要生成
+6. SSO
+7. Appium 远程运行
+8. GitHub 仓库/分支/提交 + 凭证网关
+
+每块的验收标准从手册第十二节对应条目取，不要一次全做。
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-13"><h2 id="chapter-13">联调/修复提示词</h2>
+<pre><code class="language-text">当前阶段：&lt;P? 名称&gt;
+现象：&lt;粘贴报错/复现步骤/期望&gt;
+已确认：&lt;日志/请求/响应/数据库状态&gt;
+请：
+1. 先复述你对问题的理解与最可能的 3 个原因；
+2. 只改与问题相关的最小范围，不要顺手重构；
+3. 给出修改文件与原因；
+4. 给出复现验证命令或步骤；
+5. 如果无法确认，先加日志/加测试，不要猜。
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-14"><h2 id="chapter-14">验收提示词</h2>
+<pre><code class="language-text">请按手册第十二节「验收清单」逐项检查当前实现，输出表格：
+
+| 项 | 结果（通过/不通过/未实现） | 证据（命令/页面/日志） | 备注 |
+
+重点检查：
+1. 任务全链路：创建→接受→执行→提问→答复→交付→验收
+2. 权限：未登录 401、非管理员 403、错误令牌 401
+3. 数据：迁移可重复执行、无物理外键、时间列 timestamptz
+4. 并发：机器人并行上限、事件不串、断线重连
+5. 故障：执行器离线、飞书失败、子任务事件丢失
+
+不要因为「看起来没问题」就判通过；每项都要有证据。
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-15"><h2 id="chapter-15">使用建议</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>建议模型能力</th>
+<th>预计工作量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0–P1</td>
+<td>中等</td>
+<td>1–2 天</td>
+</tr>
+<tr>
+<td>P2–P3</td>
+<td>较强（要理解 SSE/会话）</td>
+<td>3–5 天</td>
+</tr>
+<tr>
+<td>P4</td>
+<td>最强（状态机 + 并发）</td>
+<td>5–7 天</td>
+</tr>
+<tr>
+<td>P5</td>
+<td>强（工作流/条件）</td>
+<td>4–6 天</td>
+</tr>
+<tr>
+<td>P6–P7</td>
+<td>中等</td>
+<td>3–5 天</td>
+</tr>
+<tr>
+<td>P8</td>
+<td>强（飞书生态）</td>
+<td>4–6 天</td>
+</tr>
+<tr>
+<td>P9</td>
+<td>按需</td>
+<td>视范围</td>
+</tr>
+</tbody></table></div>
+<p>一个经验：<strong>每段提示词只让它做一件事</strong>，并要求它先列计划再改代码；阶段之间用 git commit 留检查点，出问题可以回退。</p>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-work-prompts.md">lita-work-prompts.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

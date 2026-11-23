@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AI 工作中心 WorkHub — 项目手册 — WorkSpace</title>
-    <meta name="description" content="一个以 AI 为中心的项目管理平台手册：全链路领域模型、MCP 开放层、多执行器抽象、工位上下文工程与可靠异步。内容已匿名化。">
+    <meta name="description" content="一个以 AI 为中心的项目管理平台手册：从产品定位、数据模型、接口到核心流程的可重建说明。">
     <meta name="theme-color" content="#eef0f3">
-    
+    <meta name="robots" content="noindex,nofollow">
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../assets/workspace.css">
   </head>
@@ -54,30 +54,36 @@
           </li>
         </ul>
 
-
+        <div class="ws-rail-subhead">WorkHub 文档</div>
+        <ul class="ws-topic-list">
+          <li><a class="is-active" href="./lita-work.html">总览</a></li>
+          <li><a class="" href="./lita-work-skeleton.html">最小代码骨架</a></li>
+          <li><a class="" href="./lita-work-prompts.html">分阶段提示词</a></li>
+        </ul>
 
         <nav class="ws-toc" aria-label="本文目录">
           <p>本文目录</p>
           <ol>
             <li><a href="#chapter-1">这份文档怎么用</a></li>
-            <li><a href="#chapter-2">一、产品定位与功能地图</a></li>
-            <li><a href="#chapter-3">二、技术栈与工程结构</a></li>
-            <li><a href="#chapter-4">三、进程与部署</a></li>
-            <li><a href="#chapter-5">四、身份与鉴权</a></li>
-            <li><a href="#chapter-6">五、数据模型</a></li>
-            <li><a href="#chapter-7">六、后端模块与接口</a></li>
-            <li><a href="#chapter-8">七、核心流程</a></li>
-            <li><a href="#chapter-9">八、前端</a></li>
-            <li><a href="#chapter-10">九、配置与运维</a></li>
-            <li><a href="#chapter-11">十、从零重建路线</a></li>
-            <li><a href="#chapter-12">十一、MVP 裁剪建议</a></li>
-            <li><a href="#chapter-13">十二、验收清单</a></li>
-            <li><a href="#chapter-14">附录说明</a></li>
-            <li><a href="#chapter-15">附录 A：实体清单</a></li>
-            <li><a href="#chapter-16">附录 B：路由清单</a></li>
-            <li><a href="#chapter-17">附录 C：MCP 工具</a></li>
-            <li><a href="#chapter-18">附录 D：枚举值</a></li>
-            <li><a href="#chapter-19">附录 E：目录速查</a></li>
+            <li><a href="#chapter-2">延伸阅读</a></li>
+            <li><a href="#chapter-3">一、产品定位与功能地图</a></li>
+            <li><a href="#chapter-4">二、技术栈与工程结构</a></li>
+            <li><a href="#chapter-5">三、进程与部署</a></li>
+            <li><a href="#chapter-6">四、身份与鉴权</a></li>
+            <li><a href="#chapter-7">五、数据模型</a></li>
+            <li><a href="#chapter-8">六、后端模块与接口</a></li>
+            <li><a href="#chapter-9">七、核心流程</a></li>
+            <li><a href="#chapter-10">八、前端</a></li>
+            <li><a href="#chapter-11">九、配置与运维</a></li>
+            <li><a href="#chapter-12">十、从零重建路线</a></li>
+            <li><a href="#chapter-13">十一、MVP 裁剪建议</a></li>
+            <li><a href="#chapter-14">十二、验收清单</a></li>
+            <li><a href="#chapter-15">附录说明</a></li>
+            <li><a href="#chapter-16">附录 A：实体清单</a></li>
+            <li><a href="#chapter-17">附录 B：路由清单</a></li>
+            <li><a href="#chapter-18">附录 C：MCP 工具</a></li>
+            <li><a href="#chapter-19">附录 D：枚举值</a></li>
+            <li><a href="#chapter-20">附录 E：目录速查</a></li>
           </ol>
         </nav>
       </aside>
@@ -119,7 +125,24 @@
 <p><strong>非目标</strong>：像素级还原现有 UI、迁移历史数据、复刻具体业务活动、接入特定公司基础设施。这些都可以按同一套接口替换。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">一、产品定位与功能地图</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">延伸阅读</h2>
+<p>如果准备真的动手重建，再配合这两份材料：</p>
+<div class="ws-topic-grid">
+  <a class="ws-topic-card" href="./lita-work-skeleton.html">
+    <span class="ws-topic-index">01 / SKELETON</span>
+    <b>最小代码骨架</b>
+    <small>文件级清单：每个文件放什么、先建哪张表、按什么顺序跑通</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-work-prompts.html">
+    <span class="ws-topic-index">02 / PROMPT PACK</span>
+    <b>分阶段提示词</b>
+    <small>把 M0–M8 拆成可直接投给 AI 的 9 段提示词</small>
+  </a>
+</div>
+
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">一、产品定位与功能地图</h2>
 <h3>一句话</h3>
 <p>Lita 工作中心（WorkHub）是一个以 AI 为中心的项目管理平台：需求、迭代、任务、工单、提测、缺陷全链路在线，AI 机器人作为「员工」参与执行，平台通过 MCP 把能力开放给外部 Agent。</p>
 <h3>使用者</h3>
@@ -302,7 +325,7 @@
 </tbody></table></div>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">二、技术栈与工程结构</h2>
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">二、技术栈与工程结构</h2>
 <h3>后端</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -514,7 +537,7 @@ remark-gfm ^4.0.1, tailwindcss ^4.3.3
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">三、进程与部署</h2>
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">三、进程与部署</h2>
 <h3>进程图</h3>
 <pre><code class="language-text">浏览器
   │  HTTP / SSE
@@ -557,7 +580,7 @@ backend（NestJS）
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">四、身份与鉴权</h2>
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">四、身份与鉴权</h2>
 <h3>身份类型</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -638,7 +661,7 @@ backend（NestJS）
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">五、数据模型</h2>
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">五、数据模型</h2>
 <h3>关系总览（应用层软引用，无物理外键）</h3>
 <pre><code class="language-text">users 1─1 workers(humanUserId)          # 真人机器人
 users 1─1 workers(personalAgentUserId)  # 个人 AGENT
@@ -680,7 +703,7 @@ feishu_bot_configs 1─n feishu_bot_groups / feishu_bot_group_records
 <p>完整 69 张表见<strong>附录 A</strong>。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">六、后端模块与接口</h2>
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">六、后端模块与接口</h2>
 <h3>模块职责</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -809,7 +832,7 @@ feishu_bot_configs 1─n feishu_bot_groups / feishu_bot_group_records
 <p>完整 313 条路由见<strong>附录 B</strong>。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">七、核心流程</h2>
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">七、核心流程</h2>
 <h3>7.1 任务状态机</h3>
 <p>主状态三态，子状态严格对应：</p>
 <div class="ws-table-wrap"><table>
@@ -1137,7 +1160,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">八、前端</h2>
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">八、前端</h2>
 <h3>路由（主要）</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -1221,7 +1244,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">九、配置与运维</h2>
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">九、配置与运维</h2>
 <h3>环境变量（核心）</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -1350,7 +1373,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </tbody></table></div>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">十、从零重建路线</h2>
+<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">十、从零重建路线</h2>
 <h3>M0 骨架（1–2 天）</h3>
 <ul>
 <li>pnpm workspace：<code>backend</code> + <code>frontend</code></li>
@@ -1413,7 +1436,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">十一、MVP 裁剪建议</h2>
+<section class="ws-card ws-prose" id="chapter-13"><h2 id="chapter-13">十一、MVP 裁剪建议</h2>
 <p>必须保留：</p>
 <ul>
 <li>用户登录、机器人、执行器、任务状态机、HANDOFF、验收</li>
@@ -1430,7 +1453,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-13"><h2 id="chapter-13">十二、验收清单</h2>
+<section class="ws-card ws-prose" id="chapter-14"><h2 id="chapter-14">十二、验收清单</h2>
 <p>功能：</p>
 <ul>
 <li>创建任务 → 分配 → 接受 → 执行 → 提问/答复 → 交付 → 验收通过</li>
@@ -1460,7 +1483,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-14"><h2 id="chapter-14">附录说明</h2>
+<section class="ws-card ws-prose" id="chapter-15"><h2 id="chapter-15">附录说明</h2>
 <p>以下附录由代码自动抽取，随代码变化会有差异；重建时以仓库为准。</p>
 <ul>
 <li>附录 A：69 个实体与字段</li>
@@ -1471,7 +1494,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-15"><h2 id="chapter-15">附录 A：实体清单</h2>
+<section class="ws-card ws-prose" id="chapter-16"><h2 id="chapter-16">附录 A：实体清单</h2>
 <blockquote>
 <p>由 <code>backend/src/**/*.entity.ts</code> 自动抽取；<code>?</code> 表示可空。</p>
 </blockquote>
@@ -1831,7 +1854,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </tbody></table></div>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-16"><h2 id="chapter-16">附录 B：路由清单</h2>
+<section class="ws-card ws-prose" id="chapter-17"><h2 id="chapter-17">附录 B：路由清单</h2>
 <blockquote>
 <p>由控制器装饰器自动抽取（已去重），按模块分组。</p>
 </blockquote>
@@ -2233,7 +2256,7 @@ CREATE INDEX knowledge_chunks_search_idx ON knowledge_chunks USING gin (search_v
 </code></pre>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-17"><h2 id="chapter-17">附录 C：MCP 工具</h2>
+<section class="ws-card ws-prose" id="chapter-18"><h2 id="chapter-18">附录 C：MCP 工具</h2>
 <blockquote>
 <p>由 <code>backend/src/mcp/**</code> 的 <code>registerTool</code> 自动抽取，共 113 个。</p>
 </blockquote>
@@ -2261,7 +2284,7 @@ upsert_task_document
 </code></pre>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-18"><h2 id="chapter-18">附录 D：枚举值</h2>
+<section class="ws-card ws-prose" id="chapter-19"><h2 id="chapter-19">附录 D：枚举值</h2>
 <pre><code class="language-text">DocumentType: 需求 / 功能 / 测试 / 技术 / 接口 / 配置 / 设计
 DocumentSource: 飞书 / apipost / -
 ProjectType: 活动 / 功能 / 游戏 / 数据 / 后台 / 技术 / 其它
@@ -2309,7 +2332,7 @@ TopicPostSource: 平台 / 飞书群
 </code></pre>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-19"><h2 id="chapter-19">附录 E：目录速查</h2>
+<section class="ws-card ws-prose" id="chapter-20"><h2 id="chapter-20">附录 E：目录速查</h2>
 <pre><code class="language-text">backend/src:
 agent apipost app-versions auth checks common defects documents executors exports feedbacks feishu-bot feishu files github-gateway github ideas images iterations knowledge mcp-servers mcp migrations milestones model-config projects releases remote-run resources schedules scripts settings sso tasks tests tickets topics wakeups workers workflows 
 

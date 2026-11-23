@@ -682,6 +682,8 @@ a.ws-table-row:focus-visible {
   font-family: var(--ws-mono);
   font-size: .8rem;
   line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .ws-prose pre:not(.ws-diagram) code {

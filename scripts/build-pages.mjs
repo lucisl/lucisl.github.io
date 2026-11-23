@@ -27,23 +27,62 @@ const PROJECTS = [
   },
 ];
 
-const TOPICS = [
-  { key: 'overview', name: '总览', href: './lita.html' },
-  { key: 'activities', name: '活动运营', href: './lita-activities.html' },
-  { key: 'voice-room', name: '语音房与直播', href: './lita-voice-room.html' },
-  { key: 'gifting', name: '送礼与虚拟礼物', href: './lita-gifting.html' },
-  { key: 'companion', name: '陪玩与交易', href: './lita-companion.html' },
-];
+const TOPIC_GROUPS = {
+  'lita-work': {
+    overview: { name: 'AI 工作中心', href: './lita-work.html' },
+    items: [
+      { key: 'overview', name: '总览', href: './lita-work.html' },
+      {
+        key: 'skeleton',
+        name: '最小代码骨架',
+        href: './lita-work-skeleton.html',
+      },
+      {
+        key: 'prompts',
+        name: '分阶段提示词',
+        href: './lita-work-prompts.html',
+      },
+    ],
+  },
+  lita: {
+    overview: { name: 'Lita 总览', href: './lita.html' },
+    items: [
+      { key: 'overview', name: '总览', href: './lita.html' },
+      {
+        key: 'activities',
+        name: '活动运营',
+        href: './lita-activities.html',
+      },
+      {
+        key: 'voice-room',
+        name: '语音房与直播',
+        href: './lita-voice-room.html',
+      },
+      {
+        key: 'gifting',
+        name: '送礼与虚拟礼物',
+        href: './lita-gifting.html',
+      },
+      {
+        key: 'companion',
+        name: '陪玩与交易',
+        href: './lita-companion.html',
+      },
+    ],
+  },
+};
 
 const PAGES = [
   {
     key: 'lita-work',
+    project: 'lita-work',
+    topic: 'overview',
     source: 'projects/content/lita-work.md',
     output: 'projects/lita-work.html',
     title: 'AI 工作中心 WorkHub — 项目手册 — WorkSpace',
     description:
-      '一个以 AI 为中心的项目管理平台手册：全链路领域模型、MCP 开放层、多执行器抽象、工位上下文工程与可靠异步。内容已匿名化。',
-    robots: '',
+      '一个以 AI 为中心的项目管理平台手册：从产品定位、数据模型、接口到核心流程的可重建说明。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
     eyebrow: 'PROJECT HANDBOOK / 001',
     breadcrumb: '001',
     h1: 'AI 工作中心',
@@ -58,9 +97,56 @@ const PAGES = [
     ],
   },
   {
+    key: 'work-skeleton',
+    project: 'lita-work',
+    topic: 'skeleton',
+    source: 'projects/content/lita-work-skeleton.md',
+    output: 'projects/lita-work-skeleton.html',
+    title: '最小代码骨架 — AI 工作中心 — WorkSpace',
+    description:
+      'WorkHub 的文件级最小实现清单：后端/前端目录、每个文件职责、建表与启动顺序。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 001 · SKELETON',
+    breadcrumb: '001 / 最小代码骨架',
+    h1: '最小代码骨架',
+    h1Note: 'Skeleton',
+    tagline:
+      '按文件搭出 MVP：先跑通登录 → 机器人 → 任务 → 验收，再扩展工单、知识库、MCP 与飞书。',
+    meta: [
+      ['目标', 'MVP'],
+      ['后端文件', '约 40 个'],
+      ['前端文件', '约 20 个'],
+      ['参考路线', 'M0–M3'],
+    ],
+  },
+  {
+    key: 'work-prompts',
+    project: 'lita-work',
+    topic: 'prompts',
+    source: 'projects/content/lita-work-prompts.md',
+    output: 'projects/lita-work-prompts.html',
+    title: '分阶段提示词 — AI 工作中心 — WorkSpace',
+    description:
+      '给 AI 编码 Agent 的分阶段提示词：从项目初始化到任务中心、工单、知识库、MCP 与飞书。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 001 · PROMPTS',
+    breadcrumb: '001 / 分阶段提示词',
+    h1: '分阶段提示词',
+    h1Note: 'Prompt Pack',
+    tagline:
+      '按阶段复制给 AI，每个阶段都有范围、交付物、约束和验收标准。',
+    meta: [
+      ['阶段', '9 个'],
+      ['用法', '顺序执行'],
+      ['节奏', '每阶段自测'],
+      ['参考', '第十节'],
+    ],
+  },
+  {
     key: 'lita',
     source: 'projects/content/lita.md',
     output: 'projects/lita.html',
+    project: 'lita',
     topic: 'overview',
     title: 'Lita 生态总览 — 项目手册 — WorkSpace',
     description:
@@ -86,6 +172,7 @@ const PAGES = [
     source: 'projects/content/lita-activities.md',
     output: 'projects/lita-activities.html',
     topic: 'activities',
+    project: 'lita',
     title: '活动运营 — Lita 生态 — WorkSpace',
     description:
       'Lita 活动体系手册：运营/产品/游戏活动分类、活动服务三代演进、配置与结算链路、代表玩法与数据口径。',
@@ -108,6 +195,7 @@ const PAGES = [
     source: 'projects/content/lita-voice-room.md',
     output: 'projects/lita-voice-room.html',
     topic: 'voice-room',
+    project: 'lita',
     title: '语音房与直播 — Lita 生态 — WorkSpace',
     description:
       'Lita 语音房与直播手册：建房、麦位、连麦、PK、KTV、榜单、声网转推与停留/上麦数据。',
@@ -130,6 +218,7 @@ const PAGES = [
     source: 'projects/content/lita-gifting.md',
     output: 'projects/lita-gifting.html',
     topic: 'gifting',
+    project: 'lita',
     title: '送礼与虚拟礼物 — Lita 生态 — WorkSpace',
     description:
       'Lita 送礼手册：礼物配置、送礼链路、特效广播、宝箱盲盒、榜单与家族积分、送礼数据口径。',
@@ -152,6 +241,7 @@ const PAGES = [
     source: 'projects/content/lita-companion.md',
     output: 'projects/lita-companion.html',
     topic: 'companion',
+    project: 'lita',
     title: '陪玩与交易 — Lita 生态 — WorkSpace',
     description:
       'Lita 陪玩与交易手册：陪玩师技能、下单接单、充值支付、订单结算与风控。',
@@ -253,20 +343,23 @@ function renderMeta(meta) {
 }
 
 function renderSubpages(page) {
-  if (!page.topic) return '';
-  const items = TOPICS.map(
+  const group = TOPIC_GROUPS[page.project];
+  if (!group || !page.topic) return '';
+  const items = group.items.map(
     (topic) => `          <li><a class="${topic.key === page.topic ? 'is-active' : ''}" href="${topic.href}">${topic.name}</a></li>`,
   ).join('\n');
-  return `        <div class="ws-rail-subhead">业务专题</div>
+  const label = page.project === 'lita-work' ? 'WorkHub 文档' : '业务专题';
+  return `        <div class="ws-rail-subhead">${label}</div>
         <ul class="ws-topic-list">
 ${items}
         </ul>`;
 }
 
 function renderActions(page) {
-  if (!page.topic || page.topic === 'overview') return '';
+  const group = TOPIC_GROUPS[page.project];
+  if (!group || !page.topic || page.topic === 'overview') return '';
   return `          <div class="ws-actions">
-            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+            <a class="ws-btn" href="${group.overview.href}">← 返回 ${group.overview.name}</a>
           </div>`;
 }
 
@@ -288,7 +381,7 @@ export async function buildPages() {
       .replaceAll('{{H1_NOTE}}', escapeHtml(page.h1Note))
       .replaceAll('{{TAGLINE}}', escapeHtml(page.tagline))
       .replaceAll('{{META_ITEMS}}', renderMeta(page.meta))
-      .replaceAll('{{PROJECTS}}', renderProjects(page.key))
+      .replaceAll('{{PROJECTS}}', renderProjects(page.project))
       .replaceAll('{{SUBPAGES}}', renderSubpages(page))
       .replaceAll('{{ACTIONS}}', renderActions(page))
       .replaceAll('{{TOC}}', toc)
