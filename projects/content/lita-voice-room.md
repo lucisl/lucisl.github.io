@@ -49,6 +49,36 @@
 | `hostlevel` | 主持等级 |
 | `roomad` / `popup` / `welcome` | 房间广告 / 弹窗 / 欢迎 |
 
+## 第三方依赖与边界
+
+房间/直播不是全自研：<strong>实时音视频用声网 Agora，IM 用腾讯云 IM（TIM）</strong>，平台负责业务编排、审核、榜单与数据。
+
+```text
+客户端 ──RTC（音频 / 麦位 / 连麦 / PK）──▶ Agora 声网
+客户端 ──IM（私聊 / 房间消息）──────────▶ 腾讯云 IM ◀── lita-msg（代理 / 拦截 / 审核 / 发送）
+平台   ──混流转推──────────────────────▶ Agora Mix → CDN → 非 RTC 观众
+```
+
+| 能力 | 供应商 | 平台侧落点 | 说明 |
+| --- | --- | --- | --- |
+| 实时音视频 | Agora 声网 | `litalive` 的 `miclink` / `liveonline`；`litaroom` 的 `AgoraTokenService` | 房间音频、连麦、直播 PK；token 与频道管理 |
+| 直播转推 | Agora 混流 + CDN | `litalive` 的 `agoramixcdn` / `livestreamconverter` | 把房间音频混流转推到 CDN，形成直播形态 |
+| IM | 腾讯云 IM（TIM） | `lita-msg` 的 `improxy`（`TencentImClient`） | 私聊、群、房间消息；平台做代理、拦截、审核、发送 |
+| 推送 | Firebase FCM / AWS SNS / Kakao | `lita-push`；`lita-basic` 的 `kakaopush` | 按大区选择通道，韩国用 Kakao |
+| 对象存储 / CDN | AWS S3 / 腾讯云 CDN | `lita-resource` / `lita-resource-center` | 图片、语音、特效资源 |
+| 搜索 | Elasticsearch（AWS / 阿里云） | `litaroom` 的 `thd-aws-es` / `thd-aliyun-es` | 双云 + 开关切换 |
+| A/B 与开关 | GrowthBook | `litaroom` 的 `thd-resources-config-growthbook` | 房间/活动实验 |
+| 监控告警 | Prometheus + 飞书 | 各服务 | 指标 + 错误日志告警 |
+| 消息队列 | Kafka | 房间事件、埋点 | 事件分发 |
+| 登录 / 表格 | Google | 用户与运营 | 第三方登录、Sheets 导出 |
+
+几个容易混淆的点：
+
+- <strong>房间和直播共用 Agora</strong>；直播只是多了一层「混流转推 CDN」，不是另一家 RTC。
+- <strong>IM 是腾讯云 IM，不是 Agora</strong>：`lita-msg` 的 `improxy` 包封装了 `TencentImClient`，并做消息拦截、敏感词、限额与补偿。
+- <strong>房间状态、麦位、榜单、礼物、家族积分都是自研</strong>，第三方只提供 RTC / IM / 推送 / 存储等基础能力。
+- IM 的 SDKAppID / Secret 走 Nacos 或环境变量，不应写进代码仓库。
+
 ## 直播与转推
 
 - <strong>Agora（声网）</strong>负责实时音视频，凭证走 Nacos <code>thd-agora.yaml</code>
@@ -80,4 +110,5 @@
 - <strong>麦位 / 连麦问题</strong>：<code>miclink</code>
 - <strong>直播看不到 / 卡顿</strong>：<code>agoramixcdn</code>、<code>livestreamconverter</code>
 - <strong>榜单不对</strong>：<code>liverank</code> + 结算定时任务
+- <strong>IM 消息问题</strong>：<code>lita-msg</code> 的 <code>improxy</code>、<code>MessageInterceptService</code>
 - <strong>停留数据核对</strong>：<code>dwd_once_room_stay_time</code> → <code>dws_voice_room_stay_time</code>
