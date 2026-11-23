@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>技能与 MCP — AI 工作中心 — WorkSpace</title>
+    <meta name="description" content="WorkHub 的技能库、规范库与 MCP 说明：机器人如何获得能力、工位如何注入、平台与外部 MCP 如何配置。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link is-active" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">WorkHub 文档</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita-work.html">总览</a></li>
+          <li><a class="" href="./lita-work-skeleton.html">最小代码骨架</a></li>
+          <li><a class="" href="./lita-work-prompts.html">分阶段提示词</a></li>
+          <li><a class="" href="./lita-work-ops.html">运维部署手册</a></li>
+          <li><a class="is-active" href="./lita-work-skills-mcp.html">技能与 MCP</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">三样东西的分工</a></li>
+            <li><a href="#chapter-2">技能库</a></li>
+            <li><a href="#chapter-3">规范库</a></li>
+            <li><a href="#chapter-4">MCP</a></li>
+            <li><a href="#chapter-5">一次任务里怎么组合</a></li>
+            <li><a href="#chapter-6">常见问题</a></li>
+            <li><a href="#chapter-7">相关链接</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>001 / 技能与 MCP</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 001 · SKILLS & MCP</p>
+          <div class="ws-title-row">
+            <h1>技能与 MCP</h1>
+            <span class="ws-title-code">Skills &amp; MCP</span>
+          </div>
+          <p class="ws-tagline">机器人怎么获得能力：技能库给操作手册，规范库给约束，MCP 给工具。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>技能库</span><b>docs/skills</b></li>
+            <li><span>规范库</span><b>docs/standard</b></li>
+            <li><span>平台 MCP</span><b>lita-work / lita-bots</b></li>
+            <li><span>外部 MCP</span><b>管理区配置</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita-work.html">← 返回 AI 工作中心</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">三样东西的分工</h2>
+<p>机器人要「会干活」，靠三样东西配合：</p>
+<pre><code class="language-text">技能 Skill      → 怎么做一件事：步骤、脚本、注意事项
+规范 Standard   → 必须遵守什么：代码规范、协作约定、边界
+MCP             → 能调用什么：平台工具、数据库、飞书、外部服务
+</code></pre>
+<ul>
+<li><strong>技能</strong>是「操作手册 + 脚本」，回答「怎么做」</li>
+<li><strong>规范</strong>是「约束」，回答「不能怎么做」</li>
+<li><strong>MCP</strong>是「工具接口」，回答「能调用什么」</li>
+</ul>
+<p>三者在工位里落地为：</p>
+<pre><code class="language-text">worker/{id}/
+├── AGENTS.md
+├── .agents/
+│   ├── skills/&lt;name&gt;/SKILL.md     # 技能源
+│   ├── rules/ + manifest          # 规范源
+│   ├── .env                       # 令牌与平台地址
+│   └── mcp.json                   # 内核无关 MCP 声明
+└── 内核适配物（opencode/kiro/devin/droid）
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">技能库</h2>
+<h3>地址</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>入口</th>
+<th>地址</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文档站</td>
+<td><a href="http://docs.cinta.team/skills/">http://docs.cinta.team/skills/</a></td>
+<td>浏览技能说明（VitePress）</td>
+</tr>
+<tr>
+<td>代码仓库</td>
+<td><a href="http://gitea.cinta.team/docs/skills">http://gitea.cinta.team/docs/skills</a></td>
+<td>技能源文件、版本、CHANGELOG</td>
+</tr>
+</tbody></table></div>
+<p>平台初始化机器人时的默认技能库地址是 <code>WORKER_SKILL_REPO_URL</code>，默认值就是 <code>http://gitea.cinta.team/docs/skills</code>。</p>
+<h3>目录结构</h3>
+<p>技能按业务方向组织：</p>
+<pre><code class="language-text">skills/
+├── README.md          # 技能库总说明、版本规范、HTTP 安装规则
+├── CHANGELOG.md
+├── active/            # 活动：排行榜、充值榜、模板榜
+├── admin/             # 后台：认证、道具发放、账户变更、封禁
+├── data/              # 数据：统一查询入口（MySQL / MaxCompute）
+├── game/              # 游戏：段位、水果机抽奖
+├── other/             # 其他：API、可视化、文档迁移、MySQL 表同步
+└── public/            # 公共：飞书、知识库、图表、Nacos、Excel
+</code></pre>
+<p>当前仓库共 <strong>33 个技能</strong>（以仓库为准）：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>分组</th>
+<th>技能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>active</td>
+<td><code>rank-module</code>、<code>recharge-rank</code>、<code>template-rank</code></td>
+</tr>
+<tr>
+<td>admin</td>
+<td><code>auth</code>、<code>forbid</code>、<code>itemReward</code>、<code>itemRewardTask</code>、<code>userAccount</code>、<code>userAccountTask</code></td>
+</tr>
+<tr>
+<td>data</td>
+<td><code>data</code>（统一入口，含 <code>QUICK-START.md</code> / <code>CHECKLIST.md</code>）</td>
+</tr>
+<tr>
+<td>game</td>
+<td><code>game-grade</code>、<code>spin-draw</code></td>
+</tr>
+<tr>
+<td>other</td>
+<td><code>api-lita</code>、<code>data-viz-echarts</code>、<code>gdocs-to-feishu</code>、<code>lita-docs-update</code>、<code>mysql-table-sync</code>、<code>report-index-generator</code>、<code>self-improve</code>、<code>test-mysql-query</code></td>
+</tr>
+<tr>
+<td>public</td>
+<td><code>chart</code>、<code>feishu-chat</code>、<code>feishu-wiki</code>、<code>knowledge-learner</code>、<code>lita-api</code>、<code>lita-query</code>、<code>lita-redis</code>、<code>nacos</code>、<code>platform-token-getter</code>、<code>report-upload</code>、<code>table-doc-generator</code>、<code>to-excel</code>、<code>user-token</code></td>
+</tr>
+</tbody></table></div>
+<h3>一个技能长什么样</h3>
+<pre><code class="language-text">skills/&lt;group&gt;/&lt;skill&gt;/
+├── SKILL.md          # 必需：技能说明（frontmatter + 步骤）
+├── KNOWLEDGE.md      # 可选：业务知识（排行榜、游戏规则等）
+├── script/           # 可选：可执行脚本
+└── README.md         # 可选：更详细的说明
+</code></pre>
+<p><code>SKILL.md</code> 的 frontmatter：</p>
+<pre><code class="language-yaml">---
+name: active-rank-module
+description: &quot;排行榜技能，提供排行榜数据查询、业务知识定义&quot;
+version: 1.5.0
+author: Lita R&amp;D Team
+tags:
+  - active
+  - rank
+---
+</code></pre>
+<p>版本号规则（技能库 README 强制）：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>位</th>
+<th>用途</th>
+<th>规则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主版本</td>
+<td>大更新</td>
+<td>作者明确指定，重大功能/架构变更，记 CHANGELOG</td>
+</tr>
+<tr>
+<td>次版本</td>
+<td>功能更新</td>
+<td>新增或改进功能</td>
+</tr>
+<tr>
+<td>修订号</td>
+<td>Bug 修复</td>
+<td>修复问题</td>
+</tr>
+</tbody></table></div>
+<h3>HTTP 安装规则</h3>
+<p>通过 HTTP 安装技能时，不能只下载 <code>SKILL.md</code>，必须补齐：</p>
+<ol>
+<li>技能根目录的 <code>SKILL.md</code>（或 <code>README.md</code>）</li>
+<li>递归向上所有父目录的 <code>README.md</code>（<code>skills/README.md</code>、<code>skills/public/README.md</code>…）</li>
+<li><code>SKILL.md</code> 中引用的本地文件（脚本、模板、知识文件）</li>
+<li>保持原始目录结构，确保相对路径可用</li>
+</ol>
+<h3>环境变量</h3>
+<p>部分技能依赖 Lita 服务，需要在 <code>~/.env</code> 配置：</p>
+<pre><code class="language-bash"># Lita 用户个人 TOKEN（SQL 查询、接口调用）
+export LITA_USER_TOKEN=&#39;your_token_here&#39;
+</code></pre>
+<ul>
+<li>使用前 <code>source ~/.env</code></li>
+<li>admin 类技能需要单独申请 token，禁止提交到代码仓库</li>
+<li>部分技能是 Python 脚本，需要 <code>pip install pyyaml pymysql</code> 等依赖</li>
+</ul>
+<h3>平台怎么使用技能</h3>
+<ol>
+<li>管理区机器人编辑页勾选技能，保存到 <code>workers.skills</code></li>
+<li>初始化/派发时，平台把技能安装到工位 <code>.agents/skills/&lt;name&gt;</code></li>
+<li>按执行内核镜像：<ul>
+<li>opencode：<code>.agents/skills</code> 原生读取</li>
+<li>kiro：镜像到 <code>.kiro/skills/</code></li>
+<li>droid：镜像到 <code>.factory/skills/</code></li>
+<li>devin：<code>.agents/skills</code> 原生</li>
+</ul>
+</li>
+<li>清单之外的旧技能目录会被移除</li>
+<li>机器人通过 <code>AGENTS.md</code> 里的指引读取技能；平台不把技能全文塞进 prompt</li>
+</ol>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">规范库</h2>
+<p>规范库与技能库是两套仓库：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>项</th>
+<th>技能库</th>
+<th>规范库</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>默认地址</td>
+<td><code>http://gitea.cinta.team/docs/skills</code></td>
+<td><code>http://gitea.cinta.team/docs/standard</code></td>
+</tr>
+<tr>
+<td>环境变量</td>
+<td><code>WORKER_SKILL_REPO_URL</code></td>
+<td><code>WORKER_STANDARD_REPO_URL</code></td>
+</tr>
+<tr>
+<td>工位位置</td>
+<td><code>.agents/skills/</code></td>
+<td><code>.agents/rules/</code></td>
+</tr>
+<tr>
+<td>作用</td>
+<td>告诉机器人「怎么做」</td>
+<td>告诉机器人「必须怎么做」</td>
+</tr>
+<tr>
+<td>清理</td>
+<td>移除清单外的旧技能</td>
+<td>按 <code>.standards-manifest.json</code> 只清理受管文件</td>
+</tr>
+</tbody></table></div>
+<p>规范镜像：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>内核</th>
+<th>规范位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>opencode</td>
+<td><code>.opencode/rules/</code></td>
+</tr>
+<tr>
+<td>kiro</td>
+<td><code>.kiro/steering/</code></td>
+</tr>
+<tr>
+<td>droid</td>
+<td><code>.factory/rules/</code></td>
+</tr>
+<tr>
+<td>devin</td>
+<td>不镜像，靠 <code>AGENTS.md</code> 引导阅读 <code>.agents/rules/</code></td>
+</tr>
+</tbody></table></div>
+<p>注意：取消规范只清理 manifest 记录的文件，机器人自己写的文档不会被删。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">MCP</h2>
+<p>MCP 是平台对机器人开放工具的协议。WorkHub 有两类 MCP：</p>
+<h3>平台自己的 MCP 服务</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>服务</th>
+<th>端点</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lita-work</code></td>
+<td><code>{APP_URL}/api/mcp/work</code></td>
+<td>平台工具：项目/需求/迭代项/文档/知识/运行/缺陷/反馈/灵感/任务/工单/机器人/飞书会话</td>
+</tr>
+<tr>
+<td><code>lita-bots</code></td>
+<td><code>{APP_URL}/api/mcp/bots</code></td>
+<td>把平台机器人当子 Agent 调用</td>
+</tr>
+</tbody></table></div>
+<p>鉴权：</p>
+<pre><code class="language-http">Authorization: Bearer &lt;机器人令牌&gt;
+# 或
+X-Worker-Token: &lt;机器人令牌&gt;
+</code></pre>
+<p><code>lita-work</code> 工具按场景大致分组：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>代表工具</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>项目/需求</td>
+<td><code>search_projects</code>、<code>get_project</code>、<code>update_project</code></td>
+</tr>
+<tr>
+<td>迭代项</td>
+<td><code>get_backlog</code>、<code>update_backlog_members</code>、<code>change_backlog_status</code>、<code>create_backlog_task</code></td>
+</tr>
+<tr>
+<td>任务</td>
+<td><code>create_task</code>、<code>get_task</code>、<code>reply_task_message</code>、<code>apply_task_acceptance</code>、<code>create_subtask</code></td>
+</tr>
+<tr>
+<td>工单</td>
+<td><code>create_ticket</code>、<code>get_ticket</code>、<code>accept_ticket</code>、<code>deliver_ticket_document</code></td>
+</tr>
+<tr>
+<td>知识</td>
+<td><code>search_knowledge</code>、<code>read_knowledge</code>、<code>create_knowledge</code>、<code>update_knowledge</code></td>
+</tr>
+<tr>
+<td>运行</td>
+<td><code>run_check</code>、<code>run_test</code>、<code>run_export</code>、<code>run_schedule</code></td>
+</tr>
+<tr>
+<td>缺陷/反馈/灵感</td>
+<td><code>list_defects</code>、<code>create_defect</code>、<code>list_feedbacks</code>、<code>create_idea</code></td>
+</tr>
+<tr>
+<td>机器人</td>
+<td><code>list_workers</code>、<code>get_worker</code>、<code>create_worker</code>、<code>update_worker</code></td>
+</tr>
+<tr>
+<td>飞书</td>
+<td><code>feishu_history</code>、<code>feishu_send_message</code></td>
+</tr>
+<tr>
+<td>唤醒</td>
+<td><code>schedule_task_wakeup</code>、<code>schedule_agent_wakeup</code></td>
+</tr>
+</tbody></table></div>
+<p><code>lita-bots</code> 只有 6 个工具：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>list_bots</code></td>
+<td>可调用的机器人清单</td>
+</tr>
+<tr>
+<td><code>bot_call</code></td>
+<td>发起一轮对话/任务，支持多轮 <code>session_id</code></td>
+</tr>
+<tr>
+<td><code>bot_answer</code></td>
+<td>回答机器人提问并继续等待</td>
+</tr>
+<tr>
+<td><code>bot_interrupt</code></td>
+<td>中断当前轮，会话保留</td>
+</tr>
+<tr>
+<td><code>bot_reset</code></td>
+<td>重置会话，解绑 opencode 上下文</td>
+</tr>
+<tr>
+<td><code>get_session</code></td>
+<td>读取会话状态与最近消息（断线找回）</td>
+</tr>
+</tbody></table></div>
+<h3>外部 MCP</h3>
+<p>平台还支持机器人连接第三方 MCP：</p>
+<ol>
+<li>管理区「MCP 配置」新增服务（<code>mcp_servers</code> 表）<ul>
+<li>类型：<code>remote</code>（Streamable HTTP）或 <code>local</code>（stdio 命令）</li>
+<li>鉴权：固定令牌（明文落盘）、环境变量占位 <code>{env:NAME}</code>、机器人自身 <code>LITA_WORK_TOKEN</code></li>
+</ul>
+</li>
+<li>机器人编辑页勾选，保存到 <code>workers.mcps</code></li>
+<li>初始化/派发时写入：<ul>
+<li><code>.agents/mcp.json</code>（内核无关声明）</li>
+<li>内核配置：opencode <code>.opencode/opencode.json</code>、kiro <code>.kiro/settings/mcp.json</code>、devin <code>.devin/mcp_config.json</code>、droid <code>.factory/mcp.json</code></li>
+</ul>
+</li>
+<li>权限 600，纳入受管文件，机器人不得读取/展示/改写</li>
+</ol>
+<h3>MCP 安全约定</h3>
+<ul>
+<li>令牌只经服务端落盘，不进入 Prompt、SSE 进度或日志</li>
+<li>每次调用写 MCP 审计（工具、身份、耗时、结果）</li>
+<li>管理类工具在服务端校验管理员；机器人动作校验当前执行机器人</li>
+<li>opencode 工位注入 <code>permissions</code> deny <code>external_directory</code>，限制读写工位外路径</li>
+<li>外部 MCP 的凭据优先用 <code>{env:NAME}</code>，避免明文</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">一次任务里怎么组合</h2>
+<p>以「查一份充值数据并发到飞书」为例：</p>
+<pre><code class="language-text">1. 机器人读 AGENTS.md，找到 data 技能
+2. 按 SKILL.md 读 QUICK-START.md / CHECKLIST.md
+3. 通过 lita-query 技能执行 SQL（用 LITA_USER_TOKEN）
+4. 需要发飞书时：
+   - 技能：public/feishu-chat 或 feishu-wiki
+   - 或 MCP：lita-work 的 feishu_send_message
+5. 结果写入任务 HANDOFF，申请验收
+</code></pre>
+<p>再比如「同步一张表到测试库」：</p>
+<pre><code class="language-text">1. 选 other/mysql-table-sync 技能
+2. 按 SKILL.md 配 LITA_USER_TOKEN + 测试库连接
+3. 技能脚本分页读取生产、单事务替换测试表
+4. 校验行数、失败回滚
+</code></pre>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">常见问题</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>排查</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>技能不显示</td>
+<td>机器人是否勾选、是否初始化、<code>.agents/skills</code> 是否有目录、内核镜像是否生成</td>
+</tr>
+<tr>
+<td>技能版本不对</td>
+<td>检查 <code>SKILL.md</code> frontmatter <code>version</code> 与 CHANGELOG</td>
+</tr>
+<tr>
+<td>技能脚本跑不起来</td>
+<td>依赖是否安装、环境变量是否 <code>source</code>、脚本路径是否相对技能目录</td>
+</tr>
+<tr>
+<td>MCP 连不上</td>
+<td>URL 是否可达、<code>X-Worker-Token</code> 是否正确、内核配置路径是否存在</td>
+</tr>
+<tr>
+<td>MCP 工具没出现</td>
+<td><code>tools/list</code> 是否有、MCP 是否 enabled、机器人是否重新初始化</td>
+</tr>
+<tr>
+<td>MCP 401</td>
+<td>令牌被重置、头名不对（<code>Authorization</code> vs <code>X-Worker-Token</code>）</td>
+</tr>
+<tr>
+<td>kiro 连不上 MCP</td>
+<td>kiro 要求 remote MCP 用 HTTPS，生产 <code>APP_URL</code> 是 http 时需 HTTPS 入口或端口转发</td>
+</tr>
+<tr>
+<td>规范没生效</td>
+<td><code>.agents/rules/.standards-manifest.json</code> 与镜像目录是否一致</td>
+</tr>
+<tr>
+<td>权限不足</td>
+<td>机器人 <code>resourcePermission</code> / <code>githubPermission</code>，或工具本身的身份校验</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">相关链接</h2>
+<ul>
+<li>技能文档站：<a href="http://docs.cinta.team/skills/">http://docs.cinta.team/skills/</a></li>
+<li>技能仓库：<a href="http://gitea.cinta.team/docs/skills">http://gitea.cinta.team/docs/skills</a></li>
+<li>规范库：<a href="http://gitea.cinta.team/docs/standard">http://gitea.cinta.team/docs/standard</a></li>
+<li>平台 MCP 接入：仓库根 <code>MCP.md</code>、<code>docs/work-mcp.md</code>、<code>docs/MCP_BOTS.md</code></li>
+<li>工位目录规范：<code>docs/WORKER_STATION.md</code></li>
+<li>执行器协议：<code>docs/EXECUTOR_PROTOCOL.md</code></li>
+<li>管理区页面：<code>/admin/mcp-servers</code>（外部 MCP）、<code>/admin/workers</code>（机器人技能/规范/ MCP 勾选）</li>
+</ul>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-work-skills-mcp.md">lita-work-skills-mcp.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

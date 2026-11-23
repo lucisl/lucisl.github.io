@@ -47,6 +47,11 @@ const TOPIC_GROUPS = {
         name: '运维部署手册',
         href: './lita-work-ops.html',
       },
+      {
+        key: 'skills-mcp',
+        name: '技能与 MCP',
+        href: './lita-work-skills-mcp.html',
+      },
     ],
   },
   lita: {
@@ -168,6 +173,29 @@ const PAGES = [
       ['数据库', 'PostgreSQL + pgvector'],
       ['执行器', 'opencode / bridge'],
       ['形态', 'Runbook'],
+    ],
+  },
+  {
+    key: 'work-skills-mcp',
+    project: 'lita-work',
+    topic: 'skills-mcp',
+    source: 'projects/content/lita-work-skills-mcp.md',
+    output: 'projects/lita-work-skills-mcp.html',
+    title: '技能与 MCP — AI 工作中心 — WorkSpace',
+    description:
+      'WorkHub 的技能库、规范库与 MCP 说明：机器人如何获得能力、工位如何注入、平台与外部 MCP 如何配置。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 001 · SKILLS & MCP',
+    breadcrumb: '001 / 技能与 MCP',
+    h1: '技能与 MCP',
+    h1Note: 'Skills & MCP',
+    tagline:
+      '机器人怎么获得能力：技能库给操作手册，规范库给约束，MCP 给工具。',
+    meta: [
+      ['技能库', 'docs/skills'],
+      ['规范库', 'docs/standard'],
+      ['平台 MCP', 'lita-work / lita-bots'],
+      ['外部 MCP', '管理区配置'],
     ],
   },
   {

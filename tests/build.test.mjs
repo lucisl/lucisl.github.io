@@ -48,6 +48,7 @@ test('build script creates a deployable artifact without development files', asy
     'projects/content/lita-work-ops.md',
     'projects/content/lita-work-prompts.md',
     'projects/content/lita-work-skeleton.md',
+    'projects/content/lita-work-skills-mcp.md',
     'projects/content/lita-work.md',
     'projects/content/lita.md',
     'projects/index.html',
@@ -58,6 +59,7 @@ test('build script creates a deployable artifact without development files', asy
     'projects/lita-work-ops.html',
     'projects/lita-work-prompts.html',
     'projects/lita-work-skeleton.html',
+    'projects/lita-work-skills-mcp.html',
     'projects/lita-work.html',
     'projects/lita.html',
   ]);

@@ -34,6 +34,11 @@
     <b>运维部署手册</b>
     <small>进程拓扑、环境变量、执行器与工位、飞书配置、备份回滚与排障</small>
   </a>
+  <a class="ws-topic-card" href="./lita-work-skills-mcp.html">
+    <span class="ws-topic-index">04 / SKILLS &amp; MCP</span>
+    <b>技能与 MCP</b>
+    <small>技能库、规范库、平台 MCP 与外部 MCP 的配置与注入</small>
+  </a>
 </div>
 
 ## 一、产品定位与功能地图
