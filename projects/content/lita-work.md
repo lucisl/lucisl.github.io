@@ -29,6 +29,11 @@
     <b>分阶段提示词</b>
     <small>把 M0–M8 拆成可直接投给 AI 的 9 段提示词</small>
   </a>
+  <a class="ws-topic-card" href="./lita-work-ops.html">
+    <span class="ws-topic-index">03 / RUNBOOK</span>
+    <b>运维部署手册</b>
+    <small>进程拓扑、环境变量、执行器与工位、飞书配置、备份回滚与排障</small>
+  </a>
 </div>
 
 ## 一、产品定位与功能地图

@@ -42,6 +42,11 @@ const TOPIC_GROUPS = {
         name: '分阶段提示词',
         href: './lita-work-prompts.html',
       },
+      {
+        key: 'ops',
+        name: '运维部署手册',
+        href: './lita-work-ops.html',
+      },
     ],
   },
   lita: {
@@ -140,6 +145,29 @@ const PAGES = [
       ['用法', '顺序执行'],
       ['节奏', '每阶段自测'],
       ['参考', '第十节'],
+    ],
+  },
+  {
+    key: 'work-ops',
+    project: 'lita-work',
+    topic: 'ops',
+    source: 'projects/content/lita-work-ops.md',
+    output: 'projects/lita-work-ops.html',
+    title: '运维部署手册 — AI 工作中心 — WorkSpace',
+    description:
+      'WorkHub 的部署与运维 runbook：进程拓扑、环境变量、迁移、执行器、工位、飞书配置、备份回滚与故障排查。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 001 · RUNBOOK',
+    breadcrumb: '001 / 运维部署手册',
+    h1: '运维部署手册',
+    h1Note: 'Runbook',
+    tagline:
+      '从一台空服务器到可用的 WorkHub：依赖、配置、执行器、工位、飞书、备份与排障。',
+    meta: [
+      ['部署', '单机 / 多机'],
+      ['数据库', 'PostgreSQL + pgvector'],
+      ['执行器', 'opencode / bridge'],
+      ['形态', 'Runbook'],
     ],
   },
   {
