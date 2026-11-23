@@ -43,5 +43,6 @@ test('build script creates a deployable artifact without development files', asy
     'index.html',
     'projects/index.html',
     'projects/lita-work.html',
+    'projects/lita.html',
   ]);
 });

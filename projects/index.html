@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>项目档案 — WorkSpace</title>
-    <meta name="description" content="公司与业务项目的技术复盘工作台：架构、关键决策、规模数据与个人成长。内容已做匿名化处理。">
+    <meta name="description" content="公司与业务项目的技术手册工作台：架构、业务域、关键决策与项目细节。">
     <meta name="theme-color" content="#eef0f3">
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../assets/workspace.css">
@@ -30,28 +30,30 @@
       <aside class="ws-rail" aria-label="项目导航">
         <div class="ws-rail-head">
           <span>项目</span>
-          <em>1</em>
+          <em>2</em>
         </div>
         <ul class="ws-project-list">
           <li>
-            <a class="ws-project-link is-active" href="./lita-work.html">
+            <a class="ws-project-link" href="./lita-work.html">
               <span class="ws-project-index">001</span>
               <span>
                 <b>AI 工作中心</b>
-                <small>WorkHub · 复盘</small>
+                <small>WorkHub · 手册</small>
               </span>
             </a>
           </li>
-          <li class="is-disabled">
-            <span class="ws-project-index">002</span>
-            <span>
-              <b>待补充</b>
-              <small>筹备中</small>
-            </span>
+          <li>
+            <a class="ws-project-link" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
           </li>
         </ul>
         <div class="ws-rail-note">
-          所有项目均已匿名化：公司、内部域名、仓库组织与同事姓名均已移除或替换为代号。
+          敏感信息的处理方式以各篇开头的说明为准；手册内容为个人整理，非公司官方文档。
         </div>
       </aside>
 
@@ -60,42 +62,19 @@
           <p class="ws-eyebrow">WORKSPACE / ARCHIVE</p>
           <h1>项目档案</h1>
           <p>
-            参与过的公司与业务项目复盘：解决什么问题、架构为什么这么切、哪些决策后来被证明是对的。
-            每篇使用同一套结构，便于横向比较，也便于自己回看。
+            参与过的公司与业务项目：把背景、架构、业务域和服务细节整理成可检索的手册。
+            每篇都按同一套结构组织，方便横向比较，也方便以后回来查细节。
           </p>
           <div class="ws-actions">
-            <a class="ws-btn ws-btn-primary" href="./lita-work.html">打开最新复盘 →</a>
+            <a class="ws-btn ws-btn-primary" href="./lita.html">打开 Lita 生态手册 →</a>
             <a class="ws-btn" href="../devkit/">去工具箱</a>
           </div>
         </header>
 
-        <section class="ws-stats" aria-label="档案统计">
-          <div class="ws-stat">
-            <span>项目</span>
-            <b>1</b>
-            <small>持续更新</small>
-          </div>
-          <div class="ws-stat">
-            <span>累计代码</span>
-            <b>18 万行</b>
-            <small>开发期统计</small>
-          </div>
-          <div class="ws-stat">
-            <span>最长周期</span>
-            <b>3 个月</b>
-            <small>单人 + AI</small>
-          </div>
-          <div class="ws-stat">
-            <span>平台工具</span>
-            <b>113</b>
-            <small>MCP 工具</small>
-          </div>
-        </section>
-
         <section class="ws-card" aria-labelledby="ws-projects-title">
           <div class="ws-card-head">
             <h2 id="ws-projects-title">全部项目</h2>
-            <span class="ws-count">1 个项目</span>
+            <span class="ws-count">2 个项目</span>
           </div>
           <div class="ws-table">
             <div class="ws-table-head" aria-hidden="true">
@@ -103,7 +82,6 @@
               <span>项目</span>
               <span class="ws-hide-sm">领域</span>
               <span class="ws-hide-sm">周期</span>
-              <span class="ws-hide-sm">规模</span>
               <span>状态</span>
             </div>
             <a class="ws-table-row" href="./lita-work.html">
@@ -114,25 +92,23 @@
               </span>
               <span class="ws-hide-sm">AI Agent 平台</span>
               <span class="ws-hide-sm ws-mono">约 3 个月</span>
-              <span class="ws-hide-sm ws-mono">约 18 万行</span>
-              <span class="ws-badge ws-badge-done">复盘</span>
+              <span class="ws-badge ws-badge-maint">手册</span>
             </a>
-            <div class="ws-table-row is-muted">
+            <a class="ws-table-row" href="./lita.html">
               <span class="ws-mono">002</span>
               <span class="ws-cell-main">
-                <b>待补充</b>
-                <small>下一个项目的复盘会放在这里</small>
+                <b>Lita 生态 <span class="ws-title-code">海外社交平台</span></b>
+                <small>40+ 仓库的总览手册：架构、业务域、服务目录、数据与工程机制</small>
               </span>
-              <span class="ws-hide-sm">—</span>
-              <span class="ws-hide-sm ws-mono">—</span>
-              <span class="ws-hide-sm ws-mono">—</span>
-              <span class="ws-badge ws-badge-pending">筹备中</span>
-            </div>
+              <span class="ws-hide-sm">社交 / 中台</span>
+              <span class="ws-hide-sm ws-mono">多年</span>
+              <span class="ws-badge ws-badge-maint">手册</span>
+            </a>
           </div>
         </section>
 
         <section class="ws-card ws-prose" aria-labelledby="ws-structure-title">
-          <h2 id="ws-structure-title">每篇复盘的结构</h2>
+          <h2 id="ws-structure-title">每篇手册的结构</h2>
           <ol>
             <li><b>项目定位</b>：一句话说清解决什么问题、给谁用。</li>
             <li><b>规模与开发方式</b>：代码量、数据模型、接口、周期与协作模式。</li>
