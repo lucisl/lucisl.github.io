@@ -1,6 +1,6 @@
 # RoamRadio —— roamdial.com 的 iOS APP 版设计（React Native + Expo）
 
-日期：2026-10-16　状态：已批准
+日期：2026-10-16　状态：已实现（core 43 测试全绿 / tsc 无错 / Metro export 通过；待真机验证）
 参照物：https://roamdial.com （群友作品，网页版随机电台星图浏览器）
 
 ## 结论

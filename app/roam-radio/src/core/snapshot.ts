@@ -207,8 +207,10 @@ export function buildSnapshot(
     let li = -1;
     const lang = primaryLangOf(row.language);
     if (lang) {
-      li = langIdx.get(lang);
-      if (li === undefined && s.langs.length < MAX_LANGS) {
+      const found = langIdx.get(lang);
+      if (found !== undefined) {
+        li = found;
+      } else if (s.langs.length < MAX_LANGS) {
         li = s.langs.length;
         s.langs.push(lang);
         langIdx.set(lang, li);
@@ -250,7 +252,7 @@ export function encodeSnapshot(s: Snapshot): string {
 /** 宽松解码（JSON 文本 → Snapshot），字段缺失时补空数组，防刷新数据损坏拖垮启动。 */
 export function decodeSnapshot(text: string): Snapshot {
   const j = JSON.parse(text);
-  const arr = (v: unknown): never[] => (Array.isArray(v) ? v : []);
+  const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
   return {
     v: j.v ?? 0, builtAt: j.builtAt ?? '', n: j.n ?? 0,
     genres: arr(j.genres), langs: arr(j.langs), countries: arr(j.countries), tzs: arr(j.tzs),

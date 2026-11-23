@@ -4,7 +4,10 @@ import type { StationRow } from './snapshot.ts';
 /** 历史环：push 当前台，back() 依次回退（最多 size 个）。 */
 export class HistoryRing {
   private items: number[] = [];
-  constructor(private size = 50) {}
+  private size: number;
+  constructor(size = 50) {
+    this.size = size;
+  }
   push(i: number) {
     if (this.items[this.items.length - 1] === i) return;
     this.items.push(i);

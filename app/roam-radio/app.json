@@ -24,6 +24,7 @@
     "plugins": [
       "expo-audio",
       "expo-sqlite"
-    ]
+    ],
+    "backgroundColor": "#0b1120"
   }
 }

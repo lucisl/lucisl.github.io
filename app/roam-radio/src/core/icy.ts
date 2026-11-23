@@ -1,7 +1,7 @@
 // ICY 元数据解析核心（纯逻辑）：Icecast mp3/aac 流每 metaint 字节音频后跟一段
 // 长度前缀（1 字节 = 16 块）的 "StreamTitle='...';..." 信息。
 // APP 侧用流式 fetch 分块喂入，解析出变化的最新标题。跨块未收全的信息段
-// 会暂存，等下一块补齐后再解析。
+// 会按总长暂存，等下一块补齐后再解析。
 
 export interface IcyInfoParsed {
   /** StreamTitle（空/无则为 null）。 */
@@ -31,13 +31,17 @@ export function tryParseIcyInfo(buf: Uint8Array): IcyInfoParsed | null {
  * 有状态解析器：push(chunk) 喂入流分块，返回出现过的、与上次不同的最新标题，否则 null。
  */
 export class IcyMetadataReader {
+  readonly metaint: number;
   /** 距下一个 icy-info 边界还差多少音频字节 */
   private audioNeeded: number;
-  /** 正在累积的信息段（首元素是长度字节） */
+  /** 正在累积的信息段（含首长度字节）；length>0 表示处于信息段中 */
   private info: number[] = [];
+  /** 当前信息段总字节数（1 + 首字节×16） */
+  private infoTotal = 0;
   private last: string | null = null;
 
-  constructor(public metaint: number) {
+  constructor(metaint: number) {
+    this.metaint = metaint;
     this.audioNeeded = metaint;
   }
 
@@ -45,26 +49,28 @@ export class IcyMetadataReader {
     if (!(this.metaint > 0)) return null;
     let pos = 0;
     while (pos < chunk.length) {
-      if (this.info.length > 0 || this.audioNeeded === 0) {
-        // 处于信息段（或刚走到边界）：累积并尝试解析
-        const avail = chunk.subarray(pos);
-        for (let k = 0; k < avail.length; k++) this.info.push(avail[k]);
+      if (this.info.length > 0) {
+        const take = Math.min(this.infoTotal - this.info.length, chunk.length - pos);
+        for (let k = 0; k < take; k++) this.info.push(chunk[pos + k]);
+        pos += take;
+        if (this.info.length < this.infoTotal) break; // 等信息段补齐
         const parsed = tryParseIcyInfo(Uint8Array.from(this.info));
-        if (!parsed) {
-          pos = chunk.length; // 等信息段补齐
-          break;
-        }
-        pos += parsed.bytes;
         this.info = [];
+        this.infoTotal = 0;
         this.audioNeeded = this.metaint;
-        if (parsed.title && parsed.title !== this.last) {
+        if (parsed && parsed.title && parsed.title !== this.last) {
           this.last = parsed.title;
           return parsed.title;
         }
-      } else {
+      } else if (this.audioNeeded > 0) {
         const take = Math.min(this.audioNeeded, chunk.length - pos);
         this.audioNeeded -= take;
         pos += take;
+      } else {
+        // 走到边界：收长度字节，确定信息段总长（len=0 时下一轮立即解析）
+        this.infoTotal = 1 + chunk[pos] * 16;
+        this.info.push(chunk[pos]);
+        pos += 1;
       }
     }
     return null;
