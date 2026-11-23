@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>项目档案 — WorkSpace</title>
+    <meta name="description" content="公司与业务项目的技术复盘工作台：架构、关键决策、规模数据与个人成长。内容已做匿名化处理。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>1</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link is-active" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 复盘</small>
+              </span>
+            </a>
+          </li>
+          <li class="is-disabled">
+            <span class="ws-project-index">002</span>
+            <span>
+              <b>待补充</b>
+              <small>筹备中</small>
+            </span>
+          </li>
+        </ul>
+        <div class="ws-rail-note">
+          所有项目均已匿名化：公司、内部域名、仓库组织与同事姓名均已移除或替换为代号。
+        </div>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-eyebrow">WORKSPACE / ARCHIVE</p>
+          <h1>项目档案</h1>
+          <p>
+            参与过的公司与业务项目复盘：解决什么问题、架构为什么这么切、哪些决策后来被证明是对的。
+            每篇使用同一套结构，便于横向比较，也便于自己回看。
+          </p>
+          <div class="ws-actions">
+            <a class="ws-btn ws-btn-primary" href="./lita-work.html">打开最新复盘 →</a>
+            <a class="ws-btn" href="../devkit/">去工具箱</a>
+          </div>
+        </header>
+
+        <section class="ws-stats" aria-label="档案统计">
+          <div class="ws-stat">
+            <span>项目</span>
+            <b>1</b>
+            <small>持续更新</small>
+          </div>
+          <div class="ws-stat">
+            <span>累计代码</span>
+            <b>18 万行</b>
+            <small>开发期统计</small>
+          </div>
+          <div class="ws-stat">
+            <span>最长周期</span>
+            <b>3 个月</b>
+            <small>单人 + AI</small>
+          </div>
+          <div class="ws-stat">
+            <span>平台工具</span>
+            <b>113</b>
+            <small>MCP 工具</small>
+          </div>
+        </section>
+
+        <section class="ws-card" aria-labelledby="ws-projects-title">
+          <div class="ws-card-head">
+            <h2 id="ws-projects-title">全部项目</h2>
+            <span class="ws-count">1 个项目</span>
+          </div>
+          <div class="ws-table">
+            <div class="ws-table-head" aria-hidden="true">
+              <span>编号</span>
+              <span>项目</span>
+              <span class="ws-hide-sm">领域</span>
+              <span class="ws-hide-sm">周期</span>
+              <span class="ws-hide-sm">规模</span>
+              <span>状态</span>
+            </div>
+            <a class="ws-table-row" href="./lita-work.html">
+              <span class="ws-mono">001</span>
+              <span class="ws-cell-main">
+                <b>AI 工作中心 <span class="ws-title-code">WorkHub</span></b>
+                <small>以 AI 为中心的项目管理平台</small>
+              </span>
+              <span class="ws-hide-sm">AI Agent 平台</span>
+              <span class="ws-hide-sm ws-mono">约 3 个月</span>
+              <span class="ws-hide-sm ws-mono">约 18 万行</span>
+              <span class="ws-badge ws-badge-done">复盘</span>
+            </a>
+            <div class="ws-table-row is-muted">
+              <span class="ws-mono">002</span>
+              <span class="ws-cell-main">
+                <b>待补充</b>
+                <small>下一个项目的复盘会放在这里</small>
+              </span>
+              <span class="ws-hide-sm">—</span>
+              <span class="ws-hide-sm ws-mono">—</span>
+              <span class="ws-hide-sm ws-mono">—</span>
+              <span class="ws-badge ws-badge-pending">筹备中</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="ws-card ws-prose" aria-labelledby="ws-structure-title">
+          <h2 id="ws-structure-title">每篇复盘的结构</h2>
+          <ol>
+            <li><b>项目定位</b>：一句话说清解决什么问题、给谁用。</li>
+            <li><b>规模与开发方式</b>：代码量、数据模型、接口、周期与协作模式。</li>
+            <li><b>架构全景</b>：分层、边界与外部依赖。</li>
+            <li><b>业务主链路</b>：从输入到交付的完整闭环。</li>
+            <li><b>关键设计决策</b>：为什么这么选，代价是什么。</li>
+            <li><b>能力提升</b>：这个项目真正练到了什么。</li>
+            <li><b>客观局限</b>：没做好的、有风险的、待验证的。</li>
+          </ol>
+        </section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>

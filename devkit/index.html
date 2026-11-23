@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DevKit — 在线开发工具箱</title>
+    <meta name="description" content="DevKit 是本地运行的在线开发工具箱，提供 JSON 格式化和时间戳转换。">
+    <meta name="theme-color" content="#101815">
+    <link rel="canonical" href="/devkit/">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DevKit — 在线开发工具箱">
+    <meta property="og:description" content="本地运行的 JSON 格式化与时间戳转换工具。">
+    <meta property="og:url" content="/devkit/">
+    <meta property="og:image" content="../assets/favicon.svg">
+    <meta property="og:image:alt" content="DevKit 终端图标">
+    <link rel="stylesheet" href="../assets/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+    <div id="app-shell" class="app-shell" data-sidebar-collapsed="false">
+      <aside class="sidebar" aria-label="工具导航">
+        <div class="sidebar-header">
+          <a class="brand" href="#json" aria-label="DevKit 首页">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24"><path d="m5 7 5 5-5 5M12 17h7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+            <span>DevKit</span>
+          </a>
+          <button class="sidebar-toggle" type="button" data-action="toggle-sidebar" aria-controls="sidebar-navigation" aria-expanded="true" aria-label="收起侧边栏" title="收起侧边栏">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 7-5 5 5 5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          </button>
+        </div>
+        <nav id="sidebar-navigation" class="tool-nav" aria-label="开发工具">
+          <ul>
+            <li><a data-tool-link="json" href="#json" aria-current="page" aria-label="JSON 格式化" title="JSON 格式化"><span>JSON 格式化</span></a></li>
+            <li><a data-tool-link="timestamp" href="#timestamp" aria-label="时间戳转换" title="时间戳转换"><span>时间戳转换</span></a></li>
+            <li><a class="tool-link-external" href="../game/monopoly/" aria-label="大富翁 · 云栖之城 小游戏" title="大富翁 · 云栖之城"><span>大富翁 · 云栖之城</span></a></li>
+            <li><a class="tool-link-external" href="../" aria-label="返回入口，选择其它界面" title="返回入口"><span>← 返回入口</span></a></li>
+          </ul>
+        </nav>
+        <p class="privacy-note">所有处理都在本地完成；JSON 历史仅保存在当前浏览器，不会上传。</p>
+        <footer>DevKit · 本地优先</footer>
+      </aside>
+
+      <main id="main-content" class="workspace" tabindex="-1">
+        <header class="workspace-header">
+          <p class="eyebrow">DEVELOPER TOOLBOX</p>
+          <h1 class="page-title">在线开发工具箱</h1>
+          <p>快速处理常见开发数据，无需注册。</p>
+        </header>
+
+        <section class="tool-panel" data-tool-panel="json" aria-labelledby="json-title">
+          <header>
+            <p class="eyebrow">01 / DATA</p>
+            <h2 id="json-title">JSON 格式化</h2>
+            <p>校验、格式化或压缩 JSON 内容。</p>
+          </header>
+          <div class="json-workbench">
+            <div class="json-workbench-main">
+              <div class="editor-grid">
+                <div class="field-group">
+                  <label for="json-input">输入 JSON / 文本</label>
+                  <textarea id="json-input" name="json-input" rows="16" spellcheck="false" placeholder="粘贴 JSON，或输入需要转义的文本"></textarea>
+                  <p id="json-input-count">输入：0 个字符</p>
+                </div>
+                <div class="field-group json-result-field">
+                  <label for="json-output">处理结果</label>
+                  <textarea id="json-output" name="json-output" rows="16" readonly aria-describedby="json-output-count json-status" spellcheck="false" placeholder="处理结果会显示在这里"></textarea>
+                  <div id="json-tree" class="json-tree" aria-label="JSON 树形结果" hidden></div>
+                  <p id="json-output-count">输出：0 个字符</p>
+                </div>
+              </div>
+              <div class="tool-controls" aria-label="JSON 操作">
+                <label for="json-indent">缩进</label>
+                <select id="json-indent" name="json-indent">
+                  <option value="2">2 个空格</option>
+                  <option value="4">4 个空格</option>
+                  <option value="tab">Tab</option>
+                </select>
+                <button type="button" data-action="example-json">填入示例 JSON</button>
+                <button type="button" data-action="format-json">格式化 JSON</button>
+                <button type="button" data-action="minify-json">压缩 JSON</button>
+                <button type="button" data-action="escape-json">转义文本</button>
+                <button type="button" data-action="unescape-json">去除转义</button>
+                <button type="button" data-action="copy-json">复制处理结果</button>
+                <button type="button" data-action="clear-json">清空 JSON 内容</button>
+              </div>
+              <div class="tree-controls" aria-label="JSON 视图操作">
+                <button type="button" data-action="toggle-json-tree" disabled>树形视图</button>
+                <button type="button" data-action="expand-json-tree" disabled>全部展开</button>
+                <button type="button" data-action="collapse-json-tree" disabled>全部收起</button>
+                <span>树形视图适用于格式化或压缩后的合法 JSON。</span>
+              </div>
+              <p id="json-status" data-status="idle" role="status" aria-live="polite">输入 JSON 后选择操作。</p>
+            </div>
+            <aside class="json-history" aria-labelledby="json-history-title">
+              <header>
+                <div>
+                  <p class="eyebrow">LOCAL / 20</p>
+                  <h3 id="json-history-title">处理历史</h3>
+                </div>
+                <button type="button" data-action="clear-json-history">清空历史</button>
+              </header>
+              <p id="json-history-empty" class="json-history-empty">暂无记录。成功处理的最近 20 条内容会保存在此浏览器。</p>
+              <ol id="json-history-list" class="json-history-list"></ol>
+            </aside>
+          </div>
+        </section>
+
+        <section class="tool-panel" data-tool-panel="timestamp" aria-labelledby="timestamp-title" hidden>
+          <header>
+            <p class="eyebrow">02 / TIME</p>
+            <h2 id="timestamp-title">时间戳转换</h2>
+            <p>在 Unix 时间戳与日期时间之间双向转换。</p>
+          </header>
+          <section class="current-time" aria-labelledby="current-time-title">
+            <h3 id="current-time-title">当前时间</h3>
+            <output id="current-time">正在读取当前时间…</output>
+            <p>本地时区：<output id="local-zone">正在读取…</output></p>
+            <button type="button" data-action="current-time">使用当前时间</button>
+          </section>
+
+          <section class="timezone-selector" aria-labelledby="timezone-selector-title">
+            <div>
+              <h3 id="timezone-selector-title">转换时区</h3>
+              <p>同一时区用于下方两个方向的转换，也用于“使用当前时间”。</p>
+            </div>
+            <label for="timezone-mode">选择国际区域</label>
+            <select id="timezone-mode" name="timezone-mode">
+              <optgroup label="浏览器与 UTC">
+                <option value="local" selected>浏览器本地时区</option>
+                <option value="utc">协调世界时（UTC）</option>
+              </optgroup>
+              <optgroup label="美洲">
+                <option value="America/New_York">纽约（America/New_York）</option>
+                <option value="America/Los_Angeles">洛杉矶（America/Los_Angeles）</option>
+                <option value="America/Chicago">芝加哥（America/Chicago）</option>
+                <option value="America/Toronto">多伦多（America/Toronto）</option>
+                <option value="America/Sao_Paulo">圣保罗（America/Sao_Paulo）</option>
+                <option value="America/Mexico_City">墨西哥城（America/Mexico_City）</option>
+              </optgroup>
+              <optgroup label="欧洲">
+                <option value="Europe/London">伦敦（Europe/London）</option>
+                <option value="Europe/Paris">巴黎（Europe/Paris）</option>
+                <option value="Europe/Berlin">柏林（Europe/Berlin）</option>
+                <option value="Europe/Amsterdam">阿姆斯特丹（Europe/Amsterdam）</option>
+                <option value="Europe/Moscow">莫斯科（Europe/Moscow）</option>
+              </optgroup>
+              <optgroup label="亚洲与中东">
+                <option value="Asia/Shanghai">上海（Asia/Shanghai）</option>
+                <option value="Asia/Hong_Kong">香港（Asia/Hong_Kong）</option>
+                <option value="Asia/Tokyo">东京（Asia/Tokyo）</option>
+                <option value="Asia/Seoul">首尔（Asia/Seoul）</option>
+                <option value="Asia/Singapore">新加坡（Asia/Singapore）</option>
+                <option value="Asia/Kolkata">加尔各答（Asia/Kolkata）</option>
+                <option value="Asia/Dubai">迪拜（Asia/Dubai）</option>
+              </optgroup>
+              <optgroup label="非洲">
+                <option value="Africa/Cairo">开罗（Africa/Cairo）</option>
+                <option value="Africa/Johannesburg">约翰内斯堡（Africa/Johannesburg）</option>
+                <option value="Africa/Lagos">拉各斯（Africa/Lagos）</option>
+              </optgroup>
+              <optgroup label="大洋洲">
+                <option value="Australia/Sydney">悉尼（Australia/Sydney）</option>
+                <option value="Pacific/Auckland">奥克兰（Pacific/Auckland）</option>
+              </optgroup>
+            </select>
+          </section>
+
+          <div class="timestamp-grid">
+            <section aria-labelledby="timestamp-to-date-title">
+              <h3 id="timestamp-to-date-title">时间戳转日期</h3>
+              <label for="timestamp-input">Unix 时间戳</label>
+              <input id="timestamp-input" name="timestamp-input" inputmode="decimal" autocomplete="off" placeholder="例如：1710000000">
+              <label for="timestamp-unit">时间戳单位</label>
+              <select id="timestamp-unit" name="timestamp-unit">
+                <option value="auto">自动识别</option>
+                <option value="seconds">秒</option>
+                <option value="milliseconds">毫秒</option>
+              </select>
+              <button type="button" data-action="convert-timestamp">转换时间戳</button>
+              <dl class="result-list" aria-live="polite">
+                <div><dt>识别单位</dt><dd id="timestamp-detected-unit">—</dd></div>
+                <div><dt>本地时间</dt><dd id="timestamp-local">—</dd></div>
+                <div><dt>UTC 时间</dt><dd id="timestamp-utc">—</dd></div>
+                <div><dt>所选区域时间</dt><dd id="timestamp-zoned">—</dd></div>
+                <div><dt>时区标识</dt><dd id="timestamp-zone-name">—</dd></div>
+                <div><dt>ISO 8601</dt><dd id="timestamp-iso">—</dd></div>
+                <div><dt>相对时间</dt><dd id="timestamp-relative">—</dd></div>
+              </dl>
+              <p id="timestamp-error" data-status="idle" role="status" aria-live="polite">输入时间戳后开始转换。</p>
+            </section>
+
+            <section aria-labelledby="date-to-timestamp-title">
+              <h3 id="date-to-timestamp-title">日期转时间戳</h3>
+              <label for="date-input">日期</label>
+              <input id="date-input" name="date-input" type="date">
+              <label for="time-input">时间</label>
+              <input id="time-input" name="time-input" type="time" step="1">
+              <button type="button" data-action="convert-date">转换为时间戳</button>
+              <dl class="result-list" aria-live="polite">
+                <div><dt>秒级时间戳</dt><dd id="date-seconds">—</dd></div>
+                <div><dt>毫秒级时间戳</dt><dd id="date-milliseconds">—</dd></div>
+                <div><dt>ISO 8601</dt><dd id="date-iso">—</dd></div>
+              </dl>
+              <p id="date-error" data-status="idle" role="status" aria-live="polite">选择日期与时间后开始转换。</p>
+            </section>
+          </div>
+          <div class="tool-controls" aria-label="时间戳操作">
+            <button type="button" data-action="copy-timestamp">复制时间戳结果</button>
+            <button type="button" data-action="clear-timestamp">清空时间戳内容</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <noscript>DevKit 需要本地 JavaScript 才能处理数据；请启用 JavaScript 后重试。</noscript>
+    <script type="module" src="../assets/js/app.mjs"></script>
+  </body>
+</html>

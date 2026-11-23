@@ -1,0 +1,312 @@
+/* 入口页：两套界面各占一半，左侧工具箱（深色），右侧项目档案（浅色工作台）。 */
+
+:root {
+  --portal-bg: #0b0e0c;
+  --portal-ink: #101411;
+  --portal-paper: #f3f0e7;
+  --portal-lime: #b8f34a;
+  --portal-panel: #171c18;
+  --portal-line-dark: rgba(255, 255, 255, .14);
+  --portal-ws-bg: #eef0f3;
+  --portal-ws-ink: #1a1d23;
+  --portal-ws-muted: #646c78;
+  --portal-ws-line: #d8dce3;
+  --portal-ws-accent: #3b5bdb;
+  --portal-radius: 22px;
+  --portal-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --portal-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  padding: clamp(14px, 2.5vw, 34px);
+  color: var(--portal-paper);
+  background-color: var(--portal-bg);
+  background-image:
+    linear-gradient(rgba(184, 243, 74, .04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 243, 74, .04) 1px, transparent 1px),
+    radial-gradient(circle at 20% 0%, rgba(184, 243, 74, .08), transparent 30rem);
+  background-size: 34px 34px, 34px 34px, auto;
+  font-family: var(--portal-font);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  color: var(--portal-ink);
+  background: var(--portal-lime);
+}
+
+a {
+  color: inherit;
+}
+
+.portal-skip {
+  position: fixed;
+  z-index: 20;
+  top: 10px;
+  left: 50%;
+  padding: 8px 14px;
+  color: var(--portal-ink);
+  background: var(--portal-lime);
+  border-radius: 999px;
+  transform: translate(-50%, -180%);
+}
+
+.portal-skip:focus {
+  transform: translate(-50%, 0);
+}
+
+.portal-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  max-width: 1400px;
+  margin: 0 auto clamp(14px, 2vw, 22px);
+}
+
+.portal-brand {
+  margin: 0;
+  font-family: var(--portal-mono);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+}
+
+.portal-brand span {
+  color: var(--portal-lime);
+}
+
+.portal-hint {
+  margin: 0;
+  color: rgba(243, 240, 231, .55);
+  font-size: .82rem;
+}
+
+.portal-main {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 20px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.portal-panel {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1.6vw, 18px);
+  min-height: min(72vh, 720px);
+  padding: clamp(20px, 3vw, 44px);
+  text-decoration: none;
+  border-radius: var(--portal-radius);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .35);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.portal-panel:hover,
+.portal-panel:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 40px 110px rgba(0, 0, 0, .45);
+}
+
+.portal-panel:focus-visible {
+  outline: 3px solid var(--portal-lime);
+  outline-offset: 4px;
+}
+
+.portal-eyebrow {
+  font-family: var(--portal-mono);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.portal-panel h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.6vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: -.03em;
+}
+
+.portal-panel h1 span {
+  display: block;
+  margin-top: 8px;
+  font-size: clamp(.92rem, 1.4vw, 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: .68;
+}
+
+.portal-desc {
+  max-width: 44ch;
+  margin: 0;
+  font-size: .95rem;
+  opacity: .78;
+}
+
+.portal-cta {
+  margin-top: auto;
+  font-weight: 700;
+}
+
+/* ---------- 左：DevKit ---------- */
+.portal-panel-devkit {
+  color: var(--portal-paper);
+  background:
+    radial-gradient(circle at 85% 8%, rgba(184, 243, 74, .16), transparent 22rem),
+    var(--portal-panel);
+  border: 1px solid var(--portal-line-dark);
+}
+
+.portal-panel-devkit .portal-eyebrow,
+.portal-panel-devkit .portal-cta {
+  color: var(--portal-lime);
+}
+
+.portal-panel-devkit:hover .portal-cta,
+.portal-panel-devkit:focus-visible .portal-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.portal-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal-list li {
+  padding: 5px 11px;
+  font-family: var(--portal-mono);
+  font-size: .76rem;
+  color: rgba(243, 240, 231, .8);
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid var(--portal-line-dark);
+  border-radius: 999px;
+}
+
+/* ---------- 右：项目档案 ---------- */
+.portal-panel-workspace {
+  color: var(--portal-ws-ink);
+  background: var(--portal-ws-bg);
+  border: 1px solid #fff;
+}
+
+.portal-panel-workspace .portal-eyebrow,
+.portal-panel-workspace .portal-cta {
+  color: var(--portal-ws-accent);
+}
+
+.portal-panel-workspace:hover .portal-cta,
+.portal-panel-workspace:focus-visible .portal-cta {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.portal-panel-workspace:focus-visible {
+  outline-color: var(--portal-ws-accent);
+}
+
+.portal-preview {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--portal-ws-line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(26, 29, 35, .06);
+}
+
+.portal-preview-head,
+.portal-preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.portal-preview-head {
+  color: var(--portal-ws-muted);
+  font-family: var(--portal-mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  background: #f8f9fb;
+  border-bottom: 1px solid var(--portal-ws-line);
+}
+
+.portal-preview-row + .portal-preview-row {
+  border-top: 1px solid var(--portal-ws-line);
+}
+
+.portal-preview-row span {
+  overflow: hidden;
+  font-size: .86rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.portal-preview-row b {
+  margin-right: 8px;
+  color: var(--portal-ws-muted);
+  font-family: var(--portal-mono);
+  font-size: .74rem;
+  font-weight: 500;
+}
+
+.portal-preview-row em {
+  flex: none;
+  padding: 2px 8px;
+  color: var(--portal-ws-accent);
+  font-size: .7rem;
+  font-style: normal;
+  background: #eef2ff;
+  border-radius: 999px;
+}
+
+.portal-footer {
+  max-width: 1400px;
+  margin: clamp(14px, 2vw, 22px) auto 0;
+  color: rgba(243, 240, 231, .45);
+  font-size: .78rem;
+}
+
+.portal-footer p {
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .portal-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portal-panel {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-panel {
+    transition: none;
+  }
+
+  .portal-panel:hover,
+  .portal-panel:focus-visible {
+    transform: none;
+  }
+}

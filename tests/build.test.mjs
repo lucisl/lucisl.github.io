@@ -35,8 +35,13 @@ test('build script creates a deployable artifact without development files', asy
     'assets/js/router-core.mjs',
     'assets/js/timestamp-core.mjs',
     'assets/monopoly.css',
+    'assets/portal.css',
     'assets/styles.css',
+    'assets/workspace.css',
+    'devkit/index.html',
     'game/monopoly/index.html',
     'index.html',
+    'projects/index.html',
+    'projects/lita-work.html',
   ]);
 });

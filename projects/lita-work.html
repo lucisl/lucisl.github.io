@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI 工作中心 WorkHub — 项目复盘 — WorkSpace</title>
+    <meta name="description" content="一个以 AI 为中心的项目管理平台复盘：全链路领域模型、MCP 开放层、多执行器抽象、工位上下文工程与可靠异步。内容已匿名化。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>1</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link is-active" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 复盘</small>
+              </span>
+            </a>
+          </li>
+          <li class="is-disabled">
+            <span class="ws-project-index">002</span>
+            <span>
+              <b>待补充</b>
+              <small>筹备中</small>
+            </span>
+          </li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#positioning">项目定位</a></li>
+            <li><a href="#scale">规模与开发方式</a></li>
+            <li><a href="#architecture">架构全景</a></li>
+            <li><a href="#domain">业务主链路</a></li>
+            <li><a href="#decisions">关键设计决策</a></li>
+            <li><a href="#stack">技术栈</a></li>
+            <li><a href="#growth">能力提升</a></li>
+            <li><a href="#limits">客观局限</a></li>
+            <li><a href="#takeaways">可迁移的方法论</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>001</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT REVIEW / 001</p>
+          <div class="ws-title-row">
+            <h1>AI 工作中心</h1>
+            <span class="ws-title-code">WorkHub</span>
+          </div>
+          <p class="ws-tagline">让 AI 机器人像同事一样接任务、干活、交付，而不是一个聊天窗口。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>周期</span><b>约 3 个月</b></li>
+            <li><span>规模</span><b>约 18 万行</b></li>
+            <li><span>数据模型</span><b>69 个实体</b></li>
+            <li><span>MCP 工具</span><b>113 个</b></li>
+            <li><span>协作方式</span><b>单人主导 + AI</b></li>
+          </ul>
+        </header>
+
+        <section id="positioning" class="ws-card ws-prose" aria-labelledby="positioning-title">
+          <h2 id="positioning-title">一、项目定位</h2>
+          <p>
+            <b>WorkHub 是一个以 AI 为中心的项目管理平台。</b>传统平台把 AI 当辅助工具，它把 AI 机器人当成
+            「员工」：有工位、有角色、有模型、有权限，可以接任务、执行、交付、被验收，也会提问、卡住、失败。
+          </p>
+          <p>
+            使用方是某互联网公司的研发、测试、产品与运营团队。核心场景是：
+            需求从外部表格单向同步进来 → 排进迭代 → 拆成交付任务派给机器人 → 机器人在自己的工位里执行 →
+            产出交付文档 → 人工验收 → 需要时走工单、提测和缺陷闭环。
+          </p>
+          <p>
+            平台同时承担一个不那么显眼的职责：<b>把「AI 执行」这件不可靠的事，变成可运营、可审计、可回滚的系统行为。</b>
+            这比做一个聊天框难得多。
+          </p>
+        </section>
+
+        <section id="scale" class="ws-card ws-prose" aria-labelledby="scale-title">
+          <h2 id="scale-title">二、规模与开发方式</h2>
+          <div class="ws-table-wrap">
+            <table>
+              <thead>
+                <tr><th>维度</th><th>数据</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>代码量</td><td>后端约 12.8 万行 / 581 个文件；前端约 5 万行 / 148 个文件；独立执行器桥约 2.2 千行</td></tr>
+                <tr><td>数据模型</td><td>69 个实体，93 个数据库迁移</td></tr>
+                <tr><td>接口层</td><td>52 个控制器，113 个 MCP 工具注册</td></tr>
+                <tr><td>前端页面</td><td>67 个页面组件</td></tr>
+                <tr><td>测试</td><td>132 个单测文件</td></tr>
+                <tr><td>提交历史</td><td>278 个提交，约 3 个月</td></tr>
+                <tr><td>贡献结构</td><td>主作者约 96%，AI 机器人 22 个提交，其余来自团队</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            这个比例说明了开发方式：<b>人负责架构、边界、验收和规范，AI 负责大量编码与重复性改造。</b>
+            为了让 AI 能持续参与而不跑偏，项目里有一份「跨模块不变量」文档（<code>AGENTS.md</code>），
+            只记录稳定约定，不复制页面和字段清单——它既是人的设计备忘，也是 AI 的约束文件。
+          </p>
+        </section>
+
+        <section id="architecture" class="ws-card ws-prose" aria-labelledby="architecture-title">
+          <h2 id="architecture-title">三、架构全景</h2>
+          <pre class="ws-diagram" aria-label="架构示意图"><code>┌──────────── 浏览器（React 19 + 组件库 + Tailwind）────────────┐
+│ 需求 / 迭代 / 任务 / 工单 / 知识库 / 机器人 / 话题   SSE 实时流    │
+└───────────────┬────────────────────────────────────────────────┘
+                │ /api （HttpOnly JWT Cookie + 全局鉴权守卫）
+┌───────────────▼────────────────────────────────────────────────┐
+│ NestJS 后端（strict TS + TypeORM + PostgreSQL + pgvector）       │
+│                                                                 │
+│  领域：需求 → 迭代项 → 任务 → 工单 → 提测 → 缺陷   话题   知识库   │
+│                                                                 │
+│  执行：统一执行器接口 ─┬─ 执行内核 A（直连 HTTP + SSE）           │
+│                        └─ 执行器桥（多内核：B / C / D）           │
+│                                                                 │
+│  身份：用户 / 真人机器人 / AI 机器人 / 个人助理 / 公共 Agent       │
+│  开放：平台工具 MCP（100+ 工具）+ 调用机器人 MCP                  │
+└───────────────┬────────────────────────────────────────────────┘
+                │
+   ┌────────────┼─────────────┬──────────────┐
+   ▼            ▼             ▼              ▼
+ 即时通讯平台   资源代理 MCP    代码托管        移动端自动化
+ 登录/文档/群   数据库/缓存/   凭证网关        设备远程运行
+ 话题/卡片     配置/日志      短租凭证</code></pre>
+          <p>四个关键边界：</p>
+          <ul>
+            <li><b>领域与执行分离</b>：任务状态机不关心底层是哪个执行内核，只依赖统一接口。</li>
+            <li><b>平台与工位分离</b>：机器人的人格、技能、规范、MCP 配置都落在工位目录里，平台只负责生成和注入。</li>
+            <li><b>人与 AI 同权</b>：同一套接口既服务网页用户，也服务机器人令牌，不为 AI 单独维护一套 API。</li>
+            <li><b>凭据不出平台</b>：代码托管、数据库、缓存等敏感凭据由网关代持，机器人只拿短期凭证。</li>
+          </ul>
+        </section>
+
+        <section id="domain" class="ws-card ws-prose" aria-labelledby="domain-title">
+          <h2 id="domain-title">四、业务主链路</h2>
+          <p>一条需求从进入到关闭，要穿过六个状态域：</p>
+          <ol class="ws-flow">
+            <li><b>需求池</b>：从外部表格单向同步，也支持平台内新建；状态是<b>读时推导</b>，不落库。</li>
+            <li><b>迭代</b>：分常驻快速通道、每周通道、特殊通道三类，标识按自然周自动生成。</li>
+            <li><b>迭代项</b>：独立于需求的交付单元，成员统一用「机器人」表示，负责人和需求方自动列入。</li>
+            <li><b>交付任务</b>：完整状态机（待分配 → 执行中 → 待验收 → 完成），支持提问、答复、返工、取消。</li>
+            <li><b>工单</b>：可配置工作流，节点类型覆盖操作、审批、验收、条件判断和群消息。</li>
+            <li><b>提测与缺陷</b>：批量提测自动建单并通知；缺陷可被脚本回归结果自动关闭。</li>
+          </ol>
+          <p>
+            横切能力有三块：<b>话题</b>（挂在任意主体下的讨论串，与即时通讯群双向同步）、
+            <b>知识库</b>（全文 + 向量混合检索）、<b>机器人体系</b>（工位、模型、技能、规范、MCP、定时唤醒）。
+          </p>
+        </section>
+
+        <section id="decisions" class="ws-card ws-prose" aria-labelledby="decisions-title">
+          <h2 id="decisions-title">五、六个关键设计决策</h2>
+          <div class="ws-decision-list">
+            <article class="ws-decision">
+              <h3>1. 把 Agent 当一等公民</h3>
+              <p>
+                每个实体都有面向机器的 Markdown 视图，带 YAML 前置信息，既读又能写；机器人令牌与网页会话平权。
+                结果是一套接口同时服务人和 AI，不用维护两套 API，也让「让 AI 自己查资料、自己操作」成为默认能力。
+              </p>
+              <p class="ws-cost"><b>代价</b>：需要严格的身份模型和权限校验，否则 AI 会越权。</p>
+            </article>
+
+            <article class="ws-decision">
+              <h3>2. 工位即上下文</h3>
+              <p>
+                机器人的「人格」不是数据库里一段 prompt，而是工位目录里的角色文档、技能目录、规范目录和 MCP 声明。
+                目录按执行内核对齐设计：平台只维护唯一的「源」，再按内核镜像出适配物。换执行内核不用改业务代码。
+              </p>
+              <p class="ws-cost"><b>代价</b>：工位初始化、令牌落盘、工作区边界都要单独设计。</p>
+            </article>
+
+            <article class="ws-decision">
+              <h3>3. 执行器抽象</h3>
+              <p>
+                平台只依赖统一执行器接口：会话、投递、中断、事件流、提问。一个内核直连，其他内核由独立桥接服务承载。
+                事件中心按执行器复用一条事件流，引用归零后延迟断开，断线自动重连。
+              </p>
+              <p class="ws-cost"><b>代价</b>：不同内核的能力差异要逐个适配，且必须在协议层写清楚。</p>
+            </article>
+
+            <article class="ws-decision">
+              <h3>4. 可靠异步</h3>
+              <p>
+                所有长任务都是「立即返回 + 快照/增量推送 + 可恢复」：收件箱、循环恢复、2/10/30 分钟退避、
+                幂等键、定时唤醒、外部事件回调。会话成功不等于任务完成，执行方必须显式申请验收。
+              </p>
+              <p class="ws-cost"><b>代价</b>：状态机和事件链路复杂度显著上升，排查成本高。</p>
+            </article>
+
+            <article class="ws-decision">
+              <h3>5. 凭据最小暴露</h3>
+              <p>
+                代码托管令牌、数据库口令、第三方密钥只由服务端持有；机器人拿短租凭证，平台工具令牌不进提示词、日志和响应；
+                工作区边界禁止读写工位之外的路径。
+              </p>
+              <p class="ws-cost"><b>代价</b>：AI 越能干，越要假设它会被诱导，安全设计必须前置。</p>
+            </article>
+
+            <article class="ws-decision">
+              <h3>6. 规约先行</h3>
+              <p>
+                <code>AGENTS.md</code> 记录跨模块稳定约定与业务不变量；另有界面规范、执行器协议、工位目录规范。
+                文档写给「人和 AI 都能读」的格式，成为可执行的约束，而不是过期的说明。
+              </p>
+              <p class="ws-cost"><b>代价</b>：约定变更时必须同步文档，否则规范会反过来误导 AI。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="stack" class="ws-card ws-prose" aria-labelledby="stack-title">
+          <h2 id="stack-title">六、技术栈</h2>
+          <div class="ws-table-wrap">
+            <table>
+              <thead>
+                <tr><th>层</th><th>选型</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>前端</td><td>Vite + React 19 + 组件库（子路径导入）+ Tailwind CSS v4，SSE 统一封装与可见性重连</td></tr>
+                <tr><td>后端</td><td>NestJS（strict TS）+ TypeORM + PostgreSQL，全局鉴权守卫</td></tr>
+                <tr><td>检索</td><td>pgvector + tsvector 生成列，全文与向量 RRF 混合检索</td></tr>
+                <tr><td>执行</td><td>执行器接口 + 直连内核 + 桥接服务（多内核适配，HTTP + SSE 协议）</td></tr>
+                <tr><td>开放</td><td>MCP（Streamable HTTP），平台工具与「调用机器人」两套服务</td></tr>
+                <tr><td>集成</td><td>即时通讯（OAuth、长连接、卡片、文档与多维表格转 Markdown）、代码托管事件、凭证网关、移动端设备自动化</td></tr>
+                <tr><td>异步</td><td>收件箱、事件流、退避重试、定时唤醒、外部回调</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="growth" class="ws-card ws-prose" aria-labelledby="growth-title">
+          <h2 id="growth-title">七、能力提升</h2>
+          <div class="ws-lift-grid">
+            <article class="ws-lift">
+              <h3>架构与领域建模</h3>
+              <p>
+                把一条真实业务链拆成 69 个实体、93 次渐进迁移，而不是一次性设计。学会区分推导值与落库值、
+                软引用与物理外键、状态机守卫与展示状态。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>异步与可靠性</h3>
+              <p>
+                事件驱动、幂等三件套（唯一键、状态守卫、乐观更新）、退避重试与恢复、实时流的快照 + 增量 + 晚订阅。
+                这些是「系统能不能长期跑」的分水岭。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>AI Agent 工程</h3>
+              <p>
+                MCP 工具设计（参数 schema、错误语义、权限校验、审计）、上下文工程（角色/技能/规范分层注入）、
+                会话隔离与生命周期、多模型容错与备用切换、多执行内核适配。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>平台集成</h3>
+              <p>
+                即时通讯平台的登录、长连接、卡片、话题双向同步、文档与多维表格转 Markdown；
+                代码托管的事件与凭证网关；执行内核的 HTTP + SSE 协议。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>数据与检索</h3>
+              <p>
+                PostgreSQL 高级特性：生成列 + GIN 索引、向量列、部分唯一索引、时区规范；
+                混合检索的融合排序、相似度阈值与降级策略。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>安全与权限</h3>
+              <p>
+                四层权限模型（登录、角色、业务身份、机器人权限档位）、令牌体系与负 ID 隔离、
+                工作区边界、审计与运维止血开关。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>产品与协作</h3>
+              <p>
+                设计「人 + AI 混合团队」的流程：谁能接受任务、谁能验收、失败了怎么升级、什么时候提醒。
+                把模糊需求落成可执行的规约与模板。
+              </p>
+            </article>
+            <article class="ws-lift">
+              <h3>工程文档</h3>
+              <p>
+                写给 AI 看的规约：只记不变量、不记快照；变更即同步。文档从「给人看的说明」变成「可执行的约束」。
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="limits" class="ws-card ws-prose" aria-labelledby="limits-title">
+          <h2 id="limits-title">八、客观局限</h2>
+          <ul>
+            <li><b>知识集中</b>：绝大多数提交来自一人，模块间耦合较深，新人上手成本高。</li>
+            <li><b>测试不均</b>：单测数量不少，但任务状态机、即时通讯长连接、执行器事件等核心链路覆盖不足。</li>
+            <li><b>传输安全</b>：内网部署长期使用明文 HTTP，令牌在网络上明文传输，是明确的待改进项。</li>
+            <li><b>权限边界</b>：部分管理接口历史上依赖前端隐藏按钮，服务端校验需要系统性补齐。</li>
+            <li><b>复杂度</b>：实体与迁移数量大，部分功能（占位模块、多内核）尚未经过生产验证。</li>
+            <li><b>外部依赖多</b>：即时通讯、资源代理、执行内核、设备代理任一不可用都会影响链路。</li>
+          </ul>
+        </section>
+
+        <section id="takeaways" class="ws-card ws-prose" aria-labelledby="takeaways-title">
+          <h2 id="takeaways-title">九、可迁移的方法论</h2>
+          <ol class="ws-takeaways">
+            <li><b>先写不变量，再写代码。</b>只记稳定约定的文档不会腐烂，也能约束 AI。</li>
+            <li><b>用协议隔离易变。</b>执行器、MCP、内核适配物，本质都是把变化关在接口后面。</li>
+            <li><b>长任务三件套。</b>立即返回、事件推送、可恢复——不要同步等。</li>
+            <li><b>幂等 + 退避。</b>AI 执行一定会失败，系统要能重来而不重复。</li>
+            <li><b>凭据不进 AI 上下文。</b>短期凭证 + 网关代持，是 AI 系统的基本安全线。</li>
+            <li><b>开关优于完美。</b>止血开关让「上线出错」变成「可以暂停」，这是运营级系统的标志。</li>
+          </ol>
+          <div class="ws-colophon">
+            <p>
+              本文已做匿名化处理：公司名称、内部域名、仓库组织、同事姓名与凭据信息均已移除或替换为代号。
+              数据为开发期统计，仅用于说明规模与复杂度。
+            </p>
+            <p><a href="./index.html">← 返回项目档案</a></p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
