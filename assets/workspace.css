@@ -416,6 +416,62 @@ a {
   font-size: .72rem;
 }
 
+/* ---------- 指标图 ---------- */
+.ws-chart {
+  margin: 16px 0 14px;
+  padding: 14px 16px;
+  background: var(--ws-surface-alt);
+  border: 1px solid var(--ws-line-soft);
+  border-radius: var(--ws-radius-sm);
+}
+
+.ws-chart-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: var(--ws-muted);
+  font-family: var(--ws-mono);
+  font-size: .72rem;
+}
+
+.ws-chart-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--ws-muted);
+  font-family: var(--ws-mono);
+  font-size: .7rem;
+}
+
+.ws-chart-track {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  background: #e4e8ee;
+  border-radius: 999px;
+}
+
+.ws-chart-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--ws-accent), #6d8cff);
+  border-radius: inherit;
+}
+
+.ws-chart-val {
+  color: var(--ws-ink);
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .ws-chart-row {
+    grid-template-columns: 46px minmax(0, 1fr) 52px;
+  }
+}
+
 /* ---------- 卡片 ---------- */
 .ws-card {
   margin-top: 14px;

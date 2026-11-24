@@ -13,9 +13,22 @@
 
 > 口径说明：代码量、提交数、最近提交时间均来自本地工作区（不含 target/ 与 node_modules）。服务状态按最近提交时间粗分：活跃（2026-10 之后）、维护（2026-06~09）、 低频（2026-01~05）、停滞（2025 及以前）。这是个人视角的整理，细节以仓库为准。
 
+## 指标速览
+
+截至 2026-11-23 的业务快照：日活稳定在 2.2 万，近 30 天月活 25.1 万；11 月前 23 天安装 23.2 万、注册 10.2 万；实时 QPS 约 885。
+
+<div class="ws-stats">
+  <div class="ws-stat"><span>DAU · 11-23</span><b>22,166</b><small>14 日均值 22,008</small></div>
+  <div class="ws-stat"><span>MAU · 近 30 天</span><b>250,970</b><small>DAU/MAU 8.8%</small></div>
+  <div class="ws-stat"><span>11 月获客安装</span><b>232,130</b><small>注册 101,839</small></div>
+  <div class="ws-stat"><span>实时 QPS</span><b>884.9</b><small>24h 峰值 1,346.8</small></div>
+</div>
+
+<p><a href="./lita-metrics.html">查看完整关键指标：收入、送礼、活动、延迟与数据规模 →</a></p>
+
 ## 业务专题
 
-活动、语音房/直播、送礼、陪玩交易是 Lita 的四个核心域：前三个决定「体验与消费」，陪玩交易决定「服务履约与结算」。这也是海外语音社交/陪玩业务最常被追问的部分，所以单独拆成子手册。
+活动、语音房/直播、送礼、陪玩交易是 Lita 的四个核心域：前三个决定「体验与消费」，陪玩交易决定「服务履约与结算」。这也是海外语音社交/陪玩业务最常被追问的部分，所以单独拆成子手册；另外补一页关键指标，把日活、月获、QPS、收入和数据规模放在同一张快照里。
 
 <div class="ws-topic-grid">
   <a class="ws-topic-card" href="./lita-activities.html">
@@ -37,6 +50,11 @@
     <span class="ws-topic-index">04 / COMPANION</span>
     <b>陪玩与交易</b>
     <small>陪玩师技能、下单接单、充值支付与结算</small>
+  </a>
+  <a class="ws-topic-card" href="./lita-metrics.html">
+    <span class="ws-topic-index">05 / METRICS</span>
+    <b>关键指标</b>
+    <small>DAU、月获客、QPS、收入与工程规模</small>
   </a>
 </div>
 

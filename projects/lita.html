@@ -57,6 +57,7 @@
         <div class="ws-rail-subhead">业务专题</div>
         <ul class="ws-topic-list">
           <li><a class="is-active" href="./lita.html">总览</a></li>
+          <li><a class="" href="./lita-metrics.html">关键指标</a></li>
           <li><a class="" href="./lita-activities.html">活动运营</a></li>
           <li><a class="" href="./lita-voice-room.html">语音房与直播</a></li>
           <li><a class="" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
@@ -67,23 +68,24 @@
           <p>本文目录</p>
           <ol>
             <li><a href="#chapter-1">这份文档怎么用</a></li>
-            <li><a href="#chapter-2">业务专题</a></li>
-            <li><a href="#chapter-3">一、产品与规模</a></li>
-            <li><a href="#chapter-4">二、架构总览</a></li>
-            <li><a href="#chapter-5">三、业务域地图</a></li>
-            <li><a href="#chapter-6">四、四条关键链路</a></li>
-            <li><a href="#chapter-7">五、服务目录 · 交易与基础</a></li>
-            <li><a href="#chapter-8">六、服务目录 · 场景与互动</a></li>
-            <li><a href="#chapter-9">七、服务目录 · 增长与活动</a></li>
-            <li><a href="#chapter-10">八、服务目录 · 管理与数据</a></li>
-            <li><a href="#chapter-11">九、服务目录 · 资源与框架</a></li>
-            <li><a href="#chapter-12">十、新平台 WorkHub</a></li>
-            <li><a href="#chapter-13">十一、数据体系</a></li>
-            <li><a href="#chapter-14">十二、工程机制</a></li>
-            <li><a href="#chapter-15">十三、架构演进</a></li>
-            <li><a href="#chapter-16">十四、阅读路线</a></li>
-            <li><a href="#chapter-17">十五、术语与常见问题</a></li>
-            <li><a href="#chapter-18">十六、服务速查表</a></li>
+            <li><a href="#chapter-2">指标速览</a></li>
+            <li><a href="#chapter-3">业务专题</a></li>
+            <li><a href="#chapter-4">一、产品与规模</a></li>
+            <li><a href="#chapter-5">二、架构总览</a></li>
+            <li><a href="#chapter-6">三、业务域地图</a></li>
+            <li><a href="#chapter-7">四、四条关键链路</a></li>
+            <li><a href="#chapter-8">五、服务目录 · 交易与基础</a></li>
+            <li><a href="#chapter-9">六、服务目录 · 场景与互动</a></li>
+            <li><a href="#chapter-10">七、服务目录 · 增长与活动</a></li>
+            <li><a href="#chapter-11">八、服务目录 · 管理与数据</a></li>
+            <li><a href="#chapter-12">九、服务目录 · 资源与框架</a></li>
+            <li><a href="#chapter-13">十、新平台 WorkHub</a></li>
+            <li><a href="#chapter-14">十一、数据体系</a></li>
+            <li><a href="#chapter-15">十二、工程机制</a></li>
+            <li><a href="#chapter-16">十三、架构演进</a></li>
+            <li><a href="#chapter-17">十四、阅读路线</a></li>
+            <li><a href="#chapter-18">十五、术语与常见问题</a></li>
+            <li><a href="#chapter-19">十六、服务速查表</a></li>
           </ol>
         </nav>
       </aside>
@@ -151,8 +153,21 @@
 </blockquote>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">业务专题</h2>
-<p>活动、语音房/直播、送礼、陪玩交易是 Lita 的四个核心域：前三个决定「体验与消费」，陪玩交易决定「服务履约与结算」。这也是海外语音社交/陪玩业务最常被追问的部分，所以单独拆成子手册。</p>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">指标速览</h2>
+<p>截至 2026-11-23 的业务快照：日活稳定在 2.2 万，近 30 天月活 25.1 万；11 月前 23 天安装 23.2 万、注册 10.2 万；实时 QPS 约 885。</p>
+<div class="ws-stats">
+  <div class="ws-stat"><span>DAU · 11-23</span><b>22,166</b><small>14 日均值 22,008</small></div>
+  <div class="ws-stat"><span>MAU · 近 30 天</span><b>250,970</b><small>DAU/MAU 8.8%</small></div>
+  <div class="ws-stat"><span>11 月获客安装</span><b>232,130</b><small>注册 101,839</small></div>
+  <div class="ws-stat"><span>实时 QPS</span><b>884.9</b><small>24h 峰值 1,346.8</small></div>
+</div>
+
+<p><a href="./lita-metrics.html">查看完整关键指标：收入、送礼、活动、延迟与数据规模 →</a></p>
+
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">业务专题</h2>
+<p>活动、语音房/直播、送礼、陪玩交易是 Lita 的四个核心域：前三个决定「体验与消费」，陪玩交易决定「服务履约与结算」。这也是海外语音社交/陪玩业务最常被追问的部分，所以单独拆成子手册；另外补一页关键指标，把日活、月获、QPS、收入和数据规模放在同一张快照里。</p>
 <div class="ws-topic-grid">
   <a class="ws-topic-card" href="./lita-activities.html">
     <span class="ws-topic-index">01 / ACTIVITIES</span>
@@ -174,11 +189,16 @@
     <b>陪玩与交易</b>
     <small>陪玩师技能、下单接单、充值支付与结算</small>
   </a>
+  <a class="ws-topic-card" href="./lita-metrics.html">
+    <span class="ws-topic-index">05 / METRICS</span>
+    <b>关键指标</b>
+    <small>DAU、月获客、QPS、收入与工程规模</small>
+  </a>
 </div>
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">一、产品与规模</h2>
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">一、产品与规模</h2>
 <h3>产品定位</h3>
 <p>Lita 是面向海外市场的<strong>语音社交 + 陪玩交易 + 游戏化消费</strong>平台。用户充值获得虚拟货币， 在语音房/直播间里送礼、连麦、玩互动游戏，或购买陪玩服务；平台通过活动、家族、榜单和推送做增长与留存。</p>
 <div class="ws-table-wrap"><table>
@@ -248,7 +268,7 @@
 </tbody></table></div>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">二、架构总览</h2>
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">二、架构总览</h2>
 <pre class="ws-diagram"><code>┌──────────────────────── 客户端（App / H5 / 后台）────────────────────────┐
 └───────────────────────────────┬──────────────────────────────────────────┘
                                 │
@@ -284,7 +304,7 @@
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">三、业务域地图</h2>
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">三、业务域地图</h2>
 <p>把 40+ 个仓库横向归纳，得到 18 个业务域。★ 是承载核心收入或核心体验的域。</p>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -406,7 +426,7 @@
 </tbody></table></div>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">四、四条关键链路</h2>
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">四、四条关键链路</h2>
 <h3>1. 语音房 / 直播</h3>
 <p>创建房间 → 主播上麦 → 用户进房 → 连麦互动 → 送礼 → 房间榜更新 → 退出并记录停留时长。 大房间通过声网混流转推 CDN，让非 RTC 观众也能观看。</p>
 <ul>
@@ -438,7 +458,7 @@
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">五、服务目录 · 交易与基础</h2>
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">五、服务目录 · 交易与基础</h2>
 <p>点开每个服务看细节。「状态」按最近提交时间粗分，用于判断是活跃维护还是历史遗留。</p>
 <details class="ws-svc">
 <summary><span class="ws-svc-name">lita-basic</span><span class="ws-svc-role">基础业务主服务 · 礼物/订单/充值入口</span><span class="ws-badge ws-badge-live">活跃</span></summary>
@@ -544,7 +564,7 @@
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">六、服务目录 · 场景与互动</h2>
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">六、服务目录 · 场景与互动</h2>
 <details class="ws-svc">
 <summary><span class="ws-svc-name">litalive</span><span class="ws-svc-role">直播 / 语音房在线</span><span class="ws-badge ws-badge-live">活跃</span></summary>
 
@@ -588,7 +608,7 @@
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">七、服务目录 · 增长与活动</h2>
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">七、服务目录 · 增长与活动</h2>
 <details class="ws-svc">
 <summary><span class="ws-svc-name">active-main</span><span class="ws-svc-role">第一代活动单体</span><span class="ws-badge ws-badge-live">活跃</span></summary>
 
@@ -637,7 +657,7 @@
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">八、服务目录 · 管理与数据</h2>
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">八、服务目录 · 管理与数据</h2>
 <details class="ws-svc">
 <summary><span class="ws-svc-name">admin-main</span><span class="ws-svc-role">Lita / Cinta 管理后台</span><span class="ws-badge ws-badge-live">活跃</span></summary>
 
@@ -670,7 +690,7 @@
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">九、服务目录 · 资源与框架</h2>
+<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">九、服务目录 · 资源与框架</h2>
 <details class="ws-svc">
 <summary><span class="ws-svc-name">lita-resource-center</span><span class="ws-svc-role">资源与配置中心</span><span class="ws-badge ws-badge-maint">维护</span></summary>
 
@@ -717,7 +737,7 @@
 
 </section>
 
-<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">十、新平台 WorkHub</h2>
+<section class="ws-card ws-prose" id="chapter-13"><h2 id="chapter-13">十、新平台 WorkHub</h2>
 <p><code>work</code> 是与 Lita 主体系并行演进的新平台：以 AI 为中心的项目管理平台，后端 NestJS + PostgreSQL， 前端 React 19，另有 <code>executor-bridge</code> 与 <code>appium-agent</code> 两个工作区成员。 它不在 Lita 微服务体系内，但同属这个工作区，代表团队从「Java 微服务」向「AI 原生平台」的另一条线。</p>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -746,7 +766,7 @@
 <p><a href="./lita-work.html">→ 展开看 WorkHub 的完整手册</a></p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-13"><h2 id="chapter-13">十一、数据体系</h2>
+<section class="ws-card ws-prose" id="chapter-14"><h2 id="chapter-14">十一、数据体系</h2>
 <h3>业务库与数仓</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -836,7 +856,7 @@
 <p><code>docs/data/knowledge/</code> 的 <code>KNOWLEDGE.md</code> 用 <code>must_follow</code> 写死了查询规则： 先查分层速查表、禁止直接查 DWD/ODS、月度/周度/日度必须用 DWS、DAU 必须用 <code>fact_dau_snapshot_a</code>、 DWD/DWS 必须带 <code>dt</code> 分区、用户查询必须过滤 <code>is_fake = FALSE</code>。 这是把数仓经验固化成可执行检查清单的典型案例。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-14"><h2 id="chapter-14">十二、工程机制</h2>
+<section class="ws-card ws-prose" id="chapter-15"><h2 id="chapter-15">十二、工程机制</h2>
 <h3>docs 仓库：规范、契约与数据</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -886,7 +906,7 @@
 <p>单测覆盖不普遍（<code>spring-boot-starter-test</code> 仅约 9 个模块引用），部分测试还依赖 Nacos（surefire 注入 <code>NACOS_GROUP=local</code>）。质量保障更依赖规范约束、代码评审和线上监控告警，而不是自动化测试。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-15"><h2 id="chapter-15">十三、架构演进</h2>
+<section class="ws-card ws-prose" id="chapter-16"><h2 id="chapter-16">十三、架构演进</h2>
 <h3>主线：funbit 单体 → lita 服务群</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -957,7 +977,7 @@
 <p>从「<code>funbit</code> 什么都有」到按域拆库：<code>lita_basic</code>（表数已超过主库）、 <code>lita_stats</code>（统计剥离）、<code>lita_active</code>（活动独立）、<code>lita_family</code>（家族独立）。 新业务基本落在新库，老库处于维护状态。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-16"><h2 id="chapter-16">十四、阅读路线</h2>
+<section class="ws-card ws-prose" id="chapter-17"><h2 id="chapter-17">十四、阅读路线</h2>
 <h3>第一次系统了解（建议 5–7 天）</h3>
 <ol>
 <li><strong>第 1 天：全局</strong>——本文 + <code>docs/README.md</code> + <code>docs/standards/</code>，先知道规范与文档在哪。</li>
@@ -982,7 +1002,7 @@
 </ul>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-17"><h2 id="chapter-17">十五、术语与常见问题</h2>
+<section class="ws-card ws-prose" id="chapter-18"><h2 id="chapter-18">十五、术语与常见问题</h2>
 <h3>术语</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -1051,7 +1071,7 @@
 <p>团队文档在 <code>docs</code> 仓库（VitePress）：规范在 <code>standards/</code>，接口在 <code>specs/api/</code>，数据在 <code>data/</code>，操作指令在 <code>command/</code>。</p>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-18"><h2 id="chapter-18">十六、服务速查表</h2>
+<section class="ws-card ws-prose" id="chapter-19"><h2 id="chapter-19">十六、服务速查表</h2>
 <div class="ws-table-wrap"><table>
 <thead>
 <tr>

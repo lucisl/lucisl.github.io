@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>关键指标 — Lita 生态 — WorkSpace</title>
+    <meta name="description" content="Lita 关键指标快照：DAU/MAU、月获客、注册率、QPS、延迟、充值、送礼与工程规模。">
+    <meta name="theme-color" content="#eef0f3">
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="项目档案首页">
+          <span class="ws-logo" aria-hidden="true">W</span>
+          WorkSpace
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="项目与目录导航">
+        <div class="ws-rail-head">
+          <span>项目</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./lita-work.html">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 工作中心</b>
+                <small>WorkHub · 手册</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="./lita.html">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>Lita 生态</b>
+                <small>海外社交平台 · 手册</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">业务专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="./lita.html">总览</a></li>
+          <li><a class="is-active" href="./lita-metrics.html">关键指标</a></li>
+          <li><a class="" href="./lita-activities.html">活动运营</a></li>
+          <li><a class="" href="./lita-voice-room.html">语音房与直播</a></li>
+          <li><a class="" href="./lita-gifting.html">送礼与虚拟礼物</a></li>
+          <li><a class="" href="./lita-companion.html">陪玩与交易</a></li>
+        </ul>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">先看结论</a></li>
+            <li><a href="#chapter-2">数据口径与快照</a></li>
+            <li><a href="#chapter-3">用户规模与活跃</a></li>
+            <li><a href="#chapter-4">获客与注册</a></li>
+            <li><a href="#chapter-5">收入与付费</a></li>
+            <li><a href="#chapter-6">送礼与房间消费</a></li>
+            <li><a href="#chapter-7">活动参与</a></li>
+            <li><a href="#chapter-8">技术指标</a></li>
+            <li><a href="#chapter-9">工程与数据规模</a></li>
+            <li><a href="#chapter-10">观察与限制</a></li>
+            <li><a href="#chapter-11">复现方式</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="./index.html">项目档案</a>
+            <span>/</span>
+            <span>002 / 关键指标</span>
+          </p>
+          <p class="ws-eyebrow">PROJECT HANDBOOK / 002 · METRICS</p>
+          <div class="ws-title-row">
+            <h1>关键指标</h1>
+            <span class="ws-title-code">Metrics Snapshot</span>
+          </div>
+          <p class="ws-tagline">把业务指标和技术指标放在同一张快照里：日活、月获客、收入、送礼、QPS、延迟与数据规模。</p>
+          <ul class="ws-meta" aria-label="项目概况">
+            <li><span>业务快照</span><b>2026-11-23</b></li>
+            <li><span>DAU</span><b>22,166</b></li>
+            <li><span>实时 QPS</span><b>884.9</b></li>
+            <li><span>数据源</span><b>Prometheus + lita_stats</b></li>
+          </ul>
+          <div class="ws-actions">
+            <a class="ws-btn" href="./lita.html">← 返回 Lita 总览</a>
+          </div>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">先看结论</h2>
+<p>这一页把 Lita 的<strong>业务指标</strong>和<strong>技术指标</strong>放在同一张快照里，方便对外介绍、面试复盘和容量评估时直接引用。业务数据取 <strong>2026-11-23</strong>（最近一个完整自然日），技术数据取 <strong>2026-11-24 12:34 CST</strong> 的实时 Prometheus 快照。</p>
+<div class="ws-stats">
+  <div class="ws-stat"><span>DAU · 11-23</span><b>22,166</b><small>14 日均值 22,008</small></div>
+  <div class="ws-stat"><span>MAU · 近 30 天</span><b>250,970</b><small>DAU/MAU 8.8%</small></div>
+  <div class="ws-stat"><span>11 月获客安装</span><b>232,130</b><small>注册 101,839</small></div>
+  <div class="ws-stat"><span>实时 QPS</span><b>884.9</b><small>24h 峰值 1,346.8</small></div>
+  <div class="ws-stat"><span>周充值</span><b>48.45M</b><small>金币 · 8,976 付费用户</small></div>
+</div>
+
+<p>五条最值得记住的结论：</p>
+<ul>
+<li><strong>印尼是绝对基本盘</strong>：占 DAU 74.9%、11 月安装 77.0%、周充值 78.0%，区域策略先看印尼。</li>
+<li><strong>韩国是小而高价值的市场</strong>：DAU 只占 2.8%，却贡献 7.5% 的周充值，ARPPU 约 14,700 金币，是印尼的 2.7 倍。</li>
+<li><strong>增长偏买量</strong>：11 月安装中 72.0% 来自付费安装，整体注册率 43.9%；买量到注册之间还有提升空间。</li>
+<li><strong>消费集中、房间渗透中等</strong>：语音房 DAU 占 37.2%，但当天送礼用户只占 DAU 6.7%；周充值 98.6% 来自老用户。</li>
+<li><strong>技术侧稳定</strong>：5xx 为 0%，平均延迟 6.84 ms；但只有 avg/max，没有 p95 分桶，容量评估还需要补 histogram。</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">数据口径与快照</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标组</th>
+<th>口径</th>
+<th>数据源</th>
+<th>时间</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DAU</td>
+<td>按 <code>user_id</code> 去重</td>
+<td><code>lita_stats.dau</code></td>
+<td>2026-11-23</td>
+</tr>
+<tr>
+<td>MAU</td>
+<td>近 30 天按 <code>user_id</code> 去重</td>
+<td><code>lita_stats.dau</code></td>
+<td>2026-10-25 ~ 11-23</td>
+</tr>
+<tr>
+<td>WAU</td>
+<td>近 7 天按 <code>user_id</code> 去重</td>
+<td><code>lita_stats.dau</code></td>
+<td>2026-11-17 ~ 11-23</td>
+</tr>
+<tr>
+<td>安装 / 注册</td>
+<td><code>period=&#39;daily&#39;</code>，按 region 汇总</td>
+<td><code>lita_stats.user_statsx</code></td>
+<td>2026-11-01 ~ 11-23</td>
+</tr>
+<tr>
+<td>充值</td>
+<td><code>period=&#39;weekly&#39;</code>，按 region 汇总</td>
+<td><code>lita_stats.recharge_stats</code></td>
+<td>周键 2026-11-16</td>
+</tr>
+<tr>
+<td>送礼</td>
+<td>按 <code>day_key</code> 过滤，去重用户/房间</td>
+<td><code>lita_stats.room_gift_send_stats</code></td>
+<td>2026-11-23</td>
+</tr>
+<tr>
+<td>活动</td>
+<td><code>locale=&#39;all&#39;</code>，按活动配置汇总</td>
+<td><code>lita_stats.active_stats_day</code></td>
+<td>2026-11-23</td>
+</tr>
+<tr>
+<td>QPS / 延迟</td>
+<td>5 分钟 rate，聚合全部 HTTP 服务</td>
+<td>生产 Prometheus</td>
+<td>2026-11-24 12:34 CST</td>
+</tr>
+<tr>
+<td>代码 / 库规模</td>
+<td>本地工作区 + <code>information_schema</code></td>
+<td>仓库统计 / 只读库</td>
+<td>2026-11-23</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>说明：<code>dau</code> 是分析表口径，<code>login_dau</code> 是登录事件表口径，两者相差 53 人（0.2%），本文统一用 <code>dau</code>。业务数据不使用 11-24 的未完整数据。</p>
+</blockquote>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">用户规模与活跃</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DAU</td>
+<td>22,166</td>
+<td>2026-11-23，按用户去重</td>
+</tr>
+<tr>
+<td>MAU</td>
+<td>250,970</td>
+<td>近 30 天，按用户去重</td>
+</tr>
+<tr>
+<td>WAU</td>
+<td>83,152</td>
+<td>近 7 天，按用户去重</td>
+</tr>
+<tr>
+<td>DAU/MAU</td>
+<td>8.8%</td>
+<td>日活占月活</td>
+</tr>
+<tr>
+<td>WAU/MAU</td>
+<td>33.1%</td>
+<td>周活占月活</td>
+</tr>
+<tr>
+<td>登录 DAU</td>
+<td>22,219</td>
+<td>登录事件表口径，与 DAU 相差 0.2%</td>
+</tr>
+<tr>
+<td>玩家 DAU</td>
+<td>4,763</td>
+<td>占 DAU 21.5%</td>
+</tr>
+<tr>
+<td>非玩家 DAU</td>
+<td>17,403</td>
+<td>占 DAU 78.5%</td>
+</tr>
+</tbody></table></div>
+<p>DAU 近两周在 2.05 万 ~ 2.44 万之间，11-15 和 11-22 两个周日出现峰值；最近 7 天均值 22,141，比前 7 天的 21,874 高 1.2%。</p>
+<div class="ws-chart">
+  <div class="ws-chart-head"><span>DAU · 2026-11-10 → 11-23</span><span>基线 19,000 · 峰值 24,436</span></div>
+  <div class="ws-chart-row"><span>11-10</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:31.4%"></i></span><span class="ws-chart-val">20,707</span></div>
+  <div class="ws-chart-row"><span>11-11</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:28.3%"></i></span><span class="ws-chart-val">20,538</span></div>
+  <div class="ws-chart-row"><span>11-12</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:38.5%"></i></span><span class="ws-chart-val">21,093</span></div>
+  <div class="ws-chart-row"><span>11-13</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:50.7%"></i></span><span class="ws-chart-val">21,754</span></div>
+  <div class="ws-chart-row"><span>11-14</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:71.6%"></i></span><span class="ws-chart-val">22,890</span></div>
+  <div class="ws-chart-row"><span>11-15</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:100%"></i></span><span class="ws-chart-val">24,436</span></div>
+  <div class="ws-chart-row"><span>11-16</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:49.7%"></i></span><span class="ws-chart-val">21,702</span></div>
+  <div class="ws-chart-row"><span>11-17</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:49.5%"></i></span><span class="ws-chart-val">21,690</span></div>
+  <div class="ws-chart-row"><span>11-18</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:45.9%"></i></span><span class="ws-chart-val">21,493</span></div>
+  <div class="ws-chart-row"><span>11-19</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:45.3%"></i></span><span class="ws-chart-val">21,463</span></div>
+  <div class="ws-chart-row"><span>11-20</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:46.0%"></i></span><span class="ws-chart-val">21,498</span></div>
+  <div class="ws-chart-row"><span>11-21</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:65.4%"></i></span><span class="ws-chart-val">22,557</span></div>
+  <div class="ws-chart-row"><span>11-22</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:94.2%"></i></span><span class="ws-chart-val">24,119</span></div>
+  <div class="ws-chart-row"><span>11-23</span><span class="ws-chart-track"><i class="ws-chart-fill" style="width:58.2%"></i></span><span class="ws-chart-val">22,166</span></div>
+</div>
+
+<blockquote>
+<p>柱长按 19,000–24,436 映射，只用于看趋势，不表示从 0 起的绝对比例。</p>
+</blockquote>
+<h3>区域分布</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>地区</th>
+<th>DAU</th>
+<th>占 DAU</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>印尼 ID</td>
+<td>16,591</td>
+<td>74.9%</td>
+<td>基本盘</td>
+</tr>
+<tr>
+<td>越南 VN</td>
+<td>2,097</td>
+<td>9.5%</td>
+<td>第二市场</td>
+</tr>
+<tr>
+<td>菲律宾 PH</td>
+<td>1,312</td>
+<td>5.9%</td>
+<td>稳定补充</td>
+</tr>
+<tr>
+<td>马来西亚 MY</td>
+<td>1,122</td>
+<td>5.1%</td>
+<td>稳定补充</td>
+</tr>
+<tr>
+<td>韩国 KR</td>
+<td>624</td>
+<td>2.8%</td>
+<td>高 ARPPU</td>
+</tr>
+<tr>
+<td>其它</td>
+<td>420</td>
+<td>1.9%</td>
+<td>日本、新加坡等</td>
+</tr>
+</tbody></table></div>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">获客与注册</h2>
+<p>11 月前 23 天累计安装 232,130、注册 101,839，整体注册率 43.9%；日均安装约 10,093、日均注册约 4,428。</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>安装</td>
+<td>232,130</td>
+<td>11-01 ~ 11-23</td>
+</tr>
+<tr>
+<td>注册</td>
+<td>101,839</td>
+<td>注册率 43.9%</td>
+</tr>
+<tr>
+<td>自然安装</td>
+<td>64,946</td>
+<td>占安装 28.0%</td>
+</tr>
+<tr>
+<td>付费安装</td>
+<td>167,184</td>
+<td>占安装 72.0%</td>
+</tr>
+<tr>
+<td>11-23 安装</td>
+<td>11,641</td>
+<td>当日</td>
+</tr>
+<tr>
+<td>11-23 注册</td>
+<td>4,981</td>
+<td>注册率 42.8%</td>
+</tr>
+</tbody></table></div>
+<h3>安装的区域结构</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>地区</th>
+<th>安装</th>
+<th>注册</th>
+<th>注册率</th>
+<th>安装占比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>印尼 ID</td>
+<td>178,691</td>
+<td>78,941</td>
+<td>44.2%</td>
+<td>77.0%</td>
+</tr>
+<tr>
+<td>越南 VN</td>
+<td>20,666</td>
+<td>8,729</td>
+<td>42.2%</td>
+<td>8.9%</td>
+</tr>
+<tr>
+<td>菲律宾 PH</td>
+<td>12,856</td>
+<td>6,376</td>
+<td>49.6%</td>
+<td>5.5%</td>
+</tr>
+<tr>
+<td>马来西亚 MY</td>
+<td>10,839</td>
+<td>4,543</td>
+<td>41.9%</td>
+<td>4.7%</td>
+</tr>
+<tr>
+<td>韩国 KR</td>
+<td>1,975</td>
+<td>766</td>
+<td>38.8%</td>
+<td>0.9%</td>
+</tr>
+<tr>
+<td>其它</td>
+<td>7,103</td>
+<td>2,484</td>
+<td>35.0%</td>
+<td>3.1%</td>
+</tr>
+</tbody></table></div>
+<p>菲律宾的注册率最高（49.6%），韩国最低（38.8%）；印尼贡献了超过四分之三的安装量，获客结构高度集中。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">收入与付费</h2>
+<p>周键 2026-11-16 的周充值合计 <strong>48,447,808 金币</strong>，付费用户 <strong>8,976</strong>；按周会材料的 149.3 coins/USD 估算，约 <strong>32.45 万美元/周</strong>。</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>周充值</td>
+<td>48,447,808 coins</td>
+<td>周口径</td>
+</tr>
+<tr>
+<td>付费用户</td>
+<td>8,976</td>
+<td>周去重</td>
+</tr>
+<tr>
+<td>ARPPU</td>
+<td>5,397 coins</td>
+<td>约 $36.2/周</td>
+</tr>
+<tr>
+<td>ARPU（按 WAU）</td>
+<td>583 coins</td>
+<td>约 $3.9/周</td>
+</tr>
+<tr>
+<td>付费率（/WAU）</td>
+<td>10.8%</td>
+<td>周付费用户 / WAU</td>
+</tr>
+<tr>
+<td>付费率（/MAU）</td>
+<td>3.6%</td>
+<td>周付费用户 / MAU</td>
+</tr>
+<tr>
+<td>新用户充值</td>
+<td>673,763 coins</td>
+<td>占 1.4%</td>
+</tr>
+<tr>
+<td>老用户充值</td>
+<td>47,774,045 coins</td>
+<td>占 98.6%</td>
+</tr>
+</tbody></table></div>
+<h3>收入的区域结构</h3>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>地区</th>
+<th>周充值 coins</th>
+<th>占比</th>
+<th>付费用户</th>
+<th>ARPPU</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>印尼 ID</td>
+<td>37,775,581</td>
+<td>78.0%</td>
+<td>6,961</td>
+<td>5,426</td>
+</tr>
+<tr>
+<td>韩国 KR</td>
+<td>3,616,261</td>
+<td>7.5%</td>
+<td>246</td>
+<td>14,700</td>
+</tr>
+<tr>
+<td>越南 VN</td>
+<td>2,840,679</td>
+<td>5.9%</td>
+<td>685</td>
+<td>4,146</td>
+</tr>
+<tr>
+<td>马来西亚 MY</td>
+<td>1,752,477</td>
+<td>3.6%</td>
+<td>520</td>
+<td>3,370</td>
+</tr>
+<tr>
+<td>菲律宾 PH</td>
+<td>1,300,080</td>
+<td>2.7%</td>
+<td>401</td>
+<td>3,242</td>
+</tr>
+<tr>
+<td>其它</td>
+<td>1,162,730</td>
+<td>2.4%</td>
+<td>163</td>
+<td>7,133</td>
+</tr>
+</tbody></table></div>
+<p>韩国用 2.8% 的 DAU 贡献了 7.5% 的充值，ARPPU 约 14,700 金币；印尼贡献 78.0% 的充值，但 ARPPU 只有 5,426 金币。前五个地区合计占周充值的 97.6%。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">送礼与房间消费</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>送礼金币</td>
+<td>4,211,649 coins</td>
+<td>2026-11-23</td>
+</tr>
+<tr>
+<td>送礼用户</td>
+<td>1,479</td>
+<td>占 DAU 6.7%</td>
+</tr>
+<tr>
+<td>有送礼房间</td>
+<td>202</td>
+<td>当天有送礼记录的房间</td>
+</tr>
+<tr>
+<td>人均送礼</td>
+<td>2,847 coins</td>
+<td>金币 / 送礼用户</td>
+</tr>
+<tr>
+<td>每房间均值</td>
+<td>20,850 coins</td>
+<td>金币 / 有送礼房间</td>
+</tr>
+<tr>
+<td>语音房 DAU</td>
+<td>8,239</td>
+<td>占 DAU 37.2%</td>
+</tr>
+<tr>
+<td>登录 DAU</td>
+<td>22,219</td>
+<td>登录事件口径</td>
+</tr>
+</tbody></table></div>
+<p>房间侧呈现「进房率不低、付费送礼集中」的结构：37.2% 的 DAU 进入语音房，但只有 6.7% 的 DAU 发生送礼；202 个有送礼的房间承担了当天的全部送礼金币。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">活动参与</h2>
+<p>2026-11-23 有 3 个活动配置产生统计数据，合计参与用户 156 人、活动总量 1,472,363、金币流水 117,435。</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>活动配置</th>
+<th>参与用户</th>
+<th>活动总量</th>
+<th>金币流水</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>89</td>
+<td>10</td>
+<td>275,000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>94</td>
+<td>7</td>
+<td>35,081</td>
+<td>5,083</td>
+</tr>
+<tr>
+<td>96</td>
+<td>139</td>
+<td>1,162,282</td>
+<td>112,352</td>
+</tr>
+<tr>
+<td>合计</td>
+<td>156</td>
+<td>1,472,363</td>
+<td>117,435</td>
+</tr>
+</tbody></table></div>
+<p>配置 96 贡献了 89.1% 的参与用户、78.9% 的活动总量和 95.7% 的金币流水，是当天的主力活动；配置 89 和 94 的参与规模都在 10 人左右。</p>
+<blockquote>
+<p><code>active_stats_day.all_total</code> 在不同活动类型下可能表示积分、抽奖次数或流水，跨配置比较时只看量级，不把它当作统一收入口径。</p>
+</blockquote>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">技术指标</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>口径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>实时 QPS</td>
+<td>884.9</td>
+<td>5 分钟 rate</td>
+</tr>
+<tr>
+<td>24 小时峰值 QPS</td>
+<td>1,346.8</td>
+<td>1 分钟步长取最大值</td>
+</tr>
+<tr>
+<td>平均延迟</td>
+<td>6.84 ms</td>
+<td>sum / count</td>
+</tr>
+<tr>
+<td>最大观测延迟</td>
+<td>1.38 s</td>
+<td><code>http_server_requests_seconds_max</code></td>
+</tr>
+<tr>
+<td>4xx 比例</td>
+<td>0.052%</td>
+<td>5 分钟 rate</td>
+</tr>
+<tr>
+<td>5xx 比例</td>
+<td>0%</td>
+<td>5 分钟 rate</td>
+</tr>
+<tr>
+<td>采集 job</td>
+<td>44</td>
+<td>Prometheus</td>
+</tr>
+<tr>
+<td>采集 target</td>
+<td>346（344 up）</td>
+<td>Prometheus <code>up</code></td>
+</tr>
+<tr>
+<td>估算日请求量</td>
+<td>约 7,645 万</td>
+<td>QPS × 86,400，仅作量级参考</td>
+</tr>
+</tbody></table></div>
+<p>当前 QPS 约 885，24 小时峰值约 1,347；平均延迟 6.84 ms，最大观测 1.38 s；4xx 约 0.05%，5xx 为 0。Prometheus 共有 44 个采集 job、346 个 target，其中 344 个在线。</p>
+<blockquote>
+<p>延迟只有 avg 和 max，没有 histogram bucket，因此无法给出 p95/p99；容量评估时应补充分位数指标。</p>
+</blockquote>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">工程与数据规模</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>数值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Git 仓库</td>
+<td>42 个</td>
+<td>独立仓库，非 monorepo</td>
+</tr>
+<tr>
+<td>Java 文件</td>
+<td>22,873</td>
+<td>不含 <code>target/</code></td>
+</tr>
+<tr>
+<td>Java 代码</td>
+<td>约 179 万行</td>
+<td>含空行与注释</td>
+</tr>
+<tr>
+<td>业务域</td>
+<td>18 个</td>
+<td>用户、房间、直播、礼物、支付、活动等</td>
+</tr>
+<tr>
+<td>表文档</td>
+<td>2,451 份</td>
+<td>文档仓库口径，不等于在线表数量</td>
+</tr>
+<tr>
+<td>API 契约</td>
+<td>188 份</td>
+<td>Swagger 自动生成</td>
+</tr>
+<tr>
+<td><code>funbit</code> 库</td>
+<td>836 张表 / 4.0 TB</td>
+<td><code>information_schema</code> 统计</td>
+</tr>
+<tr>
+<td><code>lita_stats</code> 库</td>
+<td>678 张表 / 2.3 TB</td>
+<td>统计与报表库</td>
+</tr>
+</tbody></table></div>
+<p>两个已统计的库合计约 6.3 TB；<code>funbit</code> 是老单体主库，表数量和体量都最大，<code>lita_stats</code> 则承载 DAU、安装、充值、送礼和活动等统计表。</p>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">观察与限制</h2>
+<h3>可以怎么读</h3>
+<ul>
+<li><strong>区域高度集中</strong>：印尼同时是 DAU、安装和收入的第一大来源；越南、菲律宾、马来西亚是第二梯队，韩国是低 DAU、高 ARPPU 的补充市场。</li>
+<li><strong>增长依赖买量</strong>：72.0% 的安装是付费安装，注册率 43.9%；如果自然安装占比提升，获客成本结构会明显不同。</li>
+<li><strong>活跃稳定但粘性一般</strong>：DAU/MAU 8.8%、WAU/MAU 33.1%，DAU 在 2.2 万附近波动，周日有明显峰值。</li>
+<li><strong>收入靠老用户</strong>：周充值 98.6% 来自老用户，新用户只贡献 1.4%；付费率按 WAU 约 10.8%，按 MAU 约 3.6%。</li>
+<li><strong>消费与房间渗透不匹配</strong>：37.2% 的 DAU 进语音房，但只有 6.7% 的 DAU 送礼；房间内消费转化还有空间。</li>
+<li><strong>技术侧健康</strong>：5xx 为 0%，平均延迟 6.84 ms；但缺少 p95，且 346 个 target 中有 2 个离线，需要结合告警确认是否为采集端噪声。</li>
+</ul>
+<h3>口径限制</h3>
+<ul>
+<li>业务数据取最近完整日 2026-11-23；11-24 的数据不完整，未纳入。</li>
+<li><code>login_dau</code> 与 <code>dau</code> 相差 53 人（0.2%），属于事件表与分析表的口径差异，不影响趋势判断。</li>
+<li>分区域注册率存在个别异常（例如泰国安装 1,238、注册 0），汇总注册率以总量为准。</li>
+<li>金币兑美元按 149.3 coins/USD 估算，实际渠道价格、区域定价和分成会影响真实收入。</li>
+<li>QPS/延迟只覆盖接入 Prometheus 的 HTTP 服务，不等同于网关或第三方调用的全量请求。</li>
+<li>代码量、仓库数、表文档和 API 契约来自本地工作区与文档仓库，统计截止 2026-11-23。</li>
+</ul>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">复现方式</h2>
+<p>业务指标可在 <code>lita_stats</code> 只读库执行：</p>
+<pre><code class="language-sql">-- DAU / MAU / WAU
+SELECT COUNT(DISTINCT user_id) FROM dau WHERE date = 20261123;
+SELECT COUNT(DISTINCT user_id) FROM dau WHERE date BETWEEN 20261025 AND 20261123;
+SELECT COUNT(DISTINCT user_id) FROM dau WHERE date BETWEEN 20261117 AND 20261123;
+
+-- 11 月获客
+SELECT SUM(install), SUM(register), SUM(organic_install), SUM(pa_install)
+FROM user_statsx
+WHERE date BETWEEN 20261101 AND 20261123 AND period = &#39;daily&#39;;
+
+-- 周充值
+SELECT SUM(total_coin), SUM(new_user_coin), SUM(old_user_coin), SUM(total_user)
+FROM recharge_stats
+WHERE date = 20261116 AND period = &#39;weekly&#39;;
+
+-- 当日送礼
+SELECT SUM(total_coin), COUNT(DISTINCT user_id), COUNT(DISTINCT room_id)
+FROM room_gift_send_stats
+WHERE day_key &gt;= 202611230000 AND day_key &lt; 202611240000;
+</code></pre>
+<p>技术指标可在 Prometheus 执行：</p>
+<pre><code class="language-promql"># 实时 QPS
+sum(rate(http_server_requests_seconds_count[5m]))
+
+# 平均延迟（毫秒）
+sum(rate(http_server_requests_seconds_sum[5m]))
+  / sum(rate(http_server_requests_seconds_count[5m])) * 1000
+
+# 24 小时峰值 QPS
+max_over_time(sum(rate(http_server_requests_seconds_count[5m]))[24h:1m])
+
+# 5xx 比例
+sum(rate(http_server_requests_seconds_count{status=~&quot;5..&quot;}[5m]))
+  / sum(rate(http_server_requests_seconds_count[5m])) * 100
+</code></pre>
+<blockquote>
+<p>所有查询均为只读；生产凭据不进入页面、不写入仓库。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>WorkSpace · 项目档案</p>
+      <p>Markdown 源文件：<a href="./content/lita-metrics.md">lita-metrics.md</a></p>
+      <p><a href="../">返回入口</a> · <a href="../devkit/">DevKit 工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

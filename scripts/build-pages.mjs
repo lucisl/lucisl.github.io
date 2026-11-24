@@ -59,6 +59,11 @@ const TOPIC_GROUPS = {
     items: [
       { key: 'overview', name: '总览', href: './lita.html' },
       {
+        key: 'metrics',
+        name: '关键指标',
+        href: './lita-metrics.html',
+      },
+      {
         key: 'activities',
         name: '活动运营',
         href: './lita-activities.html',
@@ -221,6 +226,29 @@ const PAGES = [
       ['数据表文档', '2,451'],
       ['API 文档', '188'],
       ['统计截止', '2026-11-23'],
+    ],
+  },
+  {
+    key: 'metrics',
+    source: 'projects/content/lita-metrics.md',
+    output: 'projects/lita-metrics.html',
+    topic: 'metrics',
+    project: 'lita',
+    title: '关键指标 — Lita 生态 — WorkSpace',
+    description:
+      'Lita 关键指标快照：DAU/MAU、月获客、注册率、QPS、延迟、充值、送礼与工程规模。',
+    robots: '<meta name="robots" content="noindex,nofollow">',
+    eyebrow: 'PROJECT HANDBOOK / 002 · METRICS',
+    breadcrumb: '002 / 关键指标',
+    h1: '关键指标',
+    h1Note: 'Metrics Snapshot',
+    tagline:
+      '把业务指标和技术指标放在同一张快照里：日活、月获客、收入、送礼、QPS、延迟与数据规模。',
+    meta: [
+      ['业务快照', '2026-11-23'],
+      ['DAU', '22,166'],
+      ['实时 QPS', '884.9'],
+      ['数据源', 'Prometheus + lita_stats'],
     ],
   },
   {
