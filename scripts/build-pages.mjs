@@ -360,15 +360,9 @@ const INTERVIEW_PAGES = [
     eyebrow: 'INTERVIEW / AI LANDING',
     breadcrumb: '001 / AI 落地',
     h1: 'AI 落地',
-    h1Note: 'Agent · RAG · MCP · Eval',
+    h1Note: '',
     tagline:
-      '不是八股文：从 WorkHub 的真实代码出发，把 Agent 运行时、工具生态、反馈闭环、线上巡检、RAG、Eval 与模型降级拆成可追问的面试题。',
-    meta: [
-      ['主线', 'WorkHub'],
-      ['题量', '39 题'],
-      ['关键词', 'Agent / RAG / MCP / Eval'],
-      ['口径', '不夸大'],
-    ],
+      'Agent 运行时、MCP、RAG、Eval、模型降级，按 WorkHub 真实实现整理。',
     sourceHref: '../content/ai.md',
     sourceName: 'ai.md',
   },
@@ -382,15 +376,9 @@ const INTERVIEW_PAGES = [
     eyebrow: 'INTERVIEW / ACTIVITY',
     breadcrumb: '002 / 活动专项',
     h1: '活动专项',
-    h1Note: 'Activity Engine',
+    h1Note: '',
     tagline:
-      '围绕活动引擎、组件化、奖励一致性与高并发：把「写活动」讲成「做运行时」，把「发奖励」讲成「资金一致性」。',
-    meta: [
-      ['主线', 'Lita 活动'],
-      ['题量', '36 题'],
-      ['关键词', 'Activity / Consistency'],
-      ['口径', '讲个人贡献'],
-    ],
+      '活动引擎、组件化、奖励一致性与高并发，按 Lita 真实实现整理。',
     sourceHref: '../content/activity.md',
     sourceName: 'activity.md',
   },
@@ -575,7 +563,6 @@ export async function buildPages() {
       .replaceAll('{{H1}}', escapeHtml(page.h1))
       .replaceAll('{{H1_NOTE}}', escapeHtml(page.h1Note))
       .replaceAll('{{TAGLINE}}', escapeHtml(page.tagline))
-      .replaceAll('{{META_ITEMS}}', renderMeta(page.meta))
       .replaceAll('{{RAIL}}', renderInterviewRail(page.key))
       .replaceAll('{{TOC}}', toc)
       .replaceAll('{{CONTENT}}', content)

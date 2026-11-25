@@ -1,37 +1,4 @@
-## 0. 这份题库怎么用
-
-这不是八股文题库，而是按 **WorkHub（公司 AI 工作中心）** 的真实代码和真实落地场景整理出来的追问清单。
-
-用法：
-
-- 先看「市场要求 ↔ WorkHub 能力」对齐，知道自己能讲什么、不能讲什么。
-- 再看「术语速查」，把英文缩写和中文解释对上。
-- 最后按模块刷题，每题先自己答，再看答案要点。
-- 面试前重点背每节最后的「30 秒表达模板」。
-
-> 口径提醒：`work` 仓库如果你没有提交记录，就用「基于 / 推动 / 落地 WorkHub」；不要说自己从 0 开发了整个平台。
-
----
-
-## 1. 市场要求 ↔ WorkHub 的真实能力
-
-2025–2026 年 AI 应用 / AI 平台岗位的高频要求，基本集中在六块：**Agent、RAG、MCP、Eval、Guardrails、Observability**。
-
-| 市场高频要求 | WorkHub 里的真实对应 | 面试能怎么讲 |
-|---|---|---|
-| Agent Runtime / Harness | 任务状态机、executor-bridge、opencode session、父子任务、wakeup | AI 不是一个对话框，是有状态、可恢复、可验收的执行角色 |
-| MCP / Tool Calling | `lita-work` 102 工具、`lita-bots` 6 个子 Agent 工具、`lita-proxy` 31 个运维工具 | 工具发现、鉴权、作用域、生产只读 / 写走工单 |
-| RAG | PGVector + 全文 + RRF 混合检索、Embedding 队列 | 不是裸向量库，有阈值、降级、引用 |
-| Eval | suite / case / point / run / item / judgement / snapshot / sandbox | 评测集、沙箱、LLM-as-judge、证据校验、返工、指标 |
-| Guardrails | eval token、eval shield、MCP policy、生产写审批 | 最小权限、写拦截、作用域隔离、审计 |
-| Model Gateway | 主备模型、限额识别、30 分钟共享冷却、同会话续跑 | 429 / 配额 / 余额降级，不是简单 try/catch |
-| Observability | 评估事件流、SSE、任务 trace、运行统计 | 每次会话 / 工具调用可追踪 |
-| Feedback Loop | 飞书反馈群话题 → feedback → 任务 ID=8 → AI 判断 / 回复 | 群反馈自动闭环，不是人工盯群 |
-| Online Inspection | checks + schedules + PK `.check.ts` | 活动上线后定时抽检结算 / 榜单 / 发奖 |
-
----
-
-## 2. 术语速查
+## 术语速查
 
 ### Agent / 运行时
 
@@ -135,7 +102,7 @@
 
 ---
 
-## 3. AI 落地面试题
+## AI 落地面试题
 
 ### A. Agent 运行时与自动交付
 
@@ -416,7 +383,7 @@
 
 ---
 
-## 4. 不要夸大的边界
+## 不要夸大的边界
 
 1. **WorkHub 仓库如果你 0 提交**：说「基于 / 推动 / 落地 WorkHub」，不要说「我开发了 WorkHub」。
 2. **AI 自动交付不是全自动**：只到 PR，不自动合并；生产写要审批。
@@ -427,7 +394,7 @@
 
 ---
 
-## 5. 面试表达模板
+## 面试表达模板
 
 **「你们 AI 落地整体怎么做？」**
 

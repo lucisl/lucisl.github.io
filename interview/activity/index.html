@@ -61,12 +61,10 @@
         <nav class="ws-toc" aria-label="本文目录">
           <p>本文目录</p>
           <ol>
-            <li><a href="#chapter-1">0. 这份题库怎么用</a></li>
-            <li><a href="#chapter-2">1. 市场要求 ↔ 活动经历</a></li>
-            <li><a href="#chapter-3">2. 术语速查（活动域）</a></li>
-            <li><a href="#chapter-4">3. 活动专项题库</a></li>
-            <li><a href="#chapter-5">4. 不要夸大的边界</a></li>
-            <li><a href="#chapter-6">5. 30 秒表达模板</a></li>
+            <li><a href="#chapter-1">术语速查（活动域）</a></li>
+            <li><a href="#chapter-2">活动专项题库</a></li>
+            <li><a href="#chapter-3">不要夸大的边界</a></li>
+            <li><a href="#chapter-4">30 秒表达模板</a></li>
           </ol>
         </nav>
       </aside>
@@ -81,76 +79,11 @@
           <p class="ws-eyebrow">INTERVIEW / ACTIVITY</p>
           <div class="ws-title-row">
             <h1>活动专项</h1>
-            <span class="ws-title-code">Activity Engine</span>
           </div>
-          <p class="ws-tagline">围绕活动引擎、组件化、奖励一致性与高并发：把「写活动」讲成「做运行时」，把「发奖励」讲成「资金一致性」。</p>
-          <ul class="ws-meta" aria-label="题库概况">
-            <li><span>主线</span><b>Lita 活动</b></li>
-            <li><span>题量</span><b>36 题</b></li>
-            <li><span>关键词</span><b>Activity / Consistency</b></li>
-            <li><span>口径</span><b>讲个人贡献</b></li>
-          </ul>
+          <p class="ws-tagline">活动引擎、组件化、奖励一致性与高并发，按 Lita 真实实现整理。</p>
         </header>
 
-<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">0. 这份题库怎么用</h2>
-<p>活动专项和 AI 专项分开准备：AI 专项讲 WorkHub 的 Agent / RAG / MCP / Eval；活动专项讲 Lita 的活动引擎、组件化、奖励一致性和高并发。</p>
-<p>用法：</p>
-<ul>
-<li>先看「市场要求 ↔ 活动经历」对齐，知道自己能讲什么。</li>
-<li>再看「术语速查」，把活动域的专业词和代码对上。</li>
-<li>按模块刷题，每题先自己答，再看答案要点。</li>
-<li>面试前重点背每节最后的「30 秒表达模板」。</li>
-</ul>
-<blockquote>
-<p>口径提醒：57%、41→13 是平台 / 团队结果；讲个人贡献时，要落到「我负责 / 参与的具体模块」，不要全说成个人从 0 到 1。</p>
-</blockquote>
-<hr>
-</section>
-
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 市场要求 ↔ 活动经历</h2>
-<div class="ws-table-wrap"><table>
-<thead>
-<tr>
-<th>市场高频要求</th>
-<th>简历 / 代码里的对应</th>
-<th>面试怎么讲</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>活动 / 游戏化系统</td>
-<td>配置驱动活动引擎、60+ 组件、Rank / PK / Task / Lottery / Monopoly</td>
-<td>不是「写活动」，是把活动做成运行时</td>
-</tr>
-<tr>
-<td>高并发活动 / 房间</td>
-<td>Pipeline 并行、64/128 线程池、Redis 多实例、Caffeine、降级</td>
-<td>聚合接口并行 + 故障隔离 + 缓存分层</td>
-</tr>
-<tr>
-<td>奖励 / 支付一致性</td>
-<td>唯一键 / 流水号 / 条件更新 / 回收队列 / 余额锁</td>
-<td>先流水后发奖，失败可补偿，能对账</td>
-</tr>
-<tr>
-<td>海外多区域</td>
-<td>5 大区、多时区时间策略、locale 配置</td>
-<td>同一套活动，按大区解析时间和配置</td>
-</tr>
-<tr>
-<td>0-1 / 架构演进</td>
-<td>active-main → active-v3、57%、41→13</td>
-<td>单体活动 → 模块化运行时</td>
-</tr>
-<tr>
-<td>快速上线</td>
-<td>Nacos YAML、标准活动零代码、alias / 灰度</td>
-<td>标准活动配置上线，复杂活动组件化</td>
-</tr>
-</tbody></table></div>
-<hr>
-</section>
-
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 术语速查（活动域）</h2>
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">术语速查（活动域）</h2>
 <div class="ws-table-wrap"><table>
 <thead>
 <tr>
@@ -323,7 +256,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 活动专项题库</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">活动专项题库</h2>
 <h3>A. 活动引擎与组件化</h3>
 <p><strong>Q1. 你们活动系统的整体架构？</strong></p>
 <ul>
@@ -554,7 +487,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 不要夸大的边界</h2>
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">不要夸大的边界</h2>
 <ol>
 <li><strong>零代码不是所有活动</strong>：标准活动零代码，复杂玩法要写组件；说「标准活动零代码，复杂活动组件化」。</li>
 <li><strong>57%、41→13 是平台 / 团队结果</strong>：可以说「我参与 / 负责其中活动引擎与组件」，不要全说成个人从 0 到 1。</li>
@@ -566,7 +499,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 30 秒表达模板</h2>
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">30 秒表达模板</h2>
 <p><strong>「你们活动系统怎么做的？」</strong></p>
 <blockquote>
 <p>我们把活动做成配置驱动（Configuration-driven）+ 组件编排（Component Orchestration）的运行时：Nacos YAML 定义模块、Pipeline、时间、大区、奖励；模块用注解注册，活动按 Pipeline 并行执行；奖励用唯一键 / 流水 / 条件更新 / 回收队列保证一致性。</p>

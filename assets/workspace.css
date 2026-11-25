@@ -525,6 +525,11 @@ a {
   padding: 10px 14px;
 }
 
+.ws-table-interview .ws-table-head,
+.ws-table-interview .ws-table-row {
+  grid-template-columns: 64px minmax(0, 1.8fr) minmax(0, 1fr);
+}
+
 .ws-table-head {
   color: var(--ws-muted);
   font-family: var(--ws-mono);

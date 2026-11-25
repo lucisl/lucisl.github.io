@@ -61,12 +61,10 @@
         <nav class="ws-toc" aria-label="本文目录">
           <p>本文目录</p>
           <ol>
-            <li><a href="#chapter-1">0. 这份题库怎么用</a></li>
-            <li><a href="#chapter-2">1. 市场要求 ↔ WorkHub 的真实能力</a></li>
-            <li><a href="#chapter-3">2. 术语速查</a></li>
-            <li><a href="#chapter-4">3. AI 落地面试题</a></li>
-            <li><a href="#chapter-5">4. 不要夸大的边界</a></li>
-            <li><a href="#chapter-6">5. 面试表达模板</a></li>
+            <li><a href="#chapter-1">术语速查</a></li>
+            <li><a href="#chapter-2">AI 落地面试题</a></li>
+            <li><a href="#chapter-3">不要夸大的边界</a></li>
+            <li><a href="#chapter-4">面试表达模板</a></li>
           </ol>
         </nav>
       </aside>
@@ -81,92 +79,11 @@
           <p class="ws-eyebrow">INTERVIEW / AI LANDING</p>
           <div class="ws-title-row">
             <h1>AI 落地</h1>
-            <span class="ws-title-code">Agent · RAG · MCP · Eval</span>
           </div>
-          <p class="ws-tagline">不是八股文：从 WorkHub 的真实代码出发，把 Agent 运行时、工具生态、反馈闭环、线上巡检、RAG、Eval 与模型降级拆成可追问的面试题。</p>
-          <ul class="ws-meta" aria-label="题库概况">
-            <li><span>主线</span><b>WorkHub</b></li>
-            <li><span>题量</span><b>39 题</b></li>
-            <li><span>关键词</span><b>Agent / RAG / MCP / Eval</b></li>
-            <li><span>口径</span><b>不夸大</b></li>
-          </ul>
+          <p class="ws-tagline">Agent 运行时、MCP、RAG、Eval、模型降级，按 WorkHub 真实实现整理。</p>
         </header>
 
-<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">0. 这份题库怎么用</h2>
-<p>这不是八股文题库，而是按 <strong>WorkHub（公司 AI 工作中心）</strong> 的真实代码和真实落地场景整理出来的追问清单。</p>
-<p>用法：</p>
-<ul>
-<li>先看「市场要求 ↔ WorkHub 能力」对齐，知道自己能讲什么、不能讲什么。</li>
-<li>再看「术语速查」，把英文缩写和中文解释对上。</li>
-<li>最后按模块刷题，每题先自己答，再看答案要点。</li>
-<li>面试前重点背每节最后的「30 秒表达模板」。</li>
-</ul>
-<blockquote>
-<p>口径提醒：<code>work</code> 仓库如果你没有提交记录，就用「基于 / 推动 / 落地 WorkHub」；不要说自己从 0 开发了整个平台。</p>
-</blockquote>
-<hr>
-</section>
-
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 市场要求 ↔ WorkHub 的真实能力</h2>
-<p>2025–2026 年 AI 应用 / AI 平台岗位的高频要求，基本集中在六块：<strong>Agent、RAG、MCP、Eval、Guardrails、Observability</strong>。</p>
-<div class="ws-table-wrap"><table>
-<thead>
-<tr>
-<th>市场高频要求</th>
-<th>WorkHub 里的真实对应</th>
-<th>面试能怎么讲</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Agent Runtime / Harness</td>
-<td>任务状态机、executor-bridge、opencode session、父子任务、wakeup</td>
-<td>AI 不是一个对话框，是有状态、可恢复、可验收的执行角色</td>
-</tr>
-<tr>
-<td>MCP / Tool Calling</td>
-<td><code>lita-work</code> 102 工具、<code>lita-bots</code> 6 个子 Agent 工具、<code>lita-proxy</code> 31 个运维工具</td>
-<td>工具发现、鉴权、作用域、生产只读 / 写走工单</td>
-</tr>
-<tr>
-<td>RAG</td>
-<td>PGVector + 全文 + RRF 混合检索、Embedding 队列</td>
-<td>不是裸向量库，有阈值、降级、引用</td>
-</tr>
-<tr>
-<td>Eval</td>
-<td>suite / case / point / run / item / judgement / snapshot / sandbox</td>
-<td>评测集、沙箱、LLM-as-judge、证据校验、返工、指标</td>
-</tr>
-<tr>
-<td>Guardrails</td>
-<td>eval token、eval shield、MCP policy、生产写审批</td>
-<td>最小权限、写拦截、作用域隔离、审计</td>
-</tr>
-<tr>
-<td>Model Gateway</td>
-<td>主备模型、限额识别、30 分钟共享冷却、同会话续跑</td>
-<td>429 / 配额 / 余额降级，不是简单 try/catch</td>
-</tr>
-<tr>
-<td>Observability</td>
-<td>评估事件流、SSE、任务 trace、运行统计</td>
-<td>每次会话 / 工具调用可追踪</td>
-</tr>
-<tr>
-<td>Feedback Loop</td>
-<td>飞书反馈群话题 → feedback → 任务 ID=8 → AI 判断 / 回复</td>
-<td>群反馈自动闭环，不是人工盯群</td>
-</tr>
-<tr>
-<td>Online Inspection</td>
-<td>checks + schedules + PK <code>.check.ts</code></td>
-<td>活动上线后定时抽检结算 / 榜单 / 发奖</td>
-</tr>
-</tbody></table></div>
-<hr>
-</section>
-
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 术语速查</h2>
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">术语速查</h2>
 <h3>Agent / 运行时</h3>
 <div class="ws-table-wrap"><table>
 <thead>
@@ -565,7 +482,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. AI 落地面试题</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">AI 落地面试题</h2>
 <h3>A. Agent 运行时与自动交付</h3>
 <p><strong>Q1. 你们 AI 自动交付的完整链路是什么？</strong></p>
 <ul>
@@ -838,7 +755,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 不要夸大的边界</h2>
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">不要夸大的边界</h2>
 <ol>
 <li><strong>WorkHub 仓库如果你 0 提交</strong>：说「基于 / 推动 / 落地 WorkHub」，不要说「我开发了 WorkHub」。</li>
 <li><strong>AI 自动交付不是全自动</strong>：只到 PR，不自动合并；生产写要审批。</li>
@@ -850,7 +767,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 面试表达模板</h2>
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">面试表达模板</h2>
 <p><strong>「你们 AI 落地整体怎么做？」</strong></p>
 <blockquote>
 <p>我们不是做一个聊天窗口，而是把 AI 做成研发流程里的执行角色：需求 → 任务定义 → Agent 运行时 → 工具调用 → 交付文档 → 人工验收。Agent 有状态机、有权限、有审计，能接任务、能提问、能返工，但生产写和验收必须过人。</p>
