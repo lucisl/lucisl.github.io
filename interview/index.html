@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>面试题库 — Interview</title>
+    <meta name="description" content="按简历和真实项目整理的面试题库：AI 落地（Agent、RAG、MCP、Eval、Guardrails）与活动专项（活动引擎、组件化、奖励一致性、高并发）。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="./index.html" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="./index.html" aria-current="page">面试题库</a>
+          <a href="../projects/">项目档案</a>
+          <a href="../devkit/">工具箱</a>
+          <a href="../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="./ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link" href="./activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+        <div class="ws-rail-note">
+          内容基于简历与 WorkHub / Lita 的真实实现；专业词在括号里解释，不夸大平台能力。
+        </div>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-eyebrow">INTERVIEW / QUESTION BANK</p>
+          <h1>面试题库</h1>
+          <p>
+            把简历里的项目拆成可追问的面试题。两条线：
+            一条讲 AI 落地（Agent、RAG、MCP、Eval、Guardrails），
+            一条讲活动专项（活动引擎、组件化、奖励一致性、高并发）。
+          </p>
+          <div class="ws-actions">
+            <a class="ws-btn ws-btn-primary" href="./ai/">进入 AI 落地题库 →</a>
+            <a class="ws-btn" href="./activity/">进入活动专项 →</a>
+          </div>
+        </header>
+
+        <section class="ws-card" aria-labelledby="question-bank-title">
+          <div class="ws-card-head">
+            <h2 id="question-bank-title">两条主线</h2>
+            <span class="ws-count">2 个专题</span>
+          </div>
+          <div class="ws-table">
+            <div class="ws-table-head" aria-hidden="true">
+              <span>编号</span>
+              <span>专题</span>
+              <span class="ws-hide-sm">关键词</span>
+              <span>题量</span>
+              <span>状态</span>
+            </div>
+            <a class="ws-table-row" href="./ai/">
+              <span class="ws-mono">001</span>
+              <span class="ws-cell-main">
+                <b>AI 落地 <span class="ws-title-code">WorkHub</span></b>
+                <small>Agent 运行时、MCP、RAG、Eval、模型降级、反馈闭环</small>
+              </span>
+              <span class="ws-hide-sm">Agent / RAG / MCP</span>
+              <span class="ws-mono">39 题</span>
+              <span class="ws-badge ws-badge-maint">题库</span>
+            </a>
+            <a class="ws-table-row" href="./activity/">
+              <span class="ws-mono">002</span>
+              <span class="ws-cell-main">
+                <b>活动专项 <span class="ws-title-code">Lita</span></b>
+                <small>配置驱动、组件化、奖励幂等、捕鱼并发、余额锁、多区域</small>
+              </span>
+              <span class="ws-hide-sm">Activity / Consistency</span>
+              <span class="ws-mono">36 题</span>
+              <span class="ws-badge ws-badge-maint">题库</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="ws-card ws-prose">
+          <h2>怎么用</h2>
+          <ol>
+            <li><b>先对齐口径</b>：知道自己能讲什么、不能讲什么，避免把平台成果说成个人成果。</li>
+            <li><b>再刷术语</b>：Eval、Guardrails、Observability、Feedback Loop 这些词，先能一句话解释。</li>
+            <li><b>最后按题练</b>：每题先自己答，再看答案要点；重点背每节最后的 30 秒表达模板。</li>
+          </ol>
+          <blockquote>
+            这两份题库是面试准备材料，不是公司官方文档；涉及内部项目名、指标和权限的描述，面试时按自己的真实参与边界讲。
+          </blockquote>
+        </section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p><a href="../">返回入口</a> · <a href="../projects/">项目档案</a> · <a href="../devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>

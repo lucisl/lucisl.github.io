@@ -2,13 +2,17 @@
  * 把 projects/content/*.md 渲染成工作台页面。
  * Markdown 是唯一内容源；模板与元信息在这里维护，输出覆盖 projects/*.html。
  */
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { marked } from './vendor/marked.esm.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const templatePath = path.join(root, 'scripts/templates/doc.html');
+const interviewTemplatePath = path.join(
+  root,
+  'scripts/templates/interview.html',
+);
 
 const PROJECTS = [
   {
@@ -345,6 +349,53 @@ const PAGES = [
   },
 ];
 
+const INTERVIEW_PAGES = [
+  {
+    key: 'ai',
+    source: 'interview/content/ai.md',
+    output: 'interview/ai/index.html',
+    title: 'AI 落地 — 面试题库 — Interview',
+    description:
+      '按 WorkHub 真实实现整理的 AI 落地面试题：Agent 运行时、MCP、RAG、Eval、Guardrails、Observability、模型降级。',
+    eyebrow: 'INTERVIEW / AI LANDING',
+    breadcrumb: '001 / AI 落地',
+    h1: 'AI 落地',
+    h1Note: 'Agent · RAG · MCP · Eval',
+    tagline:
+      '不是八股文：从 WorkHub 的真实代码出发，把 Agent 运行时、工具生态、反馈闭环、线上巡检、RAG、Eval 与模型降级拆成可追问的面试题。',
+    meta: [
+      ['主线', 'WorkHub'],
+      ['题量', '39 题'],
+      ['关键词', 'Agent / RAG / MCP / Eval'],
+      ['口径', '不夸大'],
+    ],
+    sourceHref: '../content/ai.md',
+    sourceName: 'ai.md',
+  },
+  {
+    key: 'activity',
+    source: 'interview/content/activity.md',
+    output: 'interview/activity/index.html',
+    title: '活动专项 — 面试题库 — Interview',
+    description:
+      '按 Lita 活动系统整理的面试题：配置驱动活动引擎、组件化、时间策略、奖励幂等/回收、捕鱼并发、余额锁、多区域与高并发。',
+    eyebrow: 'INTERVIEW / ACTIVITY',
+    breadcrumb: '002 / 活动专项',
+    h1: '活动专项',
+    h1Note: 'Activity Engine',
+    tagline:
+      '围绕活动引擎、组件化、奖励一致性与高并发：把「写活动」讲成「做运行时」，把「发奖励」讲成「资金一致性」。',
+    meta: [
+      ['主线', 'Lita 活动'],
+      ['题量', '36 题'],
+      ['关键词', 'Activity / Consistency'],
+      ['口径', '讲个人贡献'],
+    ],
+    sourceHref: '../content/activity.md',
+    sourceName: 'activity.md',
+  },
+];
+
 function escapeHtml(value) {
   return value
     .replace(/&/g, '&amp;')
@@ -417,6 +468,38 @@ function renderProjects(pageKey) {
   ).join('\n');
 }
 
+function renderInterviewRail(activeKey) {
+  const items = [
+    {
+      key: 'ai',
+      index: '001',
+      name: 'AI 落地',
+      sub: 'Agent · RAG · MCP · Eval',
+      href: '../ai/',
+    },
+    {
+      key: 'activity',
+      index: '002',
+      name: '活动专项',
+      sub: '活动引擎 · 一致性 · 高并发',
+      href: '../activity/',
+    },
+  ];
+  return items
+    .map(
+      (item) => `          <li>
+            <a class="ws-project-link${item.key === activeKey ? ' is-active' : ''}" href="${item.href}">
+              <span class="ws-project-index">${item.index}</span>
+              <span>
+                <b>${item.name}</b>
+                <small>${item.sub}</small>
+              </span>
+            </a>
+          </li>`,
+    )
+    .join('\n');
+}
+
 function renderMeta(meta) {
   return meta
     .map(
@@ -473,6 +556,35 @@ export async function buildPages() {
       .replaceAll('{{SOURCE_NAME}}', sourceName);
 
     await writeFile(path.join(root, page.output), `${output}\n`);
+    console.log(`rendered ${page.output}`);
+  }
+
+  const interviewTemplate = await readFile(interviewTemplatePath, 'utf8');
+
+  for (const page of INTERVIEW_PAGES) {
+    const markdown = await readFile(path.join(root, page.source), 'utf8');
+    const { content, toc } = renderMarkdown(markdown);
+    const sourceName = page.sourceName ?? path.basename(page.source);
+    const sourceHref = page.sourceHref ?? `./content/${sourceName}`;
+
+    const output = interviewTemplate
+      .replaceAll('{{TITLE}}', escapeHtml(page.title))
+      .replaceAll('{{DESCRIPTION}}', escapeHtml(page.description))
+      .replaceAll('{{EYEBROW}}', escapeHtml(page.eyebrow))
+      .replaceAll('{{BREADCRUMB}}', escapeHtml(page.breadcrumb))
+      .replaceAll('{{H1}}', escapeHtml(page.h1))
+      .replaceAll('{{H1_NOTE}}', escapeHtml(page.h1Note))
+      .replaceAll('{{TAGLINE}}', escapeHtml(page.tagline))
+      .replaceAll('{{META_ITEMS}}', renderMeta(page.meta))
+      .replaceAll('{{RAIL}}', renderInterviewRail(page.key))
+      .replaceAll('{{TOC}}', toc)
+      .replaceAll('{{CONTENT}}', content)
+      .replaceAll('{{SOURCE_HREF}}', sourceHref)
+      .replaceAll('{{SOURCE_NAME}}', sourceName);
+
+    const outputPath = path.join(root, page.output);
+    await mkdir(path.dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, `${output}\n`);
     console.log(`rendered ${page.output}`);
   }
 }

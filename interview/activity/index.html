@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>活动专项 — 面试题库 — Interview</title>
+    <meta name="description" content="按 Lita 活动系统整理的面试题：配置驱动活动引擎、组件化、时间策略、奖励幂等/回收、捕鱼并发、余额锁、多区域与高并发。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="../index.html" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="../index.html" aria-current="page">面试题库</a>
+          <a href="../../projects/">项目档案</a>
+          <a href="../../devkit/">工具箱</a>
+          <a href="../../">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="../ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="../activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-note">
+          题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
+        </div>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">0. 这份题库怎么用</a></li>
+            <li><a href="#chapter-2">1. 市场要求 ↔ 活动经历</a></li>
+            <li><a href="#chapter-3">2. 术语速查（活动域）</a></li>
+            <li><a href="#chapter-4">3. 活动专项题库</a></li>
+            <li><a href="#chapter-5">4. 不要夸大的边界</a></li>
+            <li><a href="#chapter-6">5. 30 秒表达模板</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="../index.html">面试题库</a>
+            <span>/</span>
+            <span>002 / 活动专项</span>
+          </p>
+          <p class="ws-eyebrow">INTERVIEW / ACTIVITY</p>
+          <div class="ws-title-row">
+            <h1>活动专项</h1>
+            <span class="ws-title-code">Activity Engine</span>
+          </div>
+          <p class="ws-tagline">围绕活动引擎、组件化、奖励一致性与高并发：把「写活动」讲成「做运行时」，把「发奖励」讲成「资金一致性」。</p>
+          <ul class="ws-meta" aria-label="题库概况">
+            <li><span>主线</span><b>Lita 活动</b></li>
+            <li><span>题量</span><b>36 题</b></li>
+            <li><span>关键词</span><b>Activity / Consistency</b></li>
+            <li><span>口径</span><b>讲个人贡献</b></li>
+          </ul>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">0. 这份题库怎么用</h2>
+<p>活动专项和 AI 专项分开准备：AI 专项讲 WorkHub 的 Agent / RAG / MCP / Eval；活动专项讲 Lita 的活动引擎、组件化、奖励一致性和高并发。</p>
+<p>用法：</p>
+<ul>
+<li>先看「市场要求 ↔ 活动经历」对齐，知道自己能讲什么。</li>
+<li>再看「术语速查」，把活动域的专业词和代码对上。</li>
+<li>按模块刷题，每题先自己答，再看答案要点。</li>
+<li>面试前重点背每节最后的「30 秒表达模板」。</li>
+</ul>
+<blockquote>
+<p>口径提醒：57%、41→13 是平台 / 团队结果；讲个人贡献时，要落到「我负责 / 参与的具体模块」，不要全说成个人从 0 到 1。</p>
+</blockquote>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 市场要求 ↔ 活动经历</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>市场高频要求</th>
+<th>简历 / 代码里的对应</th>
+<th>面试怎么讲</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>活动 / 游戏化系统</td>
+<td>配置驱动活动引擎、60+ 组件、Rank / PK / Task / Lottery / Monopoly</td>
+<td>不是「写活动」，是把活动做成运行时</td>
+</tr>
+<tr>
+<td>高并发活动 / 房间</td>
+<td>Pipeline 并行、64/128 线程池、Redis 多实例、Caffeine、降级</td>
+<td>聚合接口并行 + 故障隔离 + 缓存分层</td>
+</tr>
+<tr>
+<td>奖励 / 支付一致性</td>
+<td>唯一键 / 流水号 / 条件更新 / 回收队列 / 余额锁</td>
+<td>先流水后发奖，失败可补偿，能对账</td>
+</tr>
+<tr>
+<td>海外多区域</td>
+<td>5 大区、多时区时间策略、locale 配置</td>
+<td>同一套活动，按大区解析时间和配置</td>
+</tr>
+<tr>
+<td>0-1 / 架构演进</td>
+<td>active-main → active-v3、57%、41→13</td>
+<td>单体活动 → 模块化运行时</td>
+</tr>
+<tr>
+<td>快速上线</td>
+<td>Nacos YAML、标准活动零代码、alias / 灰度</td>
+<td>标准活动配置上线，复杂活动组件化</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 术语速查（活动域）</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>一句话解释</th>
+<th>代码 / 项目对应</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>活动引擎（Activity Engine）</strong></td>
+<td>用配置 + 模块 + Pipeline 驱动活动，而不是每个活动写一套代码</td>
+<td>active-main <code>DispatcherV2</code>、active-v3 <code>BaseActive</code></td>
+</tr>
+<tr>
+<td><strong>配置驱动（Configuration-driven）</strong></td>
+<td>活动逻辑由 YAML / 配置决定，代码只提供组件</td>
+<td>Nacos <code>main.yaml</code> / <code>biz.yaml</code></td>
+</tr>
+<tr>
+<td><strong>组件编排（Component Orchestration）</strong></td>
+<td>把 Rank / PK / Task / Lottery 等组件按 Pipeline 组合成一个活动</td>
+<td><code>pk-v202608.yaml</code> 35 个模块实例</td>
+</tr>
+<tr>
+<td><strong>管道（Pipeline）</strong></td>
+<td>一次请求按顺序 / 并行执行多个模块事件</td>
+<td><code>DispatchPipeline</code> / <code>ActivePipeline</code></td>
+</tr>
+<tr>
+<td><strong>模块注册表（Module Registry）</strong></td>
+<td>module → event → method 的映射，框架自动发现</td>
+<td><code>DispatchModuleProvider</code>、<code>ModuleProvider</code></td>
+</tr>
+<tr>
+<td><strong>零代码 / 低代码（Zero-code / Low-code）</strong></td>
+<td>标准活动只配 YAML；复杂活动写组件</td>
+<td><code>business/zeroCode/README.md</code></td>
+</tr>
+<tr>
+<td><strong>时间策略（Time Strategy）</strong></td>
+<td>固定 / 周期刷新 / 多阶段 / 指定时间四种活动时间窗口</td>
+<td><code>TimeStrategyFactory</code></td>
+</tr>
+<tr>
+<td><strong>多阶段（Multi-stage）</strong></td>
+<td>海选 → 资格 → 晋级 → 决赛，每阶段独立榜单 / 结算</td>
+<td>PK YAML 的 stage</td>
+</tr>
+<tr>
+<td><strong>榜单（Ranking）</strong></td>
+<td>Redis ZSet 存分数和排名，支持分页 / 同分 / 结算</td>
+<td>RankModule / <code>rank</code></td>
+</tr>
+<tr>
+<td><strong>结算（Settlement）</strong></td>
+<td>按阶段 / 大区 / 榜单区间发奖，状态置为已结算</td>
+<td><code>settle</code> 事件</td>
+</tr>
+<tr>
+<td><strong>幂等（Idempotency）</strong></td>
+<td>同一请求 / 消息重复执行，结果不变</td>
+<td>trans_no / orderNo 唯一键</td>
+</tr>
+<tr>
+<td><strong>唯一键（Unique Key）</strong></td>
+<td>数据库唯一索引兜底防重</td>
+<td><code>trans_no</code>、<code>order_no</code></td>
+</tr>
+<tr>
+<td><strong>条件更新（Conditional Update）</strong></td>
+<td><code>UPDATE ... WHERE status=...</code>，用影响行数抢处理权</td>
+<td>捕鱼扣血 / 捕捞</td>
+</tr>
+<tr>
+<td><strong>分布式锁（Distributed Lock）</strong></td>
+<td>多实例互斥，Redisson RLock</td>
+<td>余额变更单写者锁</td>
+</tr>
+<tr>
+<td><strong>状态机（State Machine）</strong></td>
+<td>奖励 / 任务 / 结算有明确状态流转</td>
+<td>PENDING / SUCCESS / FAILED</td>
+</tr>
+<tr>
+<td><strong>补偿（Compensation）</strong></td>
+<td>失败后重试 / 回滚 / 人工补发</td>
+<td>奖励回收队列、失败删标记</td>
+</tr>
+<tr>
+<td><strong>对账（Reconciliation）</strong></td>
+<td>配置 / 榜单 / 发奖记录三方核对</td>
+<td>PK 巡检脚本</td>
+</tr>
+<tr>
+<td><strong>回收（Reversal）</strong></td>
+<td>已发奖励按规则收回</td>
+<td><code>gift_award_revert_queue</code></td>
+</tr>
+<tr>
+<td><strong>热点 Key（Hot Key）</strong></td>
+<td>单个 Key 访问过于集中</td>
+<td>房间榜 / 活动榜</td>
+</tr>
+<tr>
+<td><strong>缓存击穿 / 雪崩（Cache Breakdown / Avalanche）</strong></td>
+<td>热点失效 / 大量同时失效打穿 DB</td>
+<td>本地缓存 + 随机过期 + 降级</td>
+</tr>
+<tr>
+<td><strong>降级（Degradation）</strong></td>
+<td>非核心功能关闭 / 返回兜底</td>
+<td>活动峰值 / 异常</td>
+</tr>
+<tr>
+<td><strong>限流（Rate Limiting）</strong></td>
+<td>限制单位时间请求量</td>
+<td>活动入口 / 接口</td>
+</tr>
+<tr>
+<td><strong>灰度（Canary）</strong></td>
+<td>小流量 / 小区域先上</td>
+<td>alias / 大区 / 白名单</td>
+</tr>
+<tr>
+<td><strong>多区域（Multi-region）</strong></td>
+<td>不同大区独立时间 / 配置 / 数据</td>
+<td>in / ph / vi / ko / zh</td>
+</tr>
+<tr>
+<td><strong>事件驱动（Event-driven）</strong></td>
+<td>状态变更发事件，异步做缓存 / 消息 / 结算</td>
+<td>PK start/end、庆典 worker</td>
+</tr>
+<tr>
+<td><strong>消费幂等（Consumer Idempotency）</strong></td>
+<td>Kafka 重复消费不重复处理</td>
+<td>消息 id / 业务键去重</td>
+</tr>
+<tr>
+<td><strong>死信队列（DLQ）</strong></td>
+<td>多次失败的消息进死信，人工处理</td>
+<td>Kafka 重试</td>
+</tr>
+<tr>
+<td><strong>最终一致（Eventual Consistency）</strong></td>
+<td>不追求强事务，靠重试 / 补偿达到一致</td>
+<td>奖励 / 订单</td>
+</tr>
+<tr>
+<td><strong>资损（Financial Loss）</strong></td>
+<td>重复发 / 漏发造成资金损失</td>
+<td>奖励一致性</td>
+</tr>
+<tr>
+<td><strong>压测（Load Test）</strong></td>
+<td>模拟峰值流量验证容量</td>
+<td>活动前压测</td>
+</tr>
+<tr>
+<td><strong>容量评估（Capacity Planning）</strong></td>
+<td>按 QPS / 线程池 / 连接数 / DB 估算容量</td>
+<td>活动峰值</td>
+</tr>
+<tr>
+<td><strong>链路追踪（Tracing）</strong></td>
+<td>一次请求串起所有服务 / 模块</td>
+<td>traceId / MDC</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 活动专项题库</h2>
+<h3>A. 活动引擎与组件化</h3>
+<p><strong>Q1. 你们活动系统的整体架构？</strong></p>
+<ul>
+<li>入口 → Business / Active → Module → Coordinator → 基础设施。</li>
+<li>活动 = 配置（模块 / Pipeline / 时间 / 大区 / 奖励）+ 组件。</li>
+<li>active-main 是「按活动分目录 + Dispatch 引擎」，active-v3 是「五层模块化运行时」。</li>
+</ul>
+<p><strong>Q2. 为什么不用工作流引擎 / 规则引擎？</strong></p>
+<ul>
+<li>活动需要低延迟、强一致、可回滚，和业务对象（用户 / 房间 / 家族 / CP）深度耦合。</li>
+<li>工作流引擎适合长流程审批，不适合高频活动请求；规则引擎适合规则判断，不适合奖励 / 榜单 / 结算。</li>
+<li>所以自研轻量活动引擎：Pipeline + 模块注册 + 配置。</li>
+</ul>
+<p><strong>Q3. 配置驱动怎么落地？配置模型长什么样？</strong></p>
+<ul>
+<li>Nacos <code>main.yaml</code> 决定加载哪些活动；<code>biz.yaml</code> 定义 <code>biz / active / locales / start / finish / modules / pipelines / awards / resources / actions / debug</code>。</li>
+<li>配置热更新：监听 Nacos，清本地缓存；alias 解析 + 时间重叠校验。</li>
+<li>标准活动只配 YAML，复杂玩法写组件。</li>
+</ul>
+<p><strong>Q4. 组件怎么注册 / 发现？怎么避免耦合？</strong></p>
+<ul>
+<li><code>@DispatchModule</code> / <code>@DispatchModuleEvent</code>、<code>@Module</code> / <code>@ModuleEvent</code>。</li>
+<li><code>BeanPostProcessor</code> 扫描，<code>Provider</code> 维护 module → event → method。</li>
+<li>模块只依赖配置类和上下文，不直接依赖别的模块；跨模块走 Coordinator。</li>
+</ul>
+<p><strong>Q5. Pipeline 并行怎么做的？线程池怎么定？</strong></p>
+<ul>
+<li>每个 module 一个 <code>Callable</code>，<code>Future.get</code> 聚合。</li>
+<li>64/128 线程池、<code>ArrayBlockingQueue(128)</code>；按活动峰值和下游容量压测。</li>
+<li>关键：MDC / Session 透传、finally 清理。</li>
+</ul>
+<p><strong>Q6. 单模块故障怎么隔离？</strong></p>
+<ul>
+<li>每个 module 独立 try/catch，失败只写该 module 的 error response。</li>
+<li><code>responseException</code> 可配置：是否需要整体失败。</li>
+<li>非核心模块失败不影响主流程。</li>
+</ul>
+<p><strong>Q7. 活动怎么做到零代码 / 低代码？边界在哪？</strong></p>
+<ul>
+<li>标准活动：YAML 配模块 / Pipeline / 时间 / 奖励，零代码。</li>
+<li>新玩法 / 新组件：还是要写代码。</li>
+<li>不要说「所有活动零代码」，说「标准活动零代码，复杂活动组件化」。</li>
+</ul>
+<p><strong>Q8. active-main → active-v3 为什么重构？</strong></p>
+<ul>
+<li>active-main：一个活动一个目录，Controller / Consumer / Cron 堆在全局包，互相干扰。</li>
+<li>v3：五层分层，Controller / Consumer / 定时任务下沉到活动内部；57%、41→13。</li>
+<li>代价：迁移成本、双版本并行、团队熟悉度。</li>
+</ul>
+<h3>B. 时间 / 多区域 / 榜单</h3>
+<p><strong>Q9. 多时区怎么处理？</strong></p>
+<ul>
+<li><code>TimeStrategy</code>：fixed / time / flush / multi。</li>
+<li><code>zoneId</code> + locale；<code>transformTimestamp</code> 换算大区时间。</li>
+<li>配置里按大区写时间表达式，如 <code>2026-08-17T14:00:00+08:00A|...ar</code>。</li>
+</ul>
+<p><strong>Q10. 活动跨天 / 轮次怎么算？</strong></p>
+<ul>
+<li>按大区自然日切分；<code>getTimeRoundStartTime</code> 生成所有轮次。</li>
+<li>跨天任务要幂等：<code>user + activity + day + stage</code> 唯一键。</li>
+<li>补签 / 补做要判断活动时间和轮次。</li>
+</ul>
+<p><strong>Q11. 榜单怎么设计？</strong></p>
+<ul>
+<li>Redis ZSet：member = 用户 / 房间 / 家族，score = 分数。</li>
+<li>同分排序：score + 时间 / ID 兜底。</li>
+<li>分页用 ZREVRANGE；结算时快照，不边结算边读。</li>
+<li>防刷：黑名单、频率、幂等。</li>
+</ul>
+<p><strong>Q12. 结算怎么保证不重不漏？</strong></p>
+<ul>
+<li>轮次状态 <code>status=200</code> 才结算。</li>
+<li>结算前加标记（Redis / DB），失败删标记可重试。</li>
+<li>结算后对账：配置 vs 榜单 vs 发奖记录。</li>
+</ul>
+<p><strong>Q13. 多区域配置怎么隔离？</strong></p>
+<ul>
+<li><code>enableLocales</code> 控制活动可见大区。</li>
+<li>每个大区独立时间 / 奖励 / 文案。</li>
+<li>数据按 locale 分区 / 分表；避免跨区串数据。</li>
+</ul>
+<p><strong>Q14. 灰度 / 回滚怎么做？</strong></p>
+<ul>
+<li>配置版本 + alias 路由 + 大区 / 白名单灰度。</li>
+<li>开关关闭非核心模块；回滚配置 / 代码。</li>
+<li>上线前脚本化检查，上线后定时巡检。</li>
+</ul>
+<h3>C. 奖励 / 一致性</h3>
+<p><strong>Q15. 奖励发放怎么防重？</strong></p>
+<ul>
+<li>先插流水，<code>trans_no</code> / <code>order_no</code> 唯一键。</li>
+<li><code>DuplicateKeyException</code> = 已发放，直接返回。</li>
+<li>再发奖；失败更新状态 / 进重试。</li>
+</ul>
+<p><strong>Q16. GET / USE 双流水为什么？</strong></p>
+<ul>
+<li>GET：发放流水；USE：核销流水。</li>
+<li>发放和核销分开，能查「发了多少、用了多少、剩多少」。</li>
+<li>核销用 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 单行原子，防并发双消。</li>
+</ul>
+<p><strong>Q17. 奖励回收 / 补偿怎么做？</strong></p>
+<ul>
+<li>发放记录带 <code>canRevert</code>。</li>
+<li>回收走独立 <code>gift_award_revert_queue</code>。</li>
+<li>失败重试 / 告警 / 人工补偿；不要让回收阻塞正常发奖。</li>
+</ul>
+<p><strong>Q18. 捕鱼并发捕捞怎么处理？</strong></p>
+<ul>
+<li>扣血：<code>UPDATE ... WHERE id=? AND status=&#39;ALIVE&#39;</code>，影响行数=0 放弃。</li>
+<li>捕捞成功：再用 <code>WHERE status=&#39;ALIVE&#39;</code> 抢「捕捞处理权」。</li>
+<li>刷鱼：唯一索引保证一房间一活鱼；DuplicateKey / Deadlock 重查。</li>
+<li>溢出伤害：<code>orderNo</code> 加 <code>_depth</code> 后缀，保证多条鱼流水都幂等。</li>
+</ul>
+<p><strong>Q19. 宝箱多级结算怎么防重？</strong></p>
+<ul>
+<li>奖励记录先 insert，唯一键冲突 = 已处理。</li>
+<li>状态 <code>PENDING → SUCCESS / FAILED</code>。</li>
+<li>榜单累计用 <code>orderNo + &quot;_&quot; + level</code>，一笔流水跨多级也幂等。</li>
+<li>日榜 / 总榜结算用 Redis 标记防重；失败删标记可补偿。</li>
+</ul>
+<p><strong>Q20. 余额变更怎么保证单写者？</strong></p>
+<ul>
+<li><code>@UserBalanceLock</code> + Redisson <code>RLock</code>。</li>
+<li><code>tryLock(waitMs, leaseMs)</code>；lease&lt;=0 用看门狗续期。</li>
+<li>获取失败：fail-fast 或降级 DB；释放判断当前线程。</li>
+<li>按 biz + userId 判断是否在锁范围，不是所有交易都加锁。</li>
+</ul>
+<p><strong>Q21. 分布式事务怎么处理？</strong></p>
+<ul>
+<li>尽量避免跨服务强事务。</li>
+<li>本地事务 + 消息表 / 补偿；最终一致。</li>
+<li>关键：幂等、重试、对账、人工兜底。</li>
+</ul>
+<p><strong>Q22. 幂等键怎么选？</strong></p>
+<ul>
+<li>业务唯一：orderNo、trans_no、user + activity + stage + day。</li>
+<li>不要用纯 UUID；要能重放。</li>
+<li>数据库唯一索引兜底，缓存 / 状态机辅助。</li>
+</ul>
+<p><strong>Q23. 奖励失败怎么重试？</strong></p>
+<ul>
+<li>进重试队列，退避重试；超过次数进死信。</li>
+<li>状态机记录失败原因；告警。</li>
+<li>人工补偿 / 对账脚本。</li>
+</ul>
+<p><strong>Q24. 怎么定位资损？</strong></p>
+<ul>
+<li>三方对账：配置 / 榜单 / 发奖记录。</li>
+<li>链路追踪 + 流水 + 日志。</li>
+<li>先止血（关活动 / 关发奖），再修复 / 补偿。</li>
+</ul>
+<h3>D. 高并发 / 稳定性</h3>
+<p><strong>Q25. 活动峰值怎么扛？</strong></p>
+<ul>
+<li>容量评估 + 压测；线程池 / 连接池 / Redis / DB 分段压。</li>
+<li>并行 Pipeline、缓存、异步化、限流、降级。</li>
+<li>活动前演练，活动后复盘。</li>
+</ul>
+<p><strong>Q26. 热点 Key / 大 Key 怎么处理？</strong></p>
+<ul>
+<li>本地缓存（Caffeine）+ Redis；热点 Key 拆分 / 多副本。</li>
+<li>大 Key 拆分、压缩、异步删。</li>
+<li>限流 / 降级，避免打穿 DB。</li>
+</ul>
+<p><strong>Q27. 缓存一致性怎么保证？</strong></p>
+<ul>
+<li>Cache-Aside：更新 DB 后删缓存。</li>
+<li>延迟双删 / 版本号 / 订阅 binlog。</li>
+<li>接受最终一致；关键读走 DB 兜底。</li>
+</ul>
+<p><strong>Q28. Kafka 重复 / 顺序 / 积压怎么处理？</strong></p>
+<ul>
+<li>消费幂等（消息 id / 业务键）。</li>
+<li>分区 key 保证同一业务有序。</li>
+<li>重试 + 死信队列；监控 lag。</li>
+</ul>
+<p><strong>Q29. 房间玩法怎么解耦？</strong></p>
+<ul>
+<li>领域事件：PK start/end、送礼、上麦。</li>
+<li><code>@Async @EventListener</code> 做缓存清理 / 消息推送。</li>
+<li>Redis pub/sub 清本地缓存；游标 worker 做增量结算。</li>
+</ul>
+<p><strong>Q30. 线程池怎么定？拒绝策略？</strong></p>
+<ul>
+<li>CPU 密集 vs IO 密集；核心 / 最大 / 队列。</li>
+<li>按活动隔离线程池，避免互相拖垮。</li>
+<li>拒绝策略：阻塞 / 丢弃 / 降级，不能默认 Abort。</li>
+</ul>
+<p><strong>Q31. 活动降级怎么做？</strong></p>
+<ul>
+<li>关闭非核心模块（动画 / 广播 / 非关键榜单）。</li>
+<li>缓存兜底 / 默认值；限流。</li>
+<li>配置开关，随时开合。</li>
+</ul>
+<p><strong>Q32. 线上问题怎么排查？</strong></p>
+<ul>
+<li>traceId 串链路；看入口 RT、线程池、Redis、DB、Kafka。</li>
+<li>看流水 / 状态机 / 对账。</li>
+<li>先止血，再定位，再复盘。</li>
+</ul>
+<h3>E. 测试 / 上线 / 行为</h3>
+<p><strong>Q33. 活动怎么测试？</strong></p>
+<ul>
+<li>配置 debug 时间偏移（时间旅行）。</li>
+<li>多区域 locale / 时区。</li>
+<li>脚本化检查（<code>.check.ts</code>）跑结算 / 榜单 / 发奖。</li>
+<li>回放 / 影子流量。</li>
+</ul>
+<p><strong>Q34. 活动上线 / 回滚流程？</strong></p>
+<ul>
+<li>配置版本 + 灰度 + 开关。</li>
+<li>上线前检查清单；上线后巡检。</li>
+<li>回滚配置 / 代码；数据补偿。</li>
+</ul>
+<p><strong>Q35. 你负责哪块？怎么证明？</strong></p>
+<ul>
+<li>活动引擎 / 组件 / 活动方向；具体模块 + 提交记录。</li>
+<li>不要泛泛说「我负责整个平台」。</li>
+<li>用 57% / 41→13 讲平台结果，用具体模块讲个人贡献。</li>
+</ul>
+<p><strong>Q36. 如果重做，会改什么？</strong></p>
+<ul>
+<li>配置 schema / 版本化 / 校验。</li>
+<li>组件契约 / SPI。</li>
+<li>可观测 / 对账 / 巡检。</li>
+<li>测试夹具 / 时间旅行。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 不要夸大的边界</h2>
+<ol>
+<li><strong>零代码不是所有活动</strong>：标准活动零代码，复杂玩法要写组件；说「标准活动零代码，复杂活动组件化」。</li>
+<li><strong>57%、41→13 是平台 / 团队结果</strong>：可以说「我参与 / 负责其中活动引擎与组件」，不要全说成个人从 0 到 1。</li>
+<li><strong>不要提 2,450 张表</strong>：没意义；讲 5 大区、30+ 活动、170+ 接口、60+ 组件。</li>
+<li><strong>没做过交易系统</strong>：不要为了匹配 JD 硬说交易；讲活动 / 房间 / 奖励 / 支付余额锁可以。</li>
+<li><strong>不要说你设计了整个 active-v3</strong>：如果你只是核心开发，说「参与 / 负责活动方向的核心模块」。</li>
+<li><strong>AI / Eval 不要混进活动题</strong>：面试官问活动就讲活动；AI 单独一轮再讲 WorkHub。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 30 秒表达模板</h2>
+<p><strong>「你们活动系统怎么做的？」</strong></p>
+<blockquote>
+<p>我们把活动做成配置驱动（Configuration-driven）+ 组件编排（Component Orchestration）的运行时：Nacos YAML 定义模块、Pipeline、时间、大区、奖励；模块用注解注册，活动按 Pipeline 并行执行；奖励用唯一键 / 流水 / 条件更新 / 回收队列保证一致性。</p>
+</blockquote>
+<p><strong>「你怎么保证奖励不重复？」</strong></p>
+<blockquote>
+<p>先插流水，<code>trans_no</code> 唯一键（Unique Key）做幂等（Idempotency）闸门；<code>DuplicateKey</code> 就是已发放。核销用 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 的条件更新（Conditional Update），并发不会双消；失败走回收 / 补偿队列，定时对账（Reconciliation）。</p>
+</blockquote>
+<p><strong>「活动峰值怎么扛？」</strong></p>
+<blockquote>
+<p>先做容量评估（Capacity Planning）和压测（Load Test），再分层扛：聚合接口 Pipeline 并行 + 单模块故障隔离，热点数据本地缓存 + Redis 多实例，非核心功能降级（Degradation）、入口限流（Rate Limiting），活动前演练、活动后复盘。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p>Markdown 源文件：<a href="../content/activity.md">activity.md</a></p>
+      <p><a href="../../">返回入口</a> · <a href="../../projects/">项目档案</a> · <a href="../../devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>
+
