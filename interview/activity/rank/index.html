@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>排行榜 — 活动专项 — Interview</title>
-    <meta name="description" content="mod_common_rank_record 的设计：append-only 记账表、唯一键幂等、Redis 结果缓存、窗口函数排名。">
+    <meta name="description" content="mod_common_rank_record 的设计：六维坐标覆盖所有榜单、append-only 账本、唯一键幂等、Redis 时间 tie-break、贡献者关系图与可重建。">
     <meta name="theme-color" content="#eef0f3">
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/assets/workspace.css">
@@ -72,12 +72,15 @@
           <p>本文目录</p>
           <ol>
             <li><a href="#chapter-1">一句话</a></li>
-            <li><a href="#chapter-2">1. 表结构：流水 + 快照</a></li>
-            <li><a href="#chapter-3">2. 写入链路：锁 + 事务 + 唯一键</a></li>
-            <li><a href="#chapter-4">3. 查询链路：Redis 结果 + SQL 窗口函数</a></li>
-            <li><a href="#chapter-5">4. 贡献者：player ↔ contributor 双向</a></li>
-            <li><a href="#chapter-6">5. 这张表的取舍</a></li>
-            <li><a href="#chapter-7">6. 面试怎么讲</a></li>
+            <li><a href="#chapter-2">1. 先看亮点：一张表怎么覆盖 N 个榜单</a></li>
+            <li><a href="#chapter-3">2. 账本模型：append-only + total_amount 快照</a></li>
+            <li><a href="#chapter-4">3. 写链路：锁 + 事务 + 唯一键</a></li>
+            <li><a href="#chapter-5">4. 读链路：Redis ZSet + 时间 tie-break</a></li>
+            <li><a href="#chapter-6">5. 贡献者：两张 ZSet 组成关系图</a></li>
+            <li><a href="#chapter-7">6. 配置化：RankModule + YAML</a></li>
+            <li><a href="#chapter-8">7. 设计亮点总结</a></li>
+            <li><a href="#chapter-9">8. 这套设计的边界 / 坑</a></li>
+            <li><a href="#chapter-10">9. 面试怎么讲</a></li>
           </ol>
         </nav>
       </aside>
@@ -93,25 +96,158 @@
           <div class="ws-title-row">
             <h1>排行榜</h1>
           </div>
-          <p class="ws-tagline">mod_common_rank_record：append-only 记账表 + 唯一键幂等 + Redis 结果缓存。</p>
+          <p class="ws-tagline">一张表 + 六维坐标，支撑 PK/房间/家族/用户/CP 所有榜单。</p>
         </header>
 
 <section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
-<p><code>mod_common_rank_record</code> 不是一张&quot;排行榜结果表&quot;，而是一张 <strong>append-only（只追加）的记账表</strong>：每次加分插一条流水，唯一键做幂等，Redis 存结果，DB 存事实。</p>
+<p><code>mod_common_rank_record</code> 的价值不是&quot;一张排行榜表&quot;，而是<strong>一套通用排行榜引擎的账本</strong>：用 <code>biz / topic / key / locale / player / contributor</code> 六个维度，覆盖 PK、房间榜、家族榜、用户榜、CP 榜、日榜 / 总榜 / 阶段榜、贡献者榜等所有榜单场景。</p>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 表结构：流水 + 快照</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 先看亮点：一张表怎么覆盖 N 个榜单</h2>
+<p>把六个字段当成&quot;榜单坐标&quot;：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>含义</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>biz</code></td>
+<td>业务线 / 活动</td>
+<td><code>pk-v202608</code>、<code>room-rank-2026</code></td>
+</tr>
+<tr>
+<td><code>topic</code></td>
+<td>榜单场景 / 阶段</td>
+<td><code>player_in_100_46</code>、<code>room</code>、<code>family_in_50_20</code>、<code>user</code>、<code>couple</code></td>
+</tr>
+<tr>
+<td><code>key</code></td>
+<td>空间 / 周期 / 阶段</td>
+<td><code>20260821</code>（日榜）、<code>-</code>（总榜）、<code>stage-1</code></td>
+</tr>
+<tr>
+<td><code>locale</code></td>
+<td>大区</td>
+<td><code>in</code> / <code>ph</code> / <code>vi</code> / <code>ko</code> / <code>zh</code></td>
+</tr>
+<tr>
+<td><code>player</code></td>
+<td>被排名实体</td>
+<td>userId / roomId / familyId / cpId</td>
+</tr>
+<tr>
+<td><code>contributor</code></td>
+<td>贡献者</td>
+<td>送礼人 / 陪玩师 / 家族成员</td>
+</tr>
+</tbody></table></div>
+<p><strong>同一个 <code>mod_common_rank_record</code>，换一组坐标就是另一个榜单：</strong></p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>biz</th>
+<th>topic</th>
+<th>key</th>
+<th>locale</th>
+<th>player</th>
+<th>contributor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PK 陪陪日榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>player_in_100_46</code></td>
+<td><code>20260821</code></td>
+<td><code>in</code></td>
+<td><code>userId</code></td>
+<td><code>supporterId</code></td>
+</tr>
+<tr>
+<td>PK 陪陪总榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>player_in_100_46</code></td>
+<td><code>-</code></td>
+<td><code>in</code></td>
+<td><code>userId</code></td>
+<td><code>supporterId</code></td>
+</tr>
+<tr>
+<td>房间日榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>room</code></td>
+<td><code>20260821</code></td>
+<td><code>in</code></td>
+<td><code>roomId</code></td>
+<td><code>-</code></td>
+</tr>
+<tr>
+<td>家族阶段榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>family_in_50_20</code></td>
+<td><code>20260821</code></td>
+<td><code>in</code></td>
+<td><code>familyId</code></td>
+<td><code>userId</code></td>
+</tr>
+<tr>
+<td>用户总榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>user</code></td>
+<td><code>-</code></td>
+<td><code>in</code></td>
+<td><code>userId</code></td>
+<td><code>-</code></td>
+</tr>
+<tr>
+<td>CP 榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>couple</code></td>
+<td><code>-</code></td>
+<td><code>in</code></td>
+<td><code>cpId</code></td>
+<td><code>userId</code></td>
+</tr>
+<tr>
+<td>贡献者榜</td>
+<td><code>pk-v202608</code></td>
+<td><code>player_in_100_46</code></td>
+<td><code>20260821</code></td>
+<td><code>in</code></td>
+<td><code>supporterId</code></td>
+<td><code>-</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>这就是设计亮点：</strong></p>
+<ul>
+<li>新增一个榜单，不需要建新表、不需要加字段；只需要新增一组 <code>biz/topic/key</code> 配置。</li>
+<li>实体类型由 <code>player</code> 决定：用户、房间、家族、CP 都是字符串，模型不绑死业务对象。</li>
+<li>周期/阶段由 <code>key</code> 决定：日榜、总榜、阶段榜是同一个模型的不同 key。</li>
+<li>大区由 <code>locale</code> 决定：一套活动可以按大区隔离榜单。</li>
+<li>贡献关系由 <code>contributor</code> 决定：同一个账本同时支持&quot;玩家榜&quot;和&quot;贡献者榜&quot;。</li>
+</ul>
+<p><strong>面试一句话</strong></p>
+<blockquote>
+<p>它不是&quot;为 PK 写的一张表&quot;，是&quot;一个六维坐标的排行榜引擎&quot;：biz 定业务、topic 定场景、key 定周期、locale 定大区、player 定实体、contributor 定贡献关系；新榜单只加坐标，不改表结构。</p>
+</blockquote>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 账本模型：append-only + total_amount 快照</h2>
 <pre><code class="language-sql">create table mod_common_rank_record
 (
     id           bigint auto_increment primary key,
-    biz          varchar(32)  not null,  -- 业务
-    topic        varchar(64)  not null,  -- 榜单场景
-    player       varchar(128) not null,  -- 排行目标：用户/房间/家族/CP
-    contributor  varchar(128),           -- 贡献者
-    `key`        varchar(64)  not null,  -- 空间：日榜/总榜/阶段
-    locale       varchar(16),            -- 大区
-    trans_no     varchar(200) not null,  -- 业务流水号
+    biz          varchar(32)  not null,
+    topic        varchar(64)  not null,
+    player       varchar(128) not null,
+    contributor  varchar(128),
+    `key`        varchar(64)  not null,
+    locale       varchar(16),
+    trans_no     varchar(200) not null,
     amount       decimal(16,2) not null, -- 本次增加
     total_amount decimal(16,2) not null, -- 增加后的累计
     extra        varchar(256),
@@ -120,49 +256,78 @@
     key idx_biz_player (biz, topic, player, id)
 );
 </code></pre>
-<p><strong>关键设计</strong></p>
+<p><strong>为什么是 append-only</strong></p>
 <ul>
-<li><strong>只追加</strong>：不 update 旧记录；每次 <code>amount</code> 插一条，<code>total_amount</code> 存&quot;这次加完后的累计快照&quot;。</li>
-<li><strong>唯一键</strong>：<code>(biz, topic, trans_no)</code> 是幂等闸门；同一业务流水重复消费，第二次 insert 直接 <code>DuplicateKey</code>。</li>
-<li><strong>查询索引</strong>：<code>(biz, topic, player, id)</code> 支持&quot;某玩家最新一条&quot;和&quot;某玩家流水&quot;。</li>
-<li><strong>贡献者</strong>：<code>contributor</code> 让榜单支持&quot;谁给这个玩家贡献了多少&quot;。</li>
+<li>每次加分插一条流水，不 update 旧记录：可审计、可回放、可重建。</li>
+<li><code>total_amount</code> 是&quot;这次加完后的累计快照&quot;，查最新值不用 sum 全表。</li>
+<li><code>trans_no</code> 唯一键做幂等：重复消息 / 重复请求第二次 insert 直接冲突。</li>
+<li><code>extra</code> 存扩展信息，不破坏主模型。</li>
+</ul>
+<p><strong>代价</strong></p>
+<ul>
+<li>表会一直增长：需要按 <code>biz/topic/create_time</code> 归档、分区或清理。</li>
+<li>流水多了以后，重建 / 对账要控制扫描范围。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 写入链路：锁 + 事务 + 唯一键</h2>
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 写链路：锁 + 事务 + 唯一键</h2>
 <p><code>ModCommonRankService.increase()</code>：</p>
 <ol>
-<li><strong>Redis 锁</strong>：<code>ModCommonRankRecord:increase:{biz}:{topic}:{key}:{player}</code>，<code>SETNX</code> + 1 秒 TTL，抢不到就 <code>sleep(10ms)</code> 自旋。</li>
+<li><strong>Redis 锁</strong>：<code>ModCommonRankRecord:increase:{biz}:{topic}:{key}:{player}</code>，<code>SETNX</code> + 1 秒 TTL，抢不到 <code>sleep(10ms)</code> 自旋。</li>
 <li><strong>查最新记录</strong>：<code>getLatestRecord</code> 取该 player 在该 key 下的最后一条。</li>
 <li><strong>算新累计</strong>：<code>newTotal = latest.totalAmount + amount</code>（没有历史则等于 <code>amount</code>）。</li>
-<li><strong>插入流水</strong>：<code>trans_no</code> 唯一键冲突 → 说明已处理，返回 <code>null</code>。</li>
-<li><strong>更新贡献者</strong>：写 player→contributor、contributor→player 两个 Redis 维度。</li>
+<li><strong>插入流水</strong>：<code>trans_no</code> 唯一键冲突 → 已处理，返回 <code>null</code>。</li>
+<li><strong>更新贡献者</strong>：写 <code>player → contributor</code>、<code>contributor → player</code> 两个 Redis 维度。</li>
 <li><strong>更新结果缓存</strong>：把最新 <code>totalAmount</code> 写到 <code>ModCommonRankResultRedis</code>。</li>
 <li><strong>释放锁</strong>：<code>finally</code> 删除 Redis key。</li>
 </ol>
-<p><strong>为什么先锁再查再插？</strong></p>
+<p><strong>为什么需要锁</strong></p>
 <ul>
-<li>同一 player 的并发加分，如果两个请求都读到同一个 <code>latest</code>，会算出一样的 <code>totalAmount</code>，后写覆盖前写，导致少加。</li>
-<li>锁把&quot;读 latest → 算 total → insert&quot;变成串行；唯一键再兜底重复流水。</li>
+<li>同一 player 并发加分：两个请求都读同一个 <code>latest</code>，会算出一样 <code>totalAmount</code>，后写覆盖前写 → 少加。</li>
+<li>锁把&quot;读 latest → 算 total → insert&quot;串行；唯一键再兜底重复流水。</li>
 </ul>
 <p><strong>技术难点 / 风险</strong></p>
 <ul>
-<li>锁 TTL 只有 1 秒：如果事务执行超过 1 秒，锁可能提前过期，并发仍可能穿透；更稳的做法是 Redisson 看门狗续期。</li>
-<li>自旋锁会占线程；高并发下要评估等待时间，必要时改成分段锁 / 本地锁 + Redis 锁。</li>
-<li><code>increase()</code> 捕获所有异常返回 <code>null</code>，调用方必须判断 <code>null</code>，否则会&quot;以为加上了&quot;。</li>
-<li>Redis 结果更新在 DB 事务内，Redis 不是事务资源；极端情况下 DB 回滚、Redis 已更新，需要 <code>syncResult</code> 重建。</li>
+<li>锁 TTL 只有 1 秒：事务超过 1 秒锁可能提前过期，并发仍可能穿透；更稳是 Redisson 看门狗续期。</li>
+<li>自旋锁占线程：高并发要评估等待时间，必要时分段锁 / 本地锁 + Redis 锁。</li>
+<li><code>increase()</code> 捕获所有异常返回 <code>null</code>：调用方必须判断 <code>null</code>，否则会&quot;以为加上了&quot;。</li>
+<li>Redis 结果更新在 DB 事务内：Redis 不是事务资源；极端情况下 DB 回滚、Redis 已更新，需要 <code>syncResult</code> 重建。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 查询链路：Redis 结果 + SQL 窗口函数</h2>
-<p><strong>在线读</strong></p>
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 读链路：Redis ZSet + 时间 tie-break</h2>
+<h3>4.1 Redis key 设计</h3>
+<pre><code class="language-text">玩家榜：       common:rank:{biz}:{topic}:{locale}:{key}
+玩家→贡献者：  common:rank:p2c:{biz}:{topic}:{key}:{player}
+贡献者→玩家：  common:rank:c2p:{biz}:{topic}:{key}:{contributor}
+</code></pre>
 <ul>
-<li>TopN、玩家排名、贡献者榜都走 <code>ModCommonRankResultRedis</code>，不直接扫流水表。</li>
-<li><code>getTopNWithContributors</code>、<code>getTopNContributors</code>、<code>getTopNPlayersOfContributor</code> 分别支持&quot;带贡献者的榜&quot;&quot;某玩家的贡献者&quot;&quot;某贡献者支持的玩家&quot;。</li>
+<li>玩家榜是 ZSet：member = <code>player</code>，score = 累计值 + 时间 tie-break。</li>
+<li>贡献者两张 ZSet 是&quot;关系图&quot;：一个玩家有哪些贡献者，一个贡献者支持了哪些玩家。</li>
+<li><code>getTopN</code> 用 <code>reverseRangeWithScores</code>；<code>get</code> 用 <code>score</code> + <code>reverseRank</code>。</li>
 </ul>
-<p><strong>落库查 / 结算查</strong></p>
+<h3>4.2 分数编码：金额 + 时间 tie-break</h3>
+<p><code>ModCommonRankResultRedis.update()</code> 不是直接写 <code>totalAmount</code>，而是：</p>
+<pre><code class="language-java">score = totalAmount + (40 * 864000.0) / (timestamp - BASE_TIME)
+</code></pre>
+<ul>
+<li><code>BASE_TIME = 2026-01-01</code>；时间越早，<code>delta</code> 越小，<code>baseA/delta</code> 越大。</li>
+<li>效果：<strong>金额相同时，越早达到的排名越高</strong>，和 SQL <code>ORDER BY total_amount DESC, create_time ASC</code> 一致。</li>
+<li>金额先 <code>×100</code> 再 <code>÷100</code>，保留两位精度；tie-break 约 0.001 量级，不会影响金额排序。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>一个 ZSet 同时表达&quot;金额排序 + 同分时间排序&quot;，不用额外字段/二次排序。</li>
+<li>Redis 排名和 DB 窗口函数排名口径一致，重建后不会因为同分顺序不同而错位。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li><code>getTopN</code> 取 score 后 <code>setScale(0, DOWN)</code> 会截断小数；如果金额有角/分，需要确认口径。</li>
+<li>tie-break 依赖 <code>timestamp</code> 单调性；如果乱序写入，同分排序可能和预期不一致。</li>
+</ul>
+<h3>4.3 DB 侧：窗口函数 + 重建</h3>
 <pre><code class="language-sql">SELECT t.player, t.total_amount
 FROM (
   SELECT r.*,
@@ -177,74 +342,122 @@ WHERE t.rn = 1
 ORDER BY t.total_amount DESC, t.create_time ASC
 LIMIT ?;
 </code></pre>
-<p>两层 <code>ROW_NUMBER()</code>：</p>
 <ul>
-<li>内层：每个 player 取 <code>total_amount</code> 最大、<code>create_time</code> 最早的一条（最新快照）。</li>
-<li>外层：按 <code>total_amount DESC, create_time ASC</code> 排名，解决同分排序。</li>
-</ul>
-<p><strong>重建</strong></p>
-<ul>
-<li><code>syncResult(biz, topic, locale, key)</code>：从 DB 取每个 player 的最新记录，清 Redis，重写。</li>
-<li><code>syncAllResult(biz)</code>：按 <code>DISTINCT topic/key/locale</code> 全量重建。</li>
-<li><code>transferData()</code>：旧 Redis → 新 Redis 的迁移任务。</li>
+<li>内层：每个 player 取最新快照。</li>
+<li>外层：按金额 + 时间排名。</li>
+<li><code>syncResult</code> / <code>syncAllResult</code>：从流水重建 Redis；Redis 丢了 / 口径变了 / 活动回滚都能恢复。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 贡献者：player ↔ contributor 双向</h2>
-<p><code>increaseContributor()</code> 写两个 Redis 维度：</p>
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 贡献者：两张 ZSet 组成关系图</h2>
+<p><code>contributor</code> 字段 + 两张 Redis ZSet：</p>
 <ul>
-<li><code>player → contributors</code>：这个玩家是谁撑起来的，用于&quot;玩家榜 + 贡献者 TopN&quot;。</li>
-<li><code>contributor → players</code>：这个贡献者支持了哪些玩家，用于&quot;贡献者视角&quot;。</li>
+<li><code>p2c:{biz}:{topic}:{key}:{player}</code>：这个玩家的贡献者榜单。</li>
+<li><code>c2p:{biz}:{topic}:{key}:{contributor}</code>：这个贡献者支持的玩家榜单。</li>
 </ul>
 <p><strong>用途</strong></p>
 <ul>
-<li>陪玩榜 / 家族榜 / CP 榜：不仅要看玩家收了多少，还要看谁贡献的。</li>
-<li>活动结算：按排名发奖时，可以给&quot;玩家 + 贡献者&quot;分别发奖。</li>
+<li>玩家榜展示&quot;谁撑起了这个玩家&quot;。</li>
+<li>结算时按 <code>AWARD_CONTRIBUTORS</code> 给贡献者发奖。</li>
+<li>贡献者视角的榜单 / 战报 / 家族贡献。</li>
 </ul>
-<p><strong>注意</strong></p>
+<p><strong>批量读</strong></p>
 <ul>
-<li>贡献者数据只写 Redis，不落流水表（<code>contributor</code> 字段在记录里有，但聚合在 Redis）。</li>
-<li>Redis 丢失后，贡献者维度需要从流水重新聚合，不能只靠 <code>syncResult</code> 恢复结果榜。</li>
+<li><code>getContributors</code> 用 <code>executePipelined</code> 一次取多个玩家的 Top3 贡献者，避免 N+1。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>贡献者只写 Redis，不落流水聚合；Redis 丢了这个维度要回放流水重建，不能只靠 <code>syncResult</code> 恢复结果榜。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 这张表的取舍</h2>
-<p><strong>优点</strong></p>
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 配置化：RankModule + YAML</h2>
+<p><code>SimpleRankDispatchConfig</code>：</p>
 <ul>
-<li>流水可追溯：每次加分有 <code>trans_no</code>、<code>amount</code>、<code>total_amount</code>、时间。</li>
-<li>幂等简单：唯一键就是闸门，不依赖&quot;先查后写&quot;。</li>
-<li>查询快：在线读 Redis，DB 只做事实和重建。</li>
-<li>支持贡献者、分空间（key）、分大区（locale）。</li>
+<li><code>localeAware</code>：是否区分大区。</li>
+<li><code>localeIsolated</code>：查询结果是否按大区隔离。</li>
+<li><code>awards</code>：排名 → 奖励清单。</li>
 </ul>
-<p><strong>代价 / 坑</strong></p>
+<p>在活动 YAML 里，一个榜单就是一个模块实例：</p>
+<pre><code class="language-yaml">modules:
+  player_in_100_46:
+    module: RankModule
+    configuration:
+      topic: player_in_100_46
+      playerType: USER
+      startTime: ...
+      finishTime: ...
+      mainRound:
+        settles:
+          - strategy: PLAYER_LIST
+            topN: 100
+          - strategy: AWARD
+            topN: 10
+            settleAward:
+              awardName: player_in_100_46
+          - strategy: AWARD_CONTRIBUTORS
+            topN: 10
+            settleAwardContributors:
+              contributorFromRank: 1
+              contributorToRank: 1
+              awardName: player_in_100_46-contributor
+</code></pre>
+<p><strong>新榜单 = 新配置</strong></p>
 <ul>
-<li>表会一直增长：需要归档 / 分区 / 清理策略。</li>
-<li><code>trans_no</code> 唯一键是 <code>(biz, topic, trans_no)</code>，不包含 <code>key/player/locale</code>；同一 <code>trans_no</code> 不能在不同 key 复用，业务流水号必须全局唯一。</li>
-<li><code>getLatestRecord</code> 只按 <code>biz/topic/player/key</code> 查，不带 <code>locale</code>；如果同一 key 跨大区共用，需要确认隔离口径。</li>
-<li>锁 TTL 1 秒、自旋等待、异常吞掉，都是高并发下要盯的点。</li>
-<li>Redis 结果与 DB 事实可能短暂不一致；要有重建 / 对账任务。</li>
+<li>复制一段 YAML，改 <code>topic/key/playerType/awards</code> 就是一个新榜单。</li>
+<li>不需要写新的 Mapper / Service / 表。</li>
+<li>结算策略 <code>PLAYER_LIST</code> / <code>AWARD</code> / <code>AWARD_CONTRIBUTORS</code> 直接复用。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 面试怎么讲</h2>
-<p><strong>&quot;这个排行榜怎么设计的？&quot;</strong></p>
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 设计亮点总结</h2>
+<ol>
+<li><strong>六维坐标建模</strong>：<code>biz/topic/key/locale/player/contributor</code> 把&quot;业务、场景、周期、大区、实体、贡献关系&quot;拆成正交维度，一套模型覆盖所有榜单。</li>
+<li><strong>事件溯源-lite</strong>：append-only 流水 + <code>total_amount</code> 快照，既能审计/重放，又能 O(1) 查最新值。</li>
+<li><strong>幂等写入</strong>：<code>(biz, topic, trans_no)</code> 唯一键 + <code>DuplicateKey</code> 直接返回，重复消息不重复加分。</li>
+<li><strong>读写分离</strong>：DB 存事实，Redis ZSet 存结果；在线读 Redis，重建读 DB。</li>
+<li><strong>时间 tie-break 编码</strong>：一个 ZSet 同时表达金额排序和同分时间排序，和 SQL 口径一致。</li>
+<li><strong>贡献者关系图</strong>：p2c / c2p 两张 ZSet 支持玩家榜、贡献者榜、贡献者结算。</li>
+<li><strong>可重建</strong>：<code>syncResult</code> / <code>syncAllResult</code> 从流水恢复 Redis，活动回滚 / 口径调整有兜底。</li>
+<li><strong>配置化接入</strong>：RankModule + YAML，新榜单只加配置，不写新表/新服务。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">8. 这套设计的边界 / 坑</h2>
+<ul>
+<li><strong>表增长</strong>：append-only 会一直涨；要按 <code>biz/topic/create_time</code> 归档、分区、清理。</li>
+<li><strong>唯一键粒度</strong>：<code>(biz, topic, trans_no)</code> 不含 <code>key/player/locale</code>；同一 <code>trans_no</code> 不能跨 key 复用，业务流水号必须全局唯一。</li>
+<li><strong>locale 假设</strong>：<code>getLatestRecord</code> 只按 <code>biz/topic/player/key</code> 查，不带 <code>locale</code>；如果同一 key 跨大区共用，需要确认隔离口径。</li>
+<li><strong>锁 TTL</strong>：1 秒 TTL + 10ms 自旋，没有看门狗；长事务 / 高并发要评估。</li>
+<li><strong>双写一致性</strong>：DB 事务内更新 Redis；极端情况下要 <code>syncResult</code> 重建。</li>
+<li><strong>贡献者丢失</strong>：贡献者维度只在 Redis，丢了要回放流水，不能只重建结果榜。</li>
+<li><strong>热点</strong>：单个热门 player / 榜单 ZSet 可能成热点 Key；要评估 Redis 集群 slot、拆分、限流。</li>
+<li><strong>精度</strong>：金额 <code>×100</code> 再 <code>÷100</code>、<code>setScale(0, DOWN)</code> 截断；有角/分要确认口径。</li>
+<li><strong>顺序</strong>：tie-break 依赖 timestamp 单调；乱序写入可能影响同分排序。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 面试怎么讲</h2>
+<p><strong>30 秒版</strong></p>
 <blockquote>
-<p>不是一张结果表，是一张只追加的记账表：每次加分插一条流水，<code>trans_no</code> 唯一键做幂等，<code>total_amount</code> 存累计快照；在线读 Redis 结果，DB 用窗口函数取每个玩家最新一条再排名；贡献者用 Redis 双向维度支持&quot;谁撑起了谁&quot;。</p>
+<p>我们把排行榜做成一个六维坐标的通用引擎：<code>biz</code> 定业务、<code>topic</code> 定场景、<code>key</code> 定周期、<code>locale</code> 定大区、<code>player</code> 定实体、<code>contributor</code> 定贡献关系。DB 是 append-only 账本，<code>trans_no</code> 唯一键做幂等；Redis 是结果缓存，score 用&quot;金额 + 时间 tie-break&quot;编码；新榜单只加 YAML 配置，不建新表。</p>
 </blockquote>
-<p><strong>&quot;并发加分怎么保证不丢？&quot;</strong></p>
+<p><strong>2 分钟版</strong></p>
 <blockquote>
-<p>先按 <code>biz/topic/key/player</code> 加 Redis 锁，把&quot;读 latest → 算 total → insert&quot;串行；唯一键 <code>(biz, topic, trans_no)</code> 再兜底重复流水。锁 TTL 1 秒、自旋 10ms，高并发下要评估锁续期和等待成本。</p>
+<p>写入先按 <code>biz/topic/key/player</code> 加 Redis 锁，读 latest、算 total、插流水；唯一键兜底重复。读走 Redis ZSet，score 编码保证同分时越早排名越高，和 DB 的 <code>ROW_NUMBER()</code> 口径一致；Redis 丢了可以用 <code>syncResult</code> 从流水重建。贡献者用 p2c/c2p 两张 ZSet 做关系图，结算时按 <code>AWARD_CONTRIBUTORS</code> 给贡献者发奖。这套模型支撑 PK、房间、家族、用户、CP、日榜/总榜/阶段榜，新增场景只加配置。</p>
 </blockquote>
-<p><strong>&quot;Redis 和 DB 不一致怎么办？&quot;</strong></p>
+<p><strong>追问：这算亮点吗？</strong></p>
 <blockquote>
-<p>DB 是事实，Redis 是结果缓存；有 <code>syncResult</code> / <code>syncAllResult</code> 可以从流水重建。贡献者维度是 Redis 聚合，丢了要回放流水，所以流水表不能随便删。</p>
+<p>单看一张表不算；亮点是&quot;坐标建模 + 账本 + 幂等 + 读写分离 + 时间 tie-break + 贡献者图 + 可重建 + 配置化&quot;组合起来，让一个新榜单从&quot;建表写服务&quot;变成&quot;加一组坐标和 YAML&quot;。</p>
 </blockquote>
-<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<p><strong>追问：有什么问题？</strong></p>
 <blockquote>
-<p>表会一直涨，要归档；<code>trans_no</code> 唯一键粒度是 biz/topic，跨 key 不能复用；锁 TTL 和异常吞掉是风险点；Redis 结果更新在 DB 事务内，极端情况下要重建。</p>
+<p>表会涨、锁 TTL 1 秒、<code>trans_no</code> 粒度是 biz/topic、locale 没进 latest 查询、贡献者只在 Redis、金额精度和热点 Key 都要治理；这些是这套设计的边界。</p>
 </blockquote>
 </section>
       </main>

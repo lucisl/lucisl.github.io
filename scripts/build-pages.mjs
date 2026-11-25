@@ -445,12 +445,12 @@ const INTERVIEW_PAGES = [
     output: 'interview/activity/rank/index.html',
     title: '排行榜 — 活动专项 — Interview',
     description:
-      'mod_common_rank_record 的设计：append-only 记账表、唯一键幂等、Redis 结果缓存、窗口函数排名。',
+      'mod_common_rank_record 的设计：六维坐标覆盖所有榜单、append-only 账本、唯一键幂等、Redis 时间 tie-break、贡献者关系图与可重建。',
     eyebrow: 'ACTIVITY / RANK',
     breadcrumb: '002 / 活动 / 排行榜',
     h1: '排行榜',
     tagline:
-      'mod_common_rank_record：append-only 记账表 + 唯一键幂等 + Redis 结果缓存。',
+      '一张表 + 六维坐标，支撑 PK/房间/家族/用户/CP 所有榜单。',
     sourceHref: '../../content/activity-rank.md',
     sourceName: 'activity-rank.md',
   },
