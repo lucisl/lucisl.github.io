@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>高并发玩法 — 活动专项 — Interview</title>
+    <meta name="description" content="活动高并发：捕鱼条件更新、宝箱状态机、余额单写者锁、Redis 多实例、事件驱动与峰值治理。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="/interview/" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="/interview/" aria-current="page">面试题库</a>
+          <a href="/projects/">项目档案</a>
+          <a href="/devkit/">工具箱</a>
+          <a href="/">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="/interview/ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="/interview/activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">活动专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="/interview/activity/">题库</a></li>
+          <li><a class="" href="/interview/activity/rank/">排行榜</a></li>
+          <li><a class="" href="/interview/activity/scanner/">扫表</a></li>
+          <li><a class="" href="/interview/activity/pipeline/">管道</a></li>
+          <li><a class="" href="/interview/activity/reward/">奖励一致性</a></li>
+          <li><a class="is-active" href="/interview/activity/concurrency/">高并发玩法</a></li>
+        </ul>
+
+        <div class="ws-rail-note">
+          题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
+        </div>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">一句话</a></li>
+            <li><a href="#chapter-2">1. 捕鱼：条件更新 + 唯一索引 + 溢出伤害</a></li>
+            <li><a href="#chapter-3">2. 宝箱 / 赐福：唯一键 + 状态机</a></li>
+            <li><a href="#chapter-4">3. 余额单写者锁</a></li>
+            <li><a href="#chapter-5">4. Redis 多实例 + Caffeine</a></li>
+            <li><a href="#chapter-6">5. 事件驱动房间</a></li>
+            <li><a href="#chapter-7">6. 峰值治理</a></li>
+            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="/interview/">面试题库</a>
+            <span>/</span>
+            <span>002 / 活动 / 高并发玩法</span>
+          </p>
+          <p class="ws-eyebrow">ACTIVITY / CONCURRENCY</p>
+          <div class="ws-title-row">
+            <h1>高并发玩法</h1>
+          </div>
+          <p class="ws-tagline">条件更新、唯一索引、锁、缓存分层与事件驱动。</p>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
+<p>活动高并发不是&quot;加机器&quot;，是<strong>状态机 + 条件更新 + 唯一索引 + 锁 + 缓存分层 + 事件驱动</strong>一起用，保证不重、不丢、不拖垮。</p>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 捕鱼：条件更新 + 唯一索引 + 溢出伤害</h2>
+<p><strong>场景</strong></p>
+<ul>
+<li>一个房间一条活鱼，用户送礼打鱼；鱼血归零后结算，溢出伤害继续打新鱼。</li>
+</ul>
+<p><strong>并发点</strong></p>
+<ul>
+<li>多个用户同时打同一条鱼。</li>
+<li>鱼死瞬间多个请求同时触发结算。</li>
+<li>一条鱼死后，剩余伤害要打新鱼。</li>
+</ul>
+<p><strong>解法</strong></p>
+<ul>
+<li>扣血：<code>UPDATE ... WHERE id=? AND status=&#39;ALIVE&#39;</code>，影响行数=0 放弃。</li>
+<li>捕捞：再用 <code>WHERE status=&#39;ALIVE&#39;</code> 抢&quot;捕捞处理权&quot;，只有一个请求能成功。</li>
+<li>刷鱼：唯一索引保证一房间一活鱼；<code>DuplicateKey</code> / <code>Deadlock</code> 后重查。</li>
+<li>溢出：递归打新鱼，<code>orderNo</code> 加 <code>_depth</code> 后缀，保证多条鱼流水幂等。</li>
+<li>异步：血量变化 / 广播用 <code>CompletableFuture</code>，失败不影响主流程。</li>
+</ul>
+<p><strong>面试点</strong></p>
+<ul>
+<li>为什么不用分布式锁：条件更新 + 唯一索引已经够，锁增加失败点。</li>
+<li>死锁是预期：捕获后重查，不当作系统错误。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 宝箱 / 赐福：唯一键 + 状态机</h2>
+<p><strong>宝箱</strong></p>
+<ul>
+<li>奖励记录先 insert，唯一键冲突 = 已处理。</li>
+<li><code>PENDING → SUCCESS / FAILED</code>；失败可重试。</li>
+<li>多级结算：<code>orderNo + &quot;_&quot; + level</code>。</li>
+<li>结算标记 Redis 防重；失败删标记，允许补偿。</li>
+</ul>
+<p><strong>赐福券</strong></p>
+<ul>
+<li>GET 流水 <code>trans_no = order_no</code>；USE 流水 <code>trans_no = 批次号</code>。</li>
+<li>核销 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 单行原子。</li>
+<li>发放在本地事务内：流水 + 券一起成功 / 失败。</li>
+</ul>
+<p><strong>面试点</strong></p>
+<ul>
+<li>唯一键是幂等闸门，不是&quot;先查再写&quot;。</li>
+<li>状态机让失败可重试、成功不可重复。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 余额单写者锁</h2>
+<p><code>lita-payment</code> 的 <code>UserBalanceLockAspect</code>：</p>
+<ul>
+<li><code>@UserBalanceLock</code> + Redisson <code>RLock</code>。</li>
+<li><code>tryLock(waitMs, leaseMs)</code>；<code>leaseMs&lt;=0</code> 用看门狗续期。</li>
+<li>获取失败：<code>failFast</code> 抛&quot;系统繁忙&quot;，否则降级直连 DB。</li>
+<li>释放判断 <code>isHeldByCurrentThread()</code>；过期 / 释放失败记指标。</li>
+<li>按 <code>biz + userId</code> 判断是否在锁范围，不是所有交易都加锁。</li>
+</ul>
+<p><strong>为什么不是简单 <code>lock()</code></strong></p>
+<ul>
+<li>要控制等待时间、租约、降级、指标；否则一个慢查询能把线程池打满。</li>
+<li>锁范围要按业务判断，避免无谓串行。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. Redis 多实例 + Caffeine</h2>
+<p><strong>Redis 多实例</strong></p>
+<ul>
+<li>在线状态 / 签名 / 房间 / 活动排行 / 活动通用分开。</li>
+<li>不同用途的可靠性 / 淘汰策略不同；一次大 Key / 内存打满不能同时影响多个业务。</li>
+</ul>
+<p><strong>Caffeine</strong></p>
+<ul>
+<li>房间在线列表、弹窗、关注、禁言、退房等热点数据本地缓存。</li>
+<li>减少 Redis 往返；本地缓存要接受短暂不一致。</li>
+<li>更新时删缓存 / 版本号 / 延迟双删。</li>
+</ul>
+<p><strong>面试点</strong></p>
+<ul>
+<li>缓存分层：本地 → Redis → DB。</li>
+<li>热点 Key / 大 Key 要拆、要限流、要降级。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 事件驱动房间</h2>
+<p><code>litaroom</code> 的 PK / 庆典：</p>
+<ul>
+<li><code>PkV1Service.start/end</code> 发 <code>PkV1ExecutionEvent</code>；<code>PkV1ExecutionListener</code> 用 <code>@Async @EventListener</code> 消费，通过 Redis <code>convertAndSend</code> 清缓存。</li>
+<li>庆典用 <code>@Timer(delay=3)</code> + KV 游标 + <code>limit 100</code> 增量扫描，多 worker 分工。</li>
+<li>状态变更和副作用（缓存清理、消息推送、结算）解耦。</li>
+</ul>
+<p><strong>面试点</strong></p>
+<ul>
+<li>事件驱动不是&quot;全异步&quot;：核心状态仍同步写，副作用异步。</li>
+<li>游标 worker 避免全表扫描；多 worker 要防重。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 峰值治理</h2>
+<p><strong>活动前</strong></p>
+<ul>
+<li>容量评估：QPS / 线程池 / 连接池 / Redis / DB。</li>
+<li>压测：入口、聚合接口、榜单、发奖。</li>
+<li>预案：限流、降级、开关、扩容。</li>
+</ul>
+<p><strong>活动中</strong></p>
+<ul>
+<li>并行 Pipeline、缓存、异步化。</li>
+<li>非核心模块降级（动画 / 广播 / 非关键榜单）。</li>
+<li>监控：RT、错误率、线程池、Redis 命中率、Kafka lag。</li>
+</ul>
+<p><strong>活动后</strong></p>
+<ul>
+<li>复盘：峰值、瓶颈、故障、改进。</li>
+<li>对账：奖励 / 榜单 / 配置。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
+<p><strong>&quot;活动峰值怎么扛？&quot;</strong></p>
+<blockquote>
+<p>先容量评估 + 压测，再分层扛：聚合接口 Pipeline 并行 + 单模块故障隔离，热点数据本地缓存 + Redis 多实例，非核心功能降级、入口限流；活动前演练，活动后复盘。</p>
+</blockquote>
+<p><strong>&quot;捕鱼并发怎么处理？&quot;</strong></p>
+<blockquote>
+<p>条件更新抢处理权，唯一索引防重复刷鱼，溢出伤害用 <code>orderNo_depth</code> 保幂等，死锁 / 唯一键冲突重查兜底。</p>
+</blockquote>
+<p><strong>&quot;余额变更怎么保证单写者？&quot;</strong></p>
+<blockquote>
+<p>Redisson 锁 + wait/lease/看门狗，失败 fail-fast 或降级 DB；按 biz+userId 控制锁范围，带指标。</p>
+</blockquote>
+<p><strong>&quot;这个设计有什么风险？&quot;</strong></p>
+<blockquote>
+<p>锁 TTL / 看门狗、缓存一致性、热点 Key、线程池隔离、Kafka 重复消费；都要有监控和兜底。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p>Markdown 源文件：<a href="../../content/activity-concurrency.md">activity-concurrency.md</a></p>
+      <p><a href="/">返回入口</a> · <a href="/projects/">项目档案</a> · <a href="/devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

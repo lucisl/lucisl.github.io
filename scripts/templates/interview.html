@@ -6,23 +6,23 @@
     <title>{{TITLE}}</title>
     <meta name="description" content="{{DESCRIPTION}}">
     <meta name="theme-color" content="#eef0f3">
-    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../../assets/workspace.css">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/workspace.css">
   </head>
   <body class="ws-body">
     <a class="ws-skip" href="#ws-main">跳到主要内容</a>
 
     <header class="ws-topbar">
       <div class="ws-topbar-inner">
-        <a class="ws-brand" href="../index.html" aria-label="面试题库首页">
+        <a class="ws-brand" href="/interview/" aria-label="面试题库首页">
           <span class="ws-logo" aria-hidden="true">I</span>
           Interview
         </a>
         <nav class="ws-topnav" aria-label="站点导航">
-          <a href="../index.html" aria-current="page">面试题库</a>
-          <a href="../../projects/">项目档案</a>
-          <a href="../../devkit/">工具箱</a>
-          <a href="../../">返回入口</a>
+          <a href="/interview/" aria-current="page">面试题库</a>
+          <a href="/projects/">项目档案</a>
+          <a href="/devkit/">工具箱</a>
+          <a href="/">返回入口</a>
         </nav>
       </div>
     </header>
@@ -36,6 +36,8 @@
         <ul class="ws-project-list">
 {{RAIL}}
         </ul>
+
+{{SUBNAV}}
 
         <div class="ws-rail-note">
           题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
@@ -52,7 +54,7 @@
       <main id="ws-main" class="ws-main">
         <header class="ws-page-head">
           <p class="ws-breadcrumb">
-            <a href="../index.html">面试题库</a>
+            <a href="/interview/">面试题库</a>
             <span>/</span>
             <span>{{BREADCRUMB}}</span>
           </p>
@@ -70,7 +72,7 @@
     <footer class="ws-footer">
       <p>Interview · 面试题库</p>
       <p>Markdown 源文件：<a href="{{SOURCE_HREF}}">{{SOURCE_NAME}}</a></p>
-      <p><a href="../../">返回入口</a> · <a href="../../projects/">项目档案</a> · <a href="../../devkit/">工具箱</a></p>
+      <p><a href="/">返回入口</a> · <a href="/projects/">项目档案</a> · <a href="/devkit/">工具箱</a></p>
     </footer>
   </body>
 </html>

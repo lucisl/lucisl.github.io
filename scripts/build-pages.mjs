@@ -349,9 +349,51 @@ const PAGES = [
   },
 ];
 
+const INTERVIEW_SECTIONS = {
+  ai: {
+    index: '001',
+    name: 'AI 落地',
+    sub: 'Agent · RAG · MCP · Eval',
+    href: '/interview/ai/',
+    subhead: 'AI 文档',
+    items: [
+      { key: 'overview', name: '题库', href: '/interview/ai/' },
+      {
+        key: 'highlights',
+        name: '落地亮点',
+        href: '/interview/ai/highlights/',
+      },
+    ],
+  },
+  activity: {
+    index: '002',
+    name: '活动专项',
+    sub: '活动引擎 · 一致性 · 高并发',
+    href: '/interview/activity/',
+    subhead: '活动专题',
+    items: [
+      { key: 'overview', name: '题库', href: '/interview/activity/' },
+      { key: 'rank', name: '排行榜', href: '/interview/activity/rank/' },
+      { key: 'scanner', name: '扫表', href: '/interview/activity/scanner/' },
+      { key: 'pipeline', name: '管道', href: '/interview/activity/pipeline/' },
+      {
+        key: 'reward',
+        name: '奖励一致性',
+        href: '/interview/activity/reward/',
+      },
+      {
+        key: 'concurrency',
+        name: '高并发玩法',
+        href: '/interview/activity/concurrency/',
+      },
+    ],
+  },
+};
+
 const INTERVIEW_PAGES = [
   {
-    key: 'ai',
+    section: 'ai',
+    topic: 'overview',
     source: 'interview/content/ai.md',
     output: 'interview/ai/index.html',
     title: 'AI 落地 — 面试题库 — Interview',
@@ -360,14 +402,29 @@ const INTERVIEW_PAGES = [
     eyebrow: 'INTERVIEW / AI LANDING',
     breadcrumb: '001 / AI 落地',
     h1: 'AI 落地',
-    h1Note: '',
     tagline:
       'Agent 运行时、MCP、RAG、Eval、模型降级，按 WorkHub 真实实现整理。',
     sourceHref: '../content/ai.md',
     sourceName: 'ai.md',
   },
   {
-    key: 'activity',
+    section: 'ai',
+    topic: 'highlights',
+    source: 'interview/content/ai-highlights.md',
+    output: 'interview/ai/highlights/index.html',
+    title: 'AI 落地亮点 — 面试题库 — Interview',
+    description:
+      'WorkHub 的 AI 落地技术亮点：Agent 运行时、MCP 工具生态、反馈闭环、线上巡检、RAG、Eval、模型降级与 Guardrails。',
+    eyebrow: 'INTERVIEW / AI HIGHLIGHTS',
+    breadcrumb: '001 / AI 落地 / 亮点',
+    h1: 'AI 落地亮点',
+    tagline: 'WorkHub 里真正有技术含量的 7 个 AI 落地设计。',
+    sourceHref: '../../content/ai-highlights.md',
+    sourceName: 'ai-highlights.md',
+  },
+  {
+    section: 'activity',
+    topic: 'overview',
     source: 'interview/content/activity.md',
     output: 'interview/activity/index.html',
     title: '活动专项 — 面试题库 — Interview',
@@ -376,11 +433,86 @@ const INTERVIEW_PAGES = [
     eyebrow: 'INTERVIEW / ACTIVITY',
     breadcrumb: '002 / 活动专项',
     h1: '活动专项',
-    h1Note: '',
     tagline:
       '活动引擎、组件化、奖励一致性与高并发，按 Lita 真实实现整理。',
     sourceHref: '../content/activity.md',
     sourceName: 'activity.md',
+  },
+  {
+    section: 'activity',
+    topic: 'rank',
+    source: 'interview/content/activity-rank.md',
+    output: 'interview/activity/rank/index.html',
+    title: '排行榜 — 活动专项 — Interview',
+    description:
+      'mod_common_rank_record 的设计：append-only 记账表、唯一键幂等、Redis 结果缓存、窗口函数排名。',
+    eyebrow: 'ACTIVITY / RANK',
+    breadcrumb: '002 / 活动 / 排行榜',
+    h1: '排行榜',
+    tagline:
+      'mod_common_rank_record：append-only 记账表 + 唯一键幂等 + Redis 结果缓存。',
+    sourceHref: '../../content/activity-rank.md',
+    sourceName: 'activity-rank.md',
+  },
+  {
+    section: 'activity',
+    topic: 'scanner',
+    source: 'interview/content/activity-scanner.md',
+    output: 'interview/activity/scanner/index.html',
+    title: '扫表器 — 活动专项 — Interview',
+    description:
+      'basic-scanner 的设计：游标 checkpoint、正扫/倒扫、Kafka 消息、@ScannerMessage 注解消费。',
+    eyebrow: 'ACTIVITY / SCANNER',
+    breadcrumb: '002 / 活动 / 扫表',
+    h1: '扫表器',
+    tagline: 'ScannerMessage：把 DB 变更变成 Kafka 事件。',
+    sourceHref: '../../content/activity-scanner.md',
+    sourceName: 'activity-scanner.md',
+  },
+  {
+    section: 'activity',
+    topic: 'pipeline',
+    source: 'interview/content/activity-pipeline.md',
+    output: 'interview/activity/pipeline/index.html',
+    title: '管道 — 活动专项 — Interview',
+    description:
+      '配置驱动的活动流：Nacos YAML、模块注册、Pipeline 并行、故障隔离、零代码边界。',
+    eyebrow: 'ACTIVITY / PIPELINE',
+    breadcrumb: '002 / 活动 / 管道',
+    h1: '管道',
+    tagline: '配置驱动的活动流：模块 + Pipeline + YAML。',
+    sourceHref: '../../content/activity-pipeline.md',
+    sourceName: 'activity-pipeline.md',
+  },
+  {
+    section: 'activity',
+    topic: 'reward',
+    source: 'interview/content/activity-reward.md',
+    output: 'interview/activity/reward/index.html',
+    title: '奖励一致性 — 活动专项 — Interview',
+    description:
+      '活动奖励一致性：GET/USE 双流水、唯一键幂等、宝箱多级结算、回收与补偿、对账。',
+    eyebrow: 'ACTIVITY / REWARD',
+    breadcrumb: '002 / 活动 / 奖励一致性',
+    h1: '奖励一致性',
+    tagline: '奖励不是发个奖，是资金一致性。',
+    sourceHref: '../../content/activity-reward.md',
+    sourceName: 'activity-reward.md',
+  },
+  {
+    section: 'activity',
+    topic: 'concurrency',
+    source: 'interview/content/activity-concurrency.md',
+    output: 'interview/activity/concurrency/index.html',
+    title: '高并发玩法 — 活动专项 — Interview',
+    description:
+      '活动高并发：捕鱼条件更新、宝箱状态机、余额单写者锁、Redis 多实例、事件驱动与峰值治理。',
+    eyebrow: 'ACTIVITY / CONCURRENCY',
+    breadcrumb: '002 / 活动 / 高并发玩法',
+    h1: '高并发玩法',
+    tagline: '条件更新、唯一索引、锁、缓存分层与事件驱动。',
+    sourceHref: '../../content/activity-concurrency.md',
+    sourceName: 'activity-concurrency.md',
   },
 ];
 
@@ -456,36 +588,36 @@ function renderProjects(pageKey) {
   ).join('\n');
 }
 
-function renderInterviewRail(activeKey) {
-  const items = [
-    {
-      key: 'ai',
-      index: '001',
-      name: 'AI 落地',
-      sub: 'Agent · RAG · MCP · Eval',
-      href: '../ai/',
-    },
-    {
-      key: 'activity',
-      index: '002',
-      name: '活动专项',
-      sub: '活动引擎 · 一致性 · 高并发',
-      href: '../activity/',
-    },
-  ];
-  return items
-    .map(
-      (item) => `          <li>
-            <a class="ws-project-link${item.key === activeKey ? ' is-active' : ''}" href="${item.href}">
-              <span class="ws-project-index">${item.index}</span>
+function renderInterviewRail(page) {
+  return Object.entries(INTERVIEW_SECTIONS)
+    .map(([key, section]) => {
+      const active = key === page.section ? ' is-active' : '';
+      return `          <li>
+            <a class="ws-project-link${active}" href="${section.href}">
+              <span class="ws-project-index">${section.index}</span>
               <span>
-                <b>${item.name}</b>
-                <small>${item.sub}</small>
+                <b>${section.name}</b>
+                <small>${section.sub}</small>
               </span>
             </a>
-          </li>`,
+          </li>`;
+    })
+    .join('\n');
+}
+
+function renderInterviewSubnav(page) {
+  const section = INTERVIEW_SECTIONS[page.section];
+  if (!section) return '';
+  const activeTopic = page.topic ?? 'overview';
+  const items = section.items
+    .map(
+      (item) => `          <li><a class="${item.key === activeTopic ? 'is-active' : ''}" href="${item.href}">${item.name}</a></li>`,
     )
     .join('\n');
+  return `        <div class="ws-rail-subhead">${section.subhead}</div>
+        <ul class="ws-topic-list">
+${items}
+        </ul>`;
 }
 
 function renderMeta(meta) {
@@ -561,9 +693,9 @@ export async function buildPages() {
       .replaceAll('{{EYEBROW}}', escapeHtml(page.eyebrow))
       .replaceAll('{{BREADCRUMB}}', escapeHtml(page.breadcrumb))
       .replaceAll('{{H1}}', escapeHtml(page.h1))
-      .replaceAll('{{H1_NOTE}}', escapeHtml(page.h1Note))
       .replaceAll('{{TAGLINE}}', escapeHtml(page.tagline))
-      .replaceAll('{{RAIL}}', renderInterviewRail(page.key))
+      .replaceAll('{{RAIL}}', renderInterviewRail(page))
+      .replaceAll('{{SUBNAV}}', renderInterviewSubnav(page))
       .replaceAll('{{TOC}}', toc)
       .replaceAll('{{CONTENT}}', content)
       .replaceAll('{{SOURCE_HREF}}', sourceHref)

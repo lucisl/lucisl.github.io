@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>排行榜 — 活动专项 — Interview</title>
+    <meta name="description" content="mod_common_rank_record 的设计：append-only 记账表、唯一键幂等、Redis 结果缓存、窗口函数排名。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="/interview/" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="/interview/" aria-current="page">面试题库</a>
+          <a href="/projects/">项目档案</a>
+          <a href="/devkit/">工具箱</a>
+          <a href="/">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="/interview/ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="/interview/activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">活动专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="/interview/activity/">题库</a></li>
+          <li><a class="is-active" href="/interview/activity/rank/">排行榜</a></li>
+          <li><a class="" href="/interview/activity/scanner/">扫表</a></li>
+          <li><a class="" href="/interview/activity/pipeline/">管道</a></li>
+          <li><a class="" href="/interview/activity/reward/">奖励一致性</a></li>
+          <li><a class="" href="/interview/activity/concurrency/">高并发玩法</a></li>
+        </ul>
+
+        <div class="ws-rail-note">
+          题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
+        </div>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">一句话</a></li>
+            <li><a href="#chapter-2">1. 表结构：流水 + 快照</a></li>
+            <li><a href="#chapter-3">2. 写入链路：锁 + 事务 + 唯一键</a></li>
+            <li><a href="#chapter-4">3. 查询链路：Redis 结果 + SQL 窗口函数</a></li>
+            <li><a href="#chapter-5">4. 贡献者：player ↔ contributor 双向</a></li>
+            <li><a href="#chapter-6">5. 这张表的取舍</a></li>
+            <li><a href="#chapter-7">6. 面试怎么讲</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="/interview/">面试题库</a>
+            <span>/</span>
+            <span>002 / 活动 / 排行榜</span>
+          </p>
+          <p class="ws-eyebrow">ACTIVITY / RANK</p>
+          <div class="ws-title-row">
+            <h1>排行榜</h1>
+          </div>
+          <p class="ws-tagline">mod_common_rank_record：append-only 记账表 + 唯一键幂等 + Redis 结果缓存。</p>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
+<p><code>mod_common_rank_record</code> 不是一张&quot;排行榜结果表&quot;，而是一张 <strong>append-only（只追加）的记账表</strong>：每次加分插一条流水，唯一键做幂等，Redis 存结果，DB 存事实。</p>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 表结构：流水 + 快照</h2>
+<pre><code class="language-sql">create table mod_common_rank_record
+(
+    id           bigint auto_increment primary key,
+    biz          varchar(32)  not null,  -- 业务
+    topic        varchar(64)  not null,  -- 榜单场景
+    player       varchar(128) not null,  -- 排行目标：用户/房间/家族/CP
+    contributor  varchar(128),           -- 贡献者
+    `key`        varchar(64)  not null,  -- 空间：日榜/总榜/阶段
+    locale       varchar(16),            -- 大区
+    trans_no     varchar(200) not null,  -- 业务流水号
+    amount       decimal(16,2) not null, -- 本次增加
+    total_amount decimal(16,2) not null, -- 增加后的累计
+    extra        varchar(256),
+    create_time  bigint       not null,
+    unique key idx_biz_trans (biz, topic, trans_no),
+    key idx_biz_player (biz, topic, player, id)
+);
+</code></pre>
+<p><strong>关键设计</strong></p>
+<ul>
+<li><strong>只追加</strong>：不 update 旧记录；每次 <code>amount</code> 插一条，<code>total_amount</code> 存&quot;这次加完后的累计快照&quot;。</li>
+<li><strong>唯一键</strong>：<code>(biz, topic, trans_no)</code> 是幂等闸门；同一业务流水重复消费，第二次 insert 直接 <code>DuplicateKey</code>。</li>
+<li><strong>查询索引</strong>：<code>(biz, topic, player, id)</code> 支持&quot;某玩家最新一条&quot;和&quot;某玩家流水&quot;。</li>
+<li><strong>贡献者</strong>：<code>contributor</code> 让榜单支持&quot;谁给这个玩家贡献了多少&quot;。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 写入链路：锁 + 事务 + 唯一键</h2>
+<p><code>ModCommonRankService.increase()</code>：</p>
+<ol>
+<li><strong>Redis 锁</strong>：<code>ModCommonRankRecord:increase:{biz}:{topic}:{key}:{player}</code>，<code>SETNX</code> + 1 秒 TTL，抢不到就 <code>sleep(10ms)</code> 自旋。</li>
+<li><strong>查最新记录</strong>：<code>getLatestRecord</code> 取该 player 在该 key 下的最后一条。</li>
+<li><strong>算新累计</strong>：<code>newTotal = latest.totalAmount + amount</code>（没有历史则等于 <code>amount</code>）。</li>
+<li><strong>插入流水</strong>：<code>trans_no</code> 唯一键冲突 → 说明已处理，返回 <code>null</code>。</li>
+<li><strong>更新贡献者</strong>：写 player→contributor、contributor→player 两个 Redis 维度。</li>
+<li><strong>更新结果缓存</strong>：把最新 <code>totalAmount</code> 写到 <code>ModCommonRankResultRedis</code>。</li>
+<li><strong>释放锁</strong>：<code>finally</code> 删除 Redis key。</li>
+</ol>
+<p><strong>为什么先锁再查再插？</strong></p>
+<ul>
+<li>同一 player 的并发加分，如果两个请求都读到同一个 <code>latest</code>，会算出一样的 <code>totalAmount</code>，后写覆盖前写，导致少加。</li>
+<li>锁把&quot;读 latest → 算 total → insert&quot;变成串行；唯一键再兜底重复流水。</li>
+</ul>
+<p><strong>技术难点 / 风险</strong></p>
+<ul>
+<li>锁 TTL 只有 1 秒：如果事务执行超过 1 秒，锁可能提前过期，并发仍可能穿透；更稳的做法是 Redisson 看门狗续期。</li>
+<li>自旋锁会占线程；高并发下要评估等待时间，必要时改成分段锁 / 本地锁 + Redis 锁。</li>
+<li><code>increase()</code> 捕获所有异常返回 <code>null</code>，调用方必须判断 <code>null</code>，否则会&quot;以为加上了&quot;。</li>
+<li>Redis 结果更新在 DB 事务内，Redis 不是事务资源；极端情况下 DB 回滚、Redis 已更新，需要 <code>syncResult</code> 重建。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 查询链路：Redis 结果 + SQL 窗口函数</h2>
+<p><strong>在线读</strong></p>
+<ul>
+<li>TopN、玩家排名、贡献者榜都走 <code>ModCommonRankResultRedis</code>，不直接扫流水表。</li>
+<li><code>getTopNWithContributors</code>、<code>getTopNContributors</code>、<code>getTopNPlayersOfContributor</code> 分别支持&quot;带贡献者的榜&quot;&quot;某玩家的贡献者&quot;&quot;某贡献者支持的玩家&quot;。</li>
+</ul>
+<p><strong>落库查 / 结算查</strong></p>
+<pre><code class="language-sql">SELECT t.player, t.total_amount
+FROM (
+  SELECT r.*,
+         ROW_NUMBER() OVER (
+           PARTITION BY player
+           ORDER BY total_amount DESC, create_time ASC
+         ) AS rn
+  FROM mod_common_rank_record r
+  WHERE biz = ? AND topic = ? AND `key` = ? AND locale = ?
+) t
+WHERE t.rn = 1
+ORDER BY t.total_amount DESC, t.create_time ASC
+LIMIT ?;
+</code></pre>
+<p>两层 <code>ROW_NUMBER()</code>：</p>
+<ul>
+<li>内层：每个 player 取 <code>total_amount</code> 最大、<code>create_time</code> 最早的一条（最新快照）。</li>
+<li>外层：按 <code>total_amount DESC, create_time ASC</code> 排名，解决同分排序。</li>
+</ul>
+<p><strong>重建</strong></p>
+<ul>
+<li><code>syncResult(biz, topic, locale, key)</code>：从 DB 取每个 player 的最新记录，清 Redis，重写。</li>
+<li><code>syncAllResult(biz)</code>：按 <code>DISTINCT topic/key/locale</code> 全量重建。</li>
+<li><code>transferData()</code>：旧 Redis → 新 Redis 的迁移任务。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 贡献者：player ↔ contributor 双向</h2>
+<p><code>increaseContributor()</code> 写两个 Redis 维度：</p>
+<ul>
+<li><code>player → contributors</code>：这个玩家是谁撑起来的，用于&quot;玩家榜 + 贡献者 TopN&quot;。</li>
+<li><code>contributor → players</code>：这个贡献者支持了哪些玩家，用于&quot;贡献者视角&quot;。</li>
+</ul>
+<p><strong>用途</strong></p>
+<ul>
+<li>陪玩榜 / 家族榜 / CP 榜：不仅要看玩家收了多少，还要看谁贡献的。</li>
+<li>活动结算：按排名发奖时，可以给&quot;玩家 + 贡献者&quot;分别发奖。</li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>贡献者数据只写 Redis，不落流水表（<code>contributor</code> 字段在记录里有，但聚合在 Redis）。</li>
+<li>Redis 丢失后，贡献者维度需要从流水重新聚合，不能只靠 <code>syncResult</code> 恢复结果榜。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 这张表的取舍</h2>
+<p><strong>优点</strong></p>
+<ul>
+<li>流水可追溯：每次加分有 <code>trans_no</code>、<code>amount</code>、<code>total_amount</code>、时间。</li>
+<li>幂等简单：唯一键就是闸门，不依赖&quot;先查后写&quot;。</li>
+<li>查询快：在线读 Redis，DB 只做事实和重建。</li>
+<li>支持贡献者、分空间（key）、分大区（locale）。</li>
+</ul>
+<p><strong>代价 / 坑</strong></p>
+<ul>
+<li>表会一直增长：需要归档 / 分区 / 清理策略。</li>
+<li><code>trans_no</code> 唯一键是 <code>(biz, topic, trans_no)</code>，不包含 <code>key/player/locale</code>；同一 <code>trans_no</code> 不能在不同 key 复用，业务流水号必须全局唯一。</li>
+<li><code>getLatestRecord</code> 只按 <code>biz/topic/player/key</code> 查，不带 <code>locale</code>；如果同一 key 跨大区共用，需要确认隔离口径。</li>
+<li>锁 TTL 1 秒、自旋等待、异常吞掉，都是高并发下要盯的点。</li>
+<li>Redis 结果与 DB 事实可能短暂不一致；要有重建 / 对账任务。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 面试怎么讲</h2>
+<p><strong>&quot;这个排行榜怎么设计的？&quot;</strong></p>
+<blockquote>
+<p>不是一张结果表，是一张只追加的记账表：每次加分插一条流水，<code>trans_no</code> 唯一键做幂等，<code>total_amount</code> 存累计快照；在线读 Redis 结果，DB 用窗口函数取每个玩家最新一条再排名；贡献者用 Redis 双向维度支持&quot;谁撑起了谁&quot;。</p>
+</blockquote>
+<p><strong>&quot;并发加分怎么保证不丢？&quot;</strong></p>
+<blockquote>
+<p>先按 <code>biz/topic/key/player</code> 加 Redis 锁，把&quot;读 latest → 算 total → insert&quot;串行；唯一键 <code>(biz, topic, trans_no)</code> 再兜底重复流水。锁 TTL 1 秒、自旋 10ms，高并发下要评估锁续期和等待成本。</p>
+</blockquote>
+<p><strong>&quot;Redis 和 DB 不一致怎么办？&quot;</strong></p>
+<blockquote>
+<p>DB 是事实，Redis 是结果缓存；有 <code>syncResult</code> / <code>syncAllResult</code> 可以从流水重建。贡献者维度是 Redis 聚合，丢了要回放流水，所以流水表不能随便删。</p>
+</blockquote>
+<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<blockquote>
+<p>表会一直涨，要归档；<code>trans_no</code> 唯一键粒度是 biz/topic，跨 key 不能复用；锁 TTL 和异常吞掉是风险点；Redis 结果更新在 DB 事务内，极端情况下要重建。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p>Markdown 源文件：<a href="../../content/activity-rank.md">activity-rank.md</a></p>
+      <p><a href="/">返回入口</a> · <a href="/projects/">项目档案</a> · <a href="/devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

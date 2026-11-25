@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管道 — 活动专项 — Interview</title>
+    <meta name="description" content="配置驱动的活动流：Nacos YAML、模块注册、Pipeline 并行、故障隔离、零代码边界。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="/interview/" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="/interview/" aria-current="page">面试题库</a>
+          <a href="/projects/">项目档案</a>
+          <a href="/devkit/">工具箱</a>
+          <a href="/">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="/interview/ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="/interview/activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">活动专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="/interview/activity/">题库</a></li>
+          <li><a class="" href="/interview/activity/rank/">排行榜</a></li>
+          <li><a class="" href="/interview/activity/scanner/">扫表</a></li>
+          <li><a class="is-active" href="/interview/activity/pipeline/">管道</a></li>
+          <li><a class="" href="/interview/activity/reward/">奖励一致性</a></li>
+          <li><a class="" href="/interview/activity/concurrency/">高并发玩法</a></li>
+        </ul>
+
+        <div class="ws-rail-note">
+          题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
+        </div>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">一句话</a></li>
+            <li><a href="#chapter-2">1. 活动 = 配置 + 组件 + Pipeline</a></li>
+            <li><a href="#chapter-3">2. 配置模型：main.yaml + biz.yaml</a></li>
+            <li><a href="#chapter-4">3. 模块注册：注解 + Provider</a></li>
+            <li><a href="#chapter-5">4. Pipeline 执行：并行 + 故障隔离</a></li>
+            <li><a href="#chapter-6">5. 零代码 / 低代码的边界</a></li>
+            <li><a href="#chapter-7">6. 迁移与取舍</a></li>
+            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="/interview/">面试题库</a>
+            <span>/</span>
+            <span>002 / 活动 / 管道</span>
+          </p>
+          <p class="ws-eyebrow">ACTIVITY / PIPELINE</p>
+          <div class="ws-title-row">
+            <h1>管道</h1>
+          </div>
+          <p class="ws-tagline">配置驱动的活动流：模块 + Pipeline + YAML。</p>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
+<p>活动不是&quot;一个活动写一套 Controller&quot;，而是 <strong>配置（模块 + Pipeline + 时间 + 大区 + 奖励）+ 组件</strong>；标准活动只配 YAML，复杂玩法才写组件。</p>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 活动 = 配置 + 组件 + Pipeline</h2>
+<p>以 active-v3 为例：</p>
+<pre><code>业务入口 → Business → Active → Module → Coordinator → 基础设施层
+</code></pre>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>层</th>
+<th>职责</th>
+<th>约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Business</td>
+<td>一个业务/活动一个子目录，放配置、Controller、Service</td>
+<td>可调用 Active，不能反向</td>
+</tr>
+<tr>
+<td>Active</td>
+<td>活动层，配置文件 + 入口文件驱动</td>
+<td>可调用 Module，不能反向</td>
+</tr>
+<tr>
+<td>Module</td>
+<td>功能模块，自成闭环</td>
+<td>可调用 Coordinator，不能反向</td>
+</tr>
+<tr>
+<td>Coordinator</td>
+<td>跨模块公共能力：用户、奖励、消息、打点</td>
+<td>不反向依赖 Module/Active</td>
+</tr>
+<tr>
+<td>基础设施</td>
+<td>Service / Mapper / DB</td>
+<td>所有层可调用</td>
+</tr>
+</tbody></table></div>
+<p><strong>核心思想</strong></p>
+<ul>
+<li>活动 = 积木组合，不是复制粘贴。</li>
+<li>模块只依赖配置类和上下文，不直接依赖别的模块；跨模块走 Coordinator。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 配置模型：main.yaml + biz.yaml</h2>
+<h3>main.yaml</h3>
+<p>决定&quot;加载哪些活动&quot;：</p>
+<ul>
+<li><code>businesses</code>：活动列表</li>
+<li><code>aliases</code>：别名路由</li>
+<li>加载后校验别名时间不重叠</li>
+</ul>
+<h3>biz.yaml</h3>
+<p>一个活动的完整配置：</p>
+<pre><code class="language-yaml">biz: pk-v202608
+active: PkActive
+enableLocales: [in, vi, ph, ko]
+langSheet: &#39;Activity$pk-260817&#39;
+startTime: 2026-08-12T14:00:00+08:00
+finishTime: 2026-09-01T23:59:59+08:00
+
+modules:
+  player_in_n_200:
+    module: RankModule
+    configuration:
+      topic: player_in_n_200
+      playerType: USER
+      startTime: &#39;...&#39;
+      finishTime: &#39;...&#39;
+      mainRound:
+        settles:
+          - strategy: PLAYER_LIST
+            topN: 200
+          - strategy: AWARD
+            topN: 10
+            settleAward:
+              awardName: player_in_n_200
+
+pipelines:
+  room-settle:
+    modules:
+      - module: room_in_n_200
+        event: settle
+      - module: room_in_200_100
+        event: settle
+</code></pre>
+<p><strong>技术点</strong></p>
+<ul>
+<li>配置从代码下沉到 Nacos；改活动不改代码。</li>
+<li><code>modules</code> 定义&quot;有哪些组件实例&quot;；<code>pipelines</code> 定义&quot;一次请求按什么顺序/组合执行&quot;。</li>
+<li>支持 <code>sameParameter</code> / <code>sameResponse</code> / <code>responseException</code>，控制 Pipeline 的参数和异常语义。</li>
+<li><code>debug</code> 支持时间偏移，做活动时间旅行。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 模块注册：注解 + Provider</h2>
+<p><strong>active-main</strong></p>
+<ul>
+<li><code>@DispatchModule(config = XxxConfig.class)</code> 标模块类。</li>
+<li><code>@DispatchModuleEvent(&quot;event&quot;)</code> 标事件方法。</li>
+<li><code>DispatchModuleProcessor</code> 是 <code>BeanPostProcessor</code>：扫描注解、校验方法参数、注册到 <code>DispatchModuleProvider</code>。</li>
+<li><code>DispatchModuleProvider</code> 维护 <code>module → event → method</code>。</li>
+</ul>
+<p><strong>active-v3</strong></p>
+<ul>
+<li><code>@Module</code> / <code>@ModuleEvent</code>，<code>ModuleProcessor</code> + <code>ModuleProvider</code>，同一套思路。</li>
+<li><code>@ActiveRequest</code> / <code>@ActiveConsumer</code> / <code>@ActiveCron</code> 分别注册 HTTP 请求、Kafka 消费、定时任务。</li>
+</ul>
+<p><strong>为什么用注解</strong></p>
+<ul>
+<li>组件作者只写&quot;配置类 + 事件方法&quot;，不关心注册表。</li>
+<li>新增组件不需要改引擎；Provider 自动发现。</li>
+<li>活动 YAML 只引用模块名/事件名，解耦。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. Pipeline 执行：并行 + 故障隔离</h2>
+<p><code>DispatcherV2</code> / <code>BaseActive.executePipeline()</code>：</p>
+<ul>
+<li>每个 <code>module+event</code> 一个 <code>Callable</code>，提交到线程池。</li>
+<li>线程池：64/128，<code>ArrayBlockingQueue(128)</code>。</li>
+<li>每个任务执行前 <code>MDC.put(user/trace/locale)</code>、<code>Session.set(session)</code>，finally 清理。</li>
+<li><code>Future.get()</code> 聚合结果；单模块异常只写该模块的 error response，不影响其它模块。</li>
+<li><code>responseException</code> 可配置：是否让整体失败。</li>
+</ul>
+<p><strong>为什么并行</strong></p>
+<ul>
+<li>活动聚合接口通常要同时查榜单、任务、奖励、配置；串行 RT 叠加。</li>
+<li>并行后 RT 取决于最慢模块，而不是所有模块之和。</li>
+</ul>
+<p><strong>难点</strong></p>
+<ul>
+<li>上下文透传：Session 是 ThreadLocal，线程池里要手动 set/clear。</li>
+<li>故障隔离：一个模块超时/异常不能拖垮整页。</li>
+<li>线程池隔离：活动之间最好分开，避免互相抢线程。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 零代码 / 低代码的边界</h2>
+<p><strong>零代码</strong></p>
+<ul>
+<li>标准活动：YAML 配模块、Pipeline、时间、大区、奖励，不写业务代码。</li>
+<li><code>business/zeroCode/README.md</code>：只需要在 Nacos 配 <code>biz.yaml</code>（<code>dataId=biz.yaml, group=active-v3, namespace=lita-active</code>），请求就生效。</li>
+</ul>
+<p><strong>低代码</strong></p>
+<ul>
+<li>新玩法 / 新组件：还是要写 Module / Action。</li>
+<li>活动层只做组合，不重复写业务。</li>
+</ul>
+<p><strong>不要夸大</strong></p>
+<ul>
+<li>不说&quot;所有活动零代码&quot;；说&quot;标准活动零代码，复杂活动组件化&quot;。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 迁移与取舍</h2>
+<p><strong>active-main → active-v3</strong></p>
+<ul>
+<li>active-main：一个活动一个目录，Controller / Consumer / Cron 堆在全局包，互相干扰。</li>
+<li>active-v3：五层分层，Controller / Consumer / 定时任务下沉到活动内部；57%、41→13。</li>
+<li>支持 GraalVM Native Image，活动峰值弹性伸缩。</li>
+</ul>
+<p><strong>代价</strong></p>
+<ul>
+<li>双版本并行，线上到底跑哪个要确认。</li>
+<li>迁移成本高：配置、组件、数据都要迁。</li>
+<li>分层约束靠规范 + Review，不是框架强制。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
+<p><strong>&quot;活动系统怎么做的？&quot;</strong></p>
+<blockquote>
+<p>我们把活动做成配置驱动 + 组件编排的运行时：Nacos YAML 定义模块、Pipeline、时间、大区、奖励；模块用注解自动注册；活动按 Pipeline 并行执行，单模块故障隔离。标准活动零代码，复杂玩法写组件。</p>
+</blockquote>
+<p><strong>&quot;组件怎么注册？&quot;</strong></p>
+<blockquote>
+<p><code>@DispatchModule</code> / <code>@ModuleEvent</code> 标在模块和事件方法上，<code>BeanPostProcessor</code> 扫描后注册到 Provider，维护 module → event → method；活动 YAML 只引用模块名和事件名。</p>
+</blockquote>
+<p><strong>&quot;Pipeline 怎么并行？&quot;</strong></p>
+<blockquote>
+<p>每个 module+event 一个 Callable，64/128 线程池，Future 聚合；MDC/Session 透传，单模块异常只影响自己；<code>responseException</code> 控制是否整体失败。</p>
+</blockquote>
+<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<blockquote>
+<p>分层靠规范约束、双版本并行、配置和代码边界要守；活动多了以后配置治理和可观测性是重点。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p>Markdown 源文件：<a href="../../content/activity-pipeline.md">activity-pipeline.md</a></p>
+      <p><a href="/">返回入口</a> · <a href="/projects/">项目档案</a> · <a href="/devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>
+

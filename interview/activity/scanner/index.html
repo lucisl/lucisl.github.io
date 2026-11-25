@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>扫表器 — 活动专项 — Interview</title>
+    <meta name="description" content="basic-scanner 的设计：游标 checkpoint、正扫/倒扫、Kafka 消息、@ScannerMessage 注解消费。">
+    <meta name="theme-color" content="#eef0f3">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/workspace.css">
+  </head>
+  <body class="ws-body">
+    <a class="ws-skip" href="#ws-main">跳到主要内容</a>
+
+    <header class="ws-topbar">
+      <div class="ws-topbar-inner">
+        <a class="ws-brand" href="/interview/" aria-label="面试题库首页">
+          <span class="ws-logo" aria-hidden="true">I</span>
+          Interview
+        </a>
+        <nav class="ws-topnav" aria-label="站点导航">
+          <a href="/interview/" aria-current="page">面试题库</a>
+          <a href="/projects/">项目档案</a>
+          <a href="/devkit/">工具箱</a>
+          <a href="/">返回入口</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ws-layout">
+      <aside class="ws-rail" aria-label="题库导航">
+        <div class="ws-rail-head">
+          <span>题库</span>
+          <em>2</em>
+        </div>
+        <ul class="ws-project-list">
+          <li>
+            <a class="ws-project-link" href="/interview/ai/">
+              <span class="ws-project-index">001</span>
+              <span>
+                <b>AI 落地</b>
+                <small>Agent · RAG · MCP · Eval</small>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="ws-project-link is-active" href="/interview/activity/">
+              <span class="ws-project-index">002</span>
+              <span>
+                <b>活动专项</b>
+                <small>活动引擎 · 一致性 · 高并发</small>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <div class="ws-rail-subhead">活动专题</div>
+        <ul class="ws-topic-list">
+          <li><a class="" href="/interview/activity/">题库</a></li>
+          <li><a class="" href="/interview/activity/rank/">排行榜</a></li>
+          <li><a class="is-active" href="/interview/activity/scanner/">扫表</a></li>
+          <li><a class="" href="/interview/activity/pipeline/">管道</a></li>
+          <li><a class="" href="/interview/activity/reward/">奖励一致性</a></li>
+          <li><a class="" href="/interview/activity/concurrency/">高并发玩法</a></li>
+        </ul>
+
+        <div class="ws-rail-note">
+          题目按面试追问组织；专业词在括号里解释。内容基于简历与 WorkHub / Lita 的真实实现，不夸大平台能力。
+        </div>
+
+        <nav class="ws-toc" aria-label="本文目录">
+          <p>本文目录</p>
+          <ol>
+            <li><a href="#chapter-1">一句话</a></li>
+            <li><a href="#chapter-2">1. 为什么把扫表器独立出来</a></li>
+            <li><a href="#chapter-3">2. 配置模型：ScannerSetting</a></li>
+            <li><a href="#chapter-4">3. 扫描执行：XXL-Job + 游标</a></li>
+            <li><a href="#chapter-5">4. 消息：Kafka + headers</a></li>
+            <li><a href="#chapter-6">5. 消费：@ScannerMessage 注解</a></li>
+            <li><a href="#chapter-7">6. 一致性与坑</a></li>
+            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+          </ol>
+        </nav>
+      </aside>
+
+      <main id="ws-main" class="ws-main">
+        <header class="ws-page-head">
+          <p class="ws-breadcrumb">
+            <a href="/interview/">面试题库</a>
+            <span>/</span>
+            <span>002 / 活动 / 扫表</span>
+          </p>
+          <p class="ws-eyebrow">ACTIVITY / SCANNER</p>
+          <div class="ws-title-row">
+            <h1>扫表器</h1>
+          </div>
+          <p class="ws-tagline">ScannerMessage：把 DB 变更变成 Kafka 事件。</p>
+        </header>
+
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
+<p><code>basic-scanner</code> 把数据库表的变更<strong>扫出来变成 Kafka 事件</strong>：独立服务、只读库、游标 checkpoint、正扫 / 倒扫、注解消费。</p>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 为什么把扫表器独立出来</h2>
+<p><code>basic-scanner/README.md</code> 写得很直接：</p>
+<blockquote>
+<p>原：扫表的服务，独立出来服务，减少各个服务对于基础资源的依赖，降低服务的启动时间。</p>
+</blockquote>
+<p><strong>解决什么问题</strong></p>
+<ul>
+<li>业务服务不需要为了&quot;监听某张表&quot;而连一堆库、加一堆定时任务。</li>
+<li>扫表器用独立只读数据源，和业务库隔离，避免业务服务启动变重。</li>
+<li>多种扫描策略、同表不同场景的扫描优化，集中在一个服务里维护。</li>
+</ul>
+<p><strong>代价</strong></p>
+<ul>
+<li>多一个服务要部署 / 监控。</li>
+<li>消息是 <strong>at-least-once（至少一次）</strong>，消费方必须幂等。</li>
+<li>扫表有延迟，不适合强实时场景。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 配置模型：ScannerSetting</h2>
+<p><code>scanner_setting</code> 一行就是一个扫描任务：</p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td>唯一键 / 消息 action 名</td>
+</tr>
+<tr>
+<td><code>database</code></td>
+<td>数据库白名单：<code>basic</code> / <code>funbit</code> / <code>stats</code> / <code>live</code> / <code>family</code></td>
+</tr>
+<tr>
+<td><code>table</code></td>
+<td>要扫的表</td>
+</tr>
+<tr>
+<td><code>column</code></td>
+<td>监听主键（当前实现按 <code>id</code> 扫，<code>column</code> 字段保留）</td>
+</tr>
+<tr>
+<td><code>current</code></td>
+<td>扫描进度：上次扫到的 id，<code>-1</code> 表示未开始</td>
+</tr>
+<tr>
+<td><code>partition_key</code></td>
+<td>发 Kafka 时的消息 key，决定分区</td>
+</tr>
+<tr>
+<td><code>direction</code></td>
+<td>1 正序（小→大）/ 2 倒序（大→小）</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>每批条数</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>启用 / 停用</td>
+</tr>
+</tbody></table></div>
+<p><strong>技术点</strong></p>
+<ul>
+<li>每个库一个 <code>JdbcTemplate</code>，<code>getJdbcTemplate()</code> 用 switch 做白名单，不支持的库直接报错。</li>
+<li><code>current</code> 是 checkpoint（游标），不是 offset；扫到哪存到哪。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 扫描执行：XXL-Job + 游标</h2>
+<h3>正扫 <code>ScannerExecutorHandler</code></h3>
+<pre><code class="language-sql">SELECT * FROM `table`
+WHERE id &gt; {current}
+ORDER BY id ASC
+LIMIT {batchSize};
+</code></pre>
+<ol>
+<li><code>getCurrentMaxID()</code> 先查当前最大 id，用于延迟告警。</li>
+<li>按 <code>id &gt; current</code> 取一批。</li>
+<li>逐条 <code>producer.async(session, name, partitionKey, row)</code> 发 Kafka。</li>
+<li><code>current = 最后一条的 id</code>，更新 <code>scanner_setting.current</code>。</li>
+<li>如果 <code>maxid - current &gt; batchSize * 10</code>，打 <code>tooManyDelay</code> 日志。</li>
+</ol>
+<h3>倒扫 <code>ReverseScannerExecutorHandler</code></h3>
+<pre><code class="language-sql">SELECT * FROM `table`
+WHERE id &lt; {current}
+ORDER BY id DESC
+LIMIT {batchSize};
+</code></pre>
+<p>用于历史回填 / 反向补偿；和正扫共用 <code>scanner_setting</code>，靠 <code>direction</code> 区分。</p>
+<p><strong>关键点</strong></p>
+<ul>
+<li>扫表是<strong>批处理 + 游标</strong>，不是全表 select；每批只取 <code>batchSize</code>。</li>
+<li>先发消息，再更新 checkpoint；如果发完消息、更新 checkpoint 前进程挂了，下一次会重复扫这一批 → <strong>at-least-once</strong>。</li>
+<li>消费方必须按业务唯一键（order_no / trans_no / id）做幂等。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-5"><h2 id="chapter-5">4. 消息：Kafka + headers</h2>
+<p><code>BasicScannerMessageProducer</code>：</p>
+<ul>
+<li>topic：<code>basic-scanner</code>；倒扫：<code>basic-reverse-scanner</code>。</li>
+<li>key：<code>partition_key</code> 的值，保证同一业务实体进同一分区。</li>
+<li>headers：<code>action</code> / <code>timestamp</code> / <code>trace</code> / <code>app</code> / <code>userID</code> / <code>locale</code>。</li>
+<li><code>async()</code>：发送失败只记日志，不抛异常，内部重试 5 次，间隔 300ms。</li>
+<li><code>sync()</code>：发送失败抛 <code>RException</code>，用于不能丢的场景。</li>
+</ul>
+<p><strong>设计意图</strong></p>
+<ul>
+<li>消息里带 <code>trace</code> / <code>app</code> / <code>locale</code>，消费方可以还原 <strong>Session（会话上下文）</strong>，日志和业务逻辑都能按用户 / 大区处理。</li>
+<li><code>action</code> 是路由键：消费方按 action 找方法，不是按 topic 盲目消费。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 消费：@ScannerMessage 注解</h2>
+<p><code>lita-framework</code> 提供：</p>
+<pre><code class="language-java">@ScannerMessage(
+  action = &quot;funbit.user_deal_account_log&quot;,
+  messageType = UserDealAccountChangeParameter.class
+)
+public void handleUserDealAccountLog(Session session, UserDealAccountChangeParameter message) {
+    // 业务处理
+}
+</code></pre>
+<p><strong>注册机制</strong></p>
+<ul>
+<li><code>ScannerMessageProcessor</code> 是 <code>BeanPostProcessor</code>：扫描方法上的 <code>@ScannerMessage</code>，校验参数（第一个必须是 <code>Session</code>，第二个必须是 <code>messageType</code>），注册到 <code>ScannerMessageConsumer</code>。</li>
+<li><code>ScannerMessageConsumer</code> 维护 <code>action → List&lt;ClassMethod&gt;</code>；一个 action 可以有多个消费者。</li>
+<li><code>@KafkaListener(topics = {&quot;basic-scanner&quot;, &quot;basic-reverse-scanner&quot;})</code> 消费；从 headers 还原 Session，写 MDC，<code>RuntimeHandler.execute</code> 执行，finally 清理 ThreadLocal。</li>
+</ul>
+<p><strong>技术点</strong></p>
+<ul>
+<li>注解驱动：业务方只写&quot;action + 消息体 + 处理方法&quot;，不关心 Kafka 配置。</li>
+<li>一个 action 多消费者：新增消费方不用改扫表器。</li>
+<li>消费异常只记日志、不阻断其它消费者；失败重试 / 死信要业务侧兜底。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 一致性与坑</h2>
+<p><strong>at-least-once</strong></p>
+<ul>
+<li>checkpoint 在发送之后更新，崩溃会重复扫一批；消费方必须幂等。</li>
+<li>重复消息用业务唯一键去重（order_no / trans_no / 表 id）。</li>
+</ul>
+<p><strong>顺序</strong></p>
+<ul>
+<li>同一 <code>partition_key</code> 进同一分区，分区内有序；不同 key 不保证顺序。</li>
+<li>如果业务要求严格顺序，要把相关实体放进同一 key。</li>
+</ul>
+<p><strong>延迟</strong></p>
+<ul>
+<li>扫表是定时任务，有延迟；不适合&quot;支付成功立刻发奖&quot;这种强实时场景。</li>
+<li>延迟监控：<code>tooManyDelay</code> 日志 + 扫表进度。</li>
+</ul>
+<p><strong>当前实现的债</strong></p>
+<ul>
+<li><code>ScannerSetting.column</code> 字段保留，但 <code>getListOfSetting()</code> 里 SQL 固定用 <code>id</code>；要支持其它主键需要改代码。</li>
+<li>正扫和倒扫共用 <code>current</code>，方向切换要小心。</li>
+<li>消息发送是 async + 重试，极端情况下可能重复 / 丢失；关键链路用 sync 或消费方对账。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
+<p><strong>&quot;扫表器怎么设计的？&quot;</strong></p>
+<blockquote>
+<p>独立服务 + 只读库 + <code>scanner_setting</code> 配置：每张表一个游标 <code>current</code>，XXL-Job 定时按 <code>id &gt; current</code> 批量扫，发 Kafka；消息带 action / trace / locale，消费方用 <code>@ScannerMessage</code> 注解按 action 注册。正扫做增量，倒扫做回填。</p>
+</blockquote>
+<p><strong>&quot;怎么保证不丢 / 不重？&quot;</strong></p>
+<blockquote>
+<p>不丢靠 checkpoint + 至少一次；不重靠消费方幂等——业务唯一键 / 表 id 去重。扫表器本身不保证 exactly-once，它保证 at-least-once，重复是消费方要处理的。</p>
+</blockquote>
+<p><strong>&quot;为什么不用 binlog / Canal？&quot;</strong></p>
+<blockquote>
+<p>扫表器更轻、对 DB 权限要求低、可以按表/场景配游标和批量；binlog 更实时但运维和权限成本高。我们选的是&quot;够用 + 可控&quot;，不是追求最强实时。</p>
+</blockquote>
+<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<blockquote>
+<p>有延迟、会重复、<code>column</code> 字段没真正用起来、正反扫共用游标；关键链路要配合对账和幂等。</p>
+</blockquote>
+</section>
+      </main>
+    </div>
+
+    <footer class="ws-footer">
+      <p>Interview · 面试题库</p>
+      <p>Markdown 源文件：<a href="../../content/activity-scanner.md">activity-scanner.md</a></p>
+      <p><a href="/">返回入口</a> · <a href="/projects/">项目档案</a> · <a href="/devkit/">工具箱</a></p>
+    </footer>
+  </body>
+</html>
+
