@@ -67,7 +67,7 @@
         <nav class="ws-toc" aria-label="本文目录">
           <p>本文目录</p>
           <ol>
-            <li><a href="#chapter-1">一句话总览</a></li>
+            <li><a href="#chapter-1">一句话</a></li>
             <li><a href="#chapter-2">1. Agent 运行时：AI 不是聊天框，是有状态的执行者</a></li>
             <li><a href="#chapter-3">2. 工具生态：102 + 6 + 31 个 MCP 工具</a></li>
             <li><a href="#chapter-4">3. 反馈闭环：飞书群话题 → 平台 feedback → AI 处理</a></li>
@@ -76,8 +76,9 @@
             <li><a href="#chapter-7">6. Eval：给 AI 做&quot;可回归的考试&quot;</a></li>
             <li><a href="#chapter-8">7. 模型降级：主备 + 冷却 + 同会话续跑</a></li>
             <li><a href="#chapter-9">8. Guardrails：AI 能动手，但边界清楚</a></li>
-            <li><a href="#chapter-10">9. 边界：哪些不是 WorkHub 做的</a></li>
-            <li><a href="#chapter-11">面试 30 秒总览</a></li>
+            <li><a href="#chapter-10">9. 设计亮点总结</a></li>
+            <li><a href="#chapter-11">10. 边界：哪些不是 WorkHub 做的</a></li>
+            <li><a href="#chapter-12">面试 30 秒总览</a></li>
           </ol>
         </nav>
       </aside>
@@ -93,12 +94,12 @@
           <div class="ws-title-row">
             <h1>AI 落地亮点</h1>
           </div>
-          <p class="ws-tagline">WorkHub 里真正有技术含量的 7 个 AI 落地设计。</p>
+          <p class="ws-tagline">WorkHub 里真正有技术含量的 8 个 AI 落地设计。</p>
         </header>
 
-<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话总览</h2>
+<section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
 <p>WorkHub 的 AI 落地不是&quot;接个大模型 API&quot;，而是把 AI 做成研发流程里的执行角色：<strong>有状态、有工具、有权限、有评测、有降级</strong>。</p>
-<p>下面 7 个点，是项目里真正有技术含量、也最容易被面试追问的地方。</p>
+<p>下面 8 个点，是项目里真正有技术含量、也最容易被面试追问的地方。</p>
 <hr>
 </section>
 
@@ -109,16 +110,29 @@
 <li>AI 机器人接任务后，通过 <strong>Executor（执行器）会话</strong> 执行；会话支持 prompt 队列、interrupt、提问/答复、断线重连。</li>
 <li>executor-bridge 把 kiro / codex / claude-code 统一成 HTTP + SSE；opencode 直连，平台不绑死一个内核。</li>
 <li>长任务用 <strong>wakeup（定时唤醒）</strong>：等待人工确认、工单审批、脚本结果时，AI 自己设置多久后回来，不占执行容量。</li>
+<li>父子任务：父机器人拆子任务，子任务事件通过 inbox 唤醒父机器人；父任务等待用户答复期间，子任务事件排队。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>会话终态有粘性：必须用&quot;本轮用户消息时间&quot;判断终态是否新鲜，不能只看进程/连接状态。</li>
 <li>prompt 必须按会话串行：bridge 做 per-session 队列，平台不维护发送队列。</li>
 <li>任务成功 ≠ 会话成功：会话成功后还要显式&quot;申请验收&quot;，避免 AI 自己说完成。</li>
+<li>断线恢复：<code>GET /sessions/:id</code> 幂等，SSE 重连先推快照，不能依赖轮询。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>不把 AI 当&quot;一次请求&quot;：用任务状态机承接多轮、提问、返工、验收。</li>
+<li>不把执行器绑死：bridge 统一多内核，平台只依赖协议。</li>
+<li>不让 AI 自己收尾：必须显式申请验收，人来把关。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>不是全自动交付：只到 PR，不自动合并；生产写要审批。</li>
+<li>执行器能力有差异：<code>questions/interrupt/switchModel</code> 通过 <code>/health</code> 能力协商，平台按能力降级。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
-<p>我们不是让 AI 聊一句就结束，而是给它一个任务状态机和执行器会话：能接单、能提问、能返工、能验收，断线能恢复，长任务能唤醒。</p>
+<p>我们不是让 AI 聊一句就结束，而是给它一个任务状态机和执行器会话：能接单、能提问、能返工、能验收，断线能恢复，长任务能唤醒。会话成功不等于任务完成，必须显式申请验收。</p>
 </blockquote>
 <hr>
 </section>
@@ -129,12 +143,25 @@
 <li><code>lita-work</code>：102 个平台工具，覆盖需求 / 迭代 / 文档 / 知识 / 脚本 / 缺陷 / 反馈 / 灵感 / GitHub / 任务 / 工单 / 飞书。</li>
 <li><code>lita-bots</code>：6 个工具，把平台机器人当 <strong>Sub-agent（子智能体）</strong> 调用，支持多轮、提问、中断、断线找回。</li>
 <li><code>lita-proxy</code>：31 个运维工具，覆盖 MySQL / ClickHouse / ODPS / Redis / SLS / Nacos / XXL-JOB / Firebase / GitHub PR / 工单。</li>
+<li><code>lita-work</code> / <code>lita-bots</code> 接受机器人令牌；<code>lita-proxy</code> 支持资源权限 <code>none/read/write</code>、操作权限 <code>allow/deny</code>、工单权限 <code>none/create</code>。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>工具不是越多越好：要按身份、作用域、读写权限拆，否则 AI 很容易越权。</li>
 <li>生产写不能直接给 AI：生产只读，测试可写，生产写必须走工单 + 人工审批。</li>
 <li>工具结果要可审计：谁在什么时候调用了什么、参数是什么、结果是什么。</li>
+<li>子 Agent 调用要隔离上下文：<code>lita-bots</code> 会话 7 天不活跃过期，提问用 <code>bot_answer</code> 续跑。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>细粒度工具 vs 大而全接口：细粒度更适合 AI 选择，也更容易做权限。</li>
+<li>工具数量不是亮点，<strong>权限模型</strong>才是：同一套工具，不同机器人看到的资源/操作不同。</li>
+<li>生产写走工单：牺牲即时性，换可审计和可回滚。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li><code>lita-proxy</code> 生产可写资源任何配置都不能直接操作，只能出现在工单资源清单里。</li>
+<li>工具调用失败要业务侧幂等/重试，平台只保证协议和权限。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -150,12 +177,25 @@
 <li>首帖自动创建任务定义 ID=8「用户反馈处理」，AI 读 feedback + 跟帖，判断真实性 / 类型 / 紧急度，能处理就处理，不能处理给结论和转派建议。</li>
 <li>群策略支持 <code>smart</code>（AI 判断是否回复）、<code>at</code>（仅 @）、<code>record</code>（仅记录）、<code>feedback</code>（反馈采集）。</li>
 <li>智能反馈按 5 秒 / 10 条 <strong>Batch（批处理）</strong>，AI 判定不需要回复时输出 <code>[不回复]</code>，避免刷屏。</li>
+<li>群会话按 <code>feishu:group:{chatId}</code> / <code>feishu:group:{chatId}:t:{threadId}</code> 隔离，不和私聊混。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>重复消息：按消息 id / topic root 去重，机器人自身消息不回传，防回声。</li>
-<li>群会话隔离：每个群 / 话题独立 session，不和私聊混。</li>
-<li>人在回路：AI 判断错了要能转人工，不能把反馈直接关掉。</li>
+<li>飞书话题的 <code>thread_id</code> 可能缺失/变化，不能单独作为判重键；必须用 <code>root_id</code> 归一。</li>
+<li>AI 判断错了要能转人工，不能把反馈直接关掉。</li>
+<li>批处理要兼顾时效和打扰：5 秒 / 10 条是折中。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>平台确定性采集，AI 只做分发判断：采集不依赖模型，避免漏收。</li>
+<li>群策略可配：不同群不同打扰级别，智能模式可以主动不回复。</li>
+<li>一次会话只处理一个话题：避免上下文串台。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>AI 不直接改生产；处理不了的转人工 / 工单。</li>
+<li>群消息读取需要飞书应用权限（<code>im:message</code> 等），拉取失败降级为不回上下文。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -172,11 +212,23 @@
 <li>检查内容：<code>mod_common_round</code> 结算状态 <code>status=200</code>、活动 API 拉前 N 名榜单、奖励配置文档解析、<code>mod_common_award_record</code> 发奖记录，按 rank 区间 / 奖励类型 / 发放对象核对差异。</li>
 <li>运行结果有 SSE 实时输出、运行历史、成功 / 失败统计；异常可转缺陷 / 工单。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>只读生产：只读数据源 / 只读事务、带 LIMIT、超时控制，检查脚本不写业务库。</li>
 <li>确定性：检查逻辑是脚本，不是让 AI 自由发挥；AI 可以生成 / 修改脚本、看结果、转工单。</li>
 <li>活动阶段多：每个阶段的时间、榜单、奖励配置都不同，脚本要按大区和阶段参数化。</li>
+<li>检查结果要和配置对齐：奖励配置文档解析 + 发奖记录匹配，才能发现&quot;该发没发 / 发错对象&quot;。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>脚本化 vs AI 自由查：脚本可重复、可审计；AI 负责生成/解释/转单。</li>
+<li>定时 vs 实时：巡检是兜底，不替代实时监控；活动峰值仍靠监控告警。</li>
+<li>只读 vs 自动修：不在生产自动修，异常转缺陷/工单，人来决定。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>扫表/巡检有延迟，不能替代实时对账。</li>
+<li>脚本依赖活动配置和 API 口径，活动变更要同步更新脚本。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -191,13 +243,25 @@
 <li>知识树：<code>knowledge_nodes</code> 目录 / 文章，<code>knowledge_chunks</code> 按 Markdown 标题切片 + Embedding。</li>
 <li>检索：全文 + 向量 <strong>Hybrid Retrieval（混合检索）</strong>，用 <strong>RRF（倒数排名融合）</strong> 融合两路结果。</li>
 <li>向量不可用时降级全文；低相似纯向量候选不进入 RRF；<code>PROJECT_KNOWLEDGE_SEARCH_VECTOR_MIN_SIMILARITY</code> 默认 0.65。</li>
-<li>Embedding 队列异步生成，维度默认 1024。</li>
+<li>Embedding 队列异步生成，维度默认 1024；支持 OpenAI 兼容接口。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>全文和向量分数尺度不同，不能直接加权；RRF 只看排名，稳定。</li>
 <li>chunk 太大召回不准，太小上下文断裂；按标题切 + metadata。</li>
 <li>权限：chunk 带 ACL / tenant，检索前过滤，引用时校验。</li>
+<li>向量服务不可用要能降级，不能把整个问答打挂。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>RRF vs 加权分数：RRF 不需要分数归一化，适合异构召回；代价是丢掉分数绝对值信息。</li>
+<li>纯向量最低相似度：过滤低质量候选，避免&quot;看起来相关&quot;的噪声进入 RRF。</li>
+<li>全文兜底：向量挂了仍可用关键词检索，保证可用性。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>没有 cross-encoder rerank / GraphRAG；不要为了匹配 JD 硬说。</li>
+<li>RAG 解决&quot;回答有没有依据&quot;，不解决&quot;知识本身对不对&quot;。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -214,12 +278,27 @@
 <li>判定 <code>eval_judgement</code>：评估机器人按 <strong>Rubric（评分要点）</strong> 逐条判 hit=0 / 0.5 / 1，必须给 <strong>Evidence（证据）</strong> 原文摘录。</li>
 <li>平台做 <strong>Evidence Validation（证据校验）</strong>：证据必须是交付内容子串（规范化后长度 ≥4），不合法直接判 0。</li>
 <li>算分：<code>score = round(100 × Σ(w×h) / Σw)</code>；必需项全命中且分数 ≥ 阈值（默认 80）才通过；失败给一次 <strong>Rework（返工）</strong>。</li>
+<li>并发：全局 5、判定 3、单批次 3、单项上限 200；tick 每 2 秒推进；失败续跑 30s / 3min；判定最多 3 次。</li>
+<li>配置快照 <code>eval_worker_snapshot</code> 冻结 AGENTS.md / 技能 / 规则 / MCP / 内核 / 模型，凭据不进快照。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
 <li>Judge 会瞎判：用证据校验把&quot;裁判幻觉&quot;压下去。</li>
 <li>沙箱隔离：复制真实工位，剔除 <code>docs/</code>、<code>.env</code>、MCP 配置；注入短效 eval token；独立 HOME。</li>
-<li>并发与恢复：全局 5、判定 3、单批次 3、单项上限 200；tick 每 2 秒推进；失败续跑 30s / 3min；判定最多 3 次。</li>
+<li>并发与恢复：排队项不计占用、启动时原子占位，避免&quot;排队占满槽位&quot;死锁；重启后按状态机恢复。</li>
+<li>评估不是一次性的：要能重跑、取消、重新判定、单测重跑，旧记录 superseded。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>LLM-as-judge + 平台算分：模型只判要点，平台算总分/通过，避免模型改分数。</li>
+<li>证据校验：宁可判 0，也不让 judge 编造证据。</li>
+<li>一次返工：避免无限重试，同时能区分&quot;首次通过&quot;和&quot;返工后通过&quot;。</li>
+<li>沙箱复制工位：真实环境才有意义，但必须剔除凭据。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>评测集质量决定 eval 质量；用例/要点设计不好，分数没意义。</li>
+<li>不是所有任务都适合自动判定；主观任务仍要人工抽检。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -232,15 +311,28 @@
 <p><strong>做了什么</strong></p>
 <ul>
 <li>主模型 + 备用模型；识别 429 / 配额 / 余额 / Token 用尽等限额错误。</li>
+<li>先排除上下文超长 / max tokens / too many tokens 等非限额错误，再匹配限额特征，避免误判。</li>
 <li>按 <code>executor + provider + model</code> 共享冷却 30 分钟；同执行器共用该模型的新会话直接用备用。</li>
 <li>同 session <code>switchModel</code> + continue prompt 续跑；每轮最多切一次；备用也失败走原失败流程。</li>
-<li>上下文超长 / max tokens 这类非限额错误不触发降级，因为换模型解决不了。</li>
+<li>一次性会话、任务会话、调试会话、工位初始化都走同一套 <code>resolveWorkerModel</code>。</li>
 </ul>
-<p><strong>技术难点</strong></p>
+<p><strong>为什么难</strong></p>
 <ul>
-<li>冷却状态在进程内，重启清空；多实例后端不共享（可升级 Redis）。</li>
-<li>切换后续跑可能重复工具调用，需要工具幂等。</li>
-<li>备用模型能力可能更差，需要评测 / 人工接管。</li>
+<li>冷却状态要共享：供应商限额是账号+模型维度，不是单任务维度。</li>
+<li>切换要保留上下文：同一 session 切模型 + continue prompt，不重跑已完成内容。</li>
+<li>只切一次：避免无限切换、成本爆炸。</li>
+<li>非限额错误不能切：上下文超长换模型也解决不了。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>进程内冷却 vs Redis：实现简单、重启清空；多实例后端不共享，可升级 Redis。</li>
+<li>备用模型能力可能更差：需要评测/人工接管；重要任务不能盲信备用。</li>
+<li>切换后续跑可能重复工具调用：需要工具幂等。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>只有一级备用；没有多级 fallback 链。</li>
+<li>没有按成本/延迟/质量做动态路由；可扩展成模型网关。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -256,6 +348,25 @@
 <li><strong>Eval Shield（评测拦截）</strong>：拦截写操作、子任务、需求方动作、越权任务；判定令牌只能调 2 个判定工具。</li>
 <li>沙箱：复制工位时剔除凭据 / MCP 配置，注入评估令牌，独立 HOME；bridge 校验沙箱必须在执行器工作区内。</li>
 <li>生产安全：生产只读、测试可写、生产写走工单 + 人工审批；敏感列只写不回显；审计不落原始 Token / PAT。</li>
+<li>飞书群发止血开关 <code>FEISHU_GROUP_SEND_PAUSED</code>：暂停所有群外发，平台名义发送不受影响。</li>
+</ul>
+<p><strong>为什么难</strong></p>
+<ul>
+<li>权限要按身份/作用域/任务拆：不是简单&quot;给不给 token&quot;。</li>
+<li>评测模式要限制 AI 的副作用：写操作、子任务、需求方动作都要拦。</li>
+<li>沙箱不能带真实凭据：否则被测 Agent 可能改真实数据。</li>
+<li>生产写要可审计、可回滚：工单 + 人工审批。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>短效 token + 吊销：比长期 token 安全；重启后靠过期兜底。</li>
+<li>沙箱复制 vs 全新环境：复制真实工位才有意义，但必须剔除凭据。</li>
+<li>生产只读 vs 直接写：牺牲效率，换安全。</li>
+</ul>
+<p><strong>边界</strong></p>
+<ul>
+<li>不是零信任完整实现：没有网络隔离/系统调用级沙箱，主要靠应用层权限。</li>
+<li>飞书群发止血开关是运维兜底，不是权限模型。</li>
 </ul>
 <p><strong>面试怎么讲</strong></p>
 <blockquote>
@@ -264,7 +375,20 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 边界：哪些不是 WorkHub 做的</h2>
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 设计亮点总结</h2>
+<p>如果面试官问&quot;这套 AI 落地到底亮点在哪&quot;，可以按这 6 条答：</p>
+<ol>
+<li><strong>Agent 运行时</strong>：任务状态机 + 执行器会话 + 断线恢复 + 长任务唤醒，不是聊天框。</li>
+<li><strong>工具生态</strong>：102/6/31 个 MCP 工具，按身份/作用域/读写权限治理，生产写走审批。</li>
+<li><strong>反馈闭环</strong>：飞书话题 → feedback → 任务 → AI 分诊/回复，平台确定性采集，AI 只做判断。</li>
+<li><strong>线上巡检</strong>：活动阶段脚本化、定时跑、只读生产、差异输出、异常转单。</li>
+<li><strong>RAG + Eval</strong>：全文+向量 RRF，证据校验 + Rubric 算分 + 沙箱 + 返工，AI 质量可回归。</li>
+<li><strong>模型降级 + Guardrails</strong>：主备冷却、同会话续跑、短效 token、shield、沙箱、审计。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">10. 边界：哪些不是 WorkHub 做的</h2>
 <ul>
 <li>不是全自动交付：只到 PR，不自动合并；生产写要审批。</li>
 <li>不是 AI 直接修生产：巡检脚本只读，异常转缺陷 / 工单。</li>
@@ -274,7 +398,7 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">面试 30 秒总览</h2>
+<section class="ws-card ws-prose" id="chapter-12"><h2 id="chapter-12">面试 30 秒总览</h2>
 <blockquote>
 <p>WorkHub 把 AI 做成研发流程里的执行角色：任务有状态机，执行有 Agent 运行时，工具有 MCP，反馈有飞书闭环，线上有定时巡检，知识有 RAG，质量有 Eval，模型有限额降级，权限有 Guardrails。它不是&quot;接了个大模型&quot;，是把 AI 放进了可运行、可审计、可回归的工程体系里。</p>
 </blockquote>

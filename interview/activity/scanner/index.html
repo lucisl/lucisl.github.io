@@ -73,12 +73,15 @@
           <ol>
             <li><a href="#chapter-1">一句话</a></li>
             <li><a href="#chapter-2">1. 为什么把扫表器独立出来</a></li>
-            <li><a href="#chapter-3">2. 配置模型：ScannerSetting</a></li>
+            <li><a href="#chapter-3">2. 配置模型：一行 ScannerSetting = 一条扫描管道</a></li>
             <li><a href="#chapter-4">3. 扫描执行：XXL-Job + 游标</a></li>
             <li><a href="#chapter-5">4. 消息：Kafka + headers</a></li>
             <li><a href="#chapter-6">5. 消费：@ScannerMessage 注解</a></li>
-            <li><a href="#chapter-7">6. 一致性与坑</a></li>
-            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+            <li><a href="#chapter-7">6. 一致性与失败模式</a></li>
+            <li><a href="#chapter-8">7. 与其他方案的对比</a></li>
+            <li><a href="#chapter-9">8. 设计亮点总结</a></li>
+            <li><a href="#chapter-10">9. 边界 / 坑</a></li>
+            <li><a href="#chapter-11">10. 面试怎么讲</a></li>
           </ol>
         </nav>
       </aside>
@@ -98,7 +101,7 @@
         </header>
 
 <section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
-<p><code>basic-scanner</code> 把数据库表的变更<strong>扫出来变成 Kafka 事件</strong>：独立服务、只读库、游标 checkpoint、正扫 / 倒扫、注解消费。</p>
+<p><code>basic-scanner</code> 不是&quot;定时 select 一下&quot;，而是一条<strong>配置驱动的准 CDC 管道</strong>：一行配置定义一个表/场景的扫描任务，游标 checkpoint 保进度，正扫做增量、倒扫做回填，Kafka 做事件总线，<code>@ScannerMessage</code> 做消费路由。</p>
 <hr>
 </section>
 
@@ -112,72 +115,86 @@
 <li>业务服务不需要为了&quot;监听某张表&quot;而连一堆库、加一堆定时任务。</li>
 <li>扫表器用独立只读数据源，和业务库隔离，避免业务服务启动变重。</li>
 <li>多种扫描策略、同表不同场景的扫描优化，集中在一个服务里维护。</li>
+<li>扫表失败/延迟不影响业务主链路；业务只消费事件。</li>
 </ul>
 <p><strong>代价</strong></p>
 <ul>
 <li>多一个服务要部署 / 监控。</li>
 <li>消息是 <strong>at-least-once（至少一次）</strong>，消费方必须幂等。</li>
 <li>扫表有延迟，不适合强实时场景。</li>
+<li>不是 binlog，拿不到 update/delete 的 before/after，只能按行快照扫。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 配置模型：ScannerSetting</h2>
+<section class="ws-card ws-prose" id="chapter-3"><h2 id="chapter-3">2. 配置模型：一行 ScannerSetting = 一条扫描管道</h2>
 <p><code>scanner_setting</code> 一行就是一个扫描任务：</p>
 <div class="ws-table-wrap"><table>
 <thead>
 <tr>
 <th>字段</th>
 <th>作用</th>
+<th>设计点</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><code>name</code></td>
 <td>唯一键 / 消息 action 名</td>
+<td>消费方按 action 路由</td>
 </tr>
 <tr>
 <td><code>database</code></td>
-<td>数据库白名单：<code>basic</code> / <code>funbit</code> / <code>stats</code> / <code>live</code> / <code>family</code></td>
+<td>数据库白名单</td>
+<td><code>basic</code> / <code>funbit</code> / <code>stats</code> / <code>live</code> / <code>family</code></td>
 </tr>
 <tr>
 <td><code>table</code></td>
 <td>要扫的表</td>
+<td>只允许白名单库</td>
 </tr>
 <tr>
 <td><code>column</code></td>
-<td>监听主键（当前实现按 <code>id</code> 扫，<code>column</code> 字段保留）</td>
+<td>监听主键</td>
+<td>当前实现按 <code>id</code> 扫，字段保留</td>
 </tr>
 <tr>
 <td><code>current</code></td>
-<td>扫描进度：上次扫到的 id，<code>-1</code> 表示未开始</td>
+<td>扫描进度</td>
+<td>上次扫到的 id，<code>-1</code> 表示未开始</td>
 </tr>
 <tr>
 <td><code>partition_key</code></td>
-<td>发 Kafka 时的消息 key，决定分区</td>
+<td>Kafka 消息 key</td>
+<td>决定分区 / 同实体顺序</td>
 </tr>
 <tr>
 <td><code>direction</code></td>
-<td>1 正序（小→大）/ 2 倒序（大→小）</td>
+<td>1 正序 / 2 倒序</td>
+<td>增量 vs 回填</td>
 </tr>
 <tr>
 <td><code>batch_size</code></td>
 <td>每批条数</td>
+<td>控制 DB 压力和消息批量</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td>启用 / 停用</td>
+<td>停用不参与调度</td>
 </tr>
 </tbody></table></div>
-<p><strong>技术点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
-<li>每个库一个 <code>JdbcTemplate</code>，<code>getJdbcTemplate()</code> 用 switch 做白名单，不支持的库直接报错。</li>
-<li><code>current</code> 是 checkpoint（游标），不是 offset；扫到哪存到哪。</li>
+<li>配置即管道：新增一张表/场景，不用写新的扫表代码，只加一行配置。</li>
+<li><code>name</code> 同时是 action：消费方按业务语义订阅，不关心物理表。</li>
+<li><code>current</code> 是 checkpoint：扫到哪存到哪，不依赖 Kafka offset。</li>
+<li><code>partition_key</code> 把&quot;同一实体&quot;的消息送进同一分区，保证分区内有序。</li>
 </ul>
 <hr>
 </section>
 
 <section class="ws-card ws-prose" id="chapter-4"><h2 id="chapter-4">3. 扫描执行：XXL-Job + 游标</h2>
-<h3>正扫 <code>ScannerExecutorHandler</code></h3>
+<h3>正扫</h3>
 <pre><code class="language-sql">SELECT * FROM `table`
 WHERE id &gt; {current}
 ORDER BY id ASC
@@ -190,18 +207,24 @@ LIMIT {batchSize};
 <li><code>current = 最后一条的 id</code>，更新 <code>scanner_setting.current</code>。</li>
 <li>如果 <code>maxid - current &gt; batchSize * 10</code>，打 <code>tooManyDelay</code> 日志。</li>
 </ol>
-<h3>倒扫 <code>ReverseScannerExecutorHandler</code></h3>
+<h3>倒扫</h3>
 <pre><code class="language-sql">SELECT * FROM `table`
 WHERE id &lt; {current}
 ORDER BY id DESC
 LIMIT {batchSize};
 </code></pre>
 <p>用于历史回填 / 反向补偿；和正扫共用 <code>scanner_setting</code>，靠 <code>direction</code> 区分。</p>
-<p><strong>关键点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
-<li>扫表是<strong>批处理 + 游标</strong>，不是全表 select；每批只取 <code>batchSize</code>。</li>
+<li>批处理 + 游标：不是全表 select，每批只取 <code>batchSize</code>。</li>
+<li>延迟可观测：<code>maxid - current</code> 直接反映扫表落后多少。</li>
+<li>正反扫复用同一配置：回填不用另建任务模型。</li>
+</ul>
+<p><strong>关键语义</strong></p>
+<ul>
 <li>先发消息，再更新 checkpoint；如果发完消息、更新 checkpoint 前进程挂了，下一次会重复扫这一批 → <strong>at-least-once</strong>。</li>
 <li>消费方必须按业务唯一键（order_no / trans_no / id）做幂等。</li>
+<li><code>current</code> 是单游标；正扫/倒扫切换时要小心，不能同时跑同一张表。</li>
 </ul>
 <hr>
 </section>
@@ -214,17 +237,23 @@ LIMIT {batchSize};
 <li>headers：<code>action</code> / <code>timestamp</code> / <code>trace</code> / <code>app</code> / <code>userID</code> / <code>locale</code>。</li>
 <li><code>async()</code>：发送失败只记日志，不抛异常，内部重试 5 次，间隔 300ms。</li>
 <li><code>sync()</code>：发送失败抛 <code>RException</code>，用于不能丢的场景。</li>
+<li><code>timeout</code> 默认 300ms。</li>
 </ul>
-<p><strong>设计意图</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
 <li>消息里带 <code>trace</code> / <code>app</code> / <code>locale</code>，消费方可以还原 <strong>Session（会话上下文）</strong>，日志和业务逻辑都能按用户 / 大区处理。</li>
 <li><code>action</code> 是路由键：消费方按 action 找方法，不是按 topic 盲目消费。</li>
+<li>sync/async 两档：关键链路同步，普通链路异步。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>async 重试 5 次仍失败只记日志，消息可能丢；关键链路要用 sync 或消费方对账。</li>
+<li>重试可能产生重复消息；消费方幂等是前提。</li>
 </ul>
 <hr>
 </section>
 
 <section class="ws-card ws-prose" id="chapter-6"><h2 id="chapter-6">5. 消费：@ScannerMessage 注解</h2>
-<p><code>lita-framework</code> 提供：</p>
 <pre><code class="language-java">@ScannerMessage(
   action = &quot;funbit.user_deal_account_log&quot;,
   messageType = UserDealAccountChangeParameter.class
@@ -239,16 +268,22 @@ public void handleUserDealAccountLog(Session session, UserDealAccountChangeParam
 <li><code>ScannerMessageConsumer</code> 维护 <code>action → List&lt;ClassMethod&gt;</code>；一个 action 可以有多个消费者。</li>
 <li><code>@KafkaListener(topics = {&quot;basic-scanner&quot;, &quot;basic-reverse-scanner&quot;})</code> 消费；从 headers 还原 Session，写 MDC，<code>RuntimeHandler.execute</code> 执行，finally 清理 ThreadLocal。</li>
 </ul>
-<p><strong>技术点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
 <li>注解驱动：业务方只写&quot;action + 消息体 + 处理方法&quot;，不关心 Kafka 配置。</li>
 <li>一个 action 多消费者：新增消费方不用改扫表器。</li>
-<li>消费异常只记日志、不阻断其它消费者；失败重试 / 死信要业务侧兜底。</li>
+<li>上下文透传：消息头 → Session → MDC，日志能串 trace。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>消费异常只记日志、不阻断其它消费者；没有内建 DLQ / 重试，失败要靠业务侧补偿。</li>
+<li>一个 action 多消费者是顺序执行还是并行？看 <code>handleAction</code> 实现；消费者多了要评估耗时。</li>
+<li><code>messageType</code> 用 <code>Json.mustDecode</code> 反序列化，字段兼容性要小心。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 一致性与坑</h2>
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 一致性与失败模式</h2>
 <p><strong>at-least-once</strong></p>
 <ul>
 <li>checkpoint 在发送之后更新，崩溃会重复扫一批；消费方必须幂等。</li>
@@ -264,31 +299,133 @@ public void handleUserDealAccountLog(Session session, UserDealAccountChangeParam
 <li>扫表是定时任务，有延迟；不适合&quot;支付成功立刻发奖&quot;这种强实时场景。</li>
 <li>延迟监控：<code>tooManyDelay</code> 日志 + 扫表进度。</li>
 </ul>
-<p><strong>当前实现的债</strong></p>
+<p><strong>失败模式</strong></p>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>失败点</th>
+<th>后果</th>
+<th>兜底</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>发消息失败（async）</td>
+<td>消息可能丢</td>
+<td>重试 5 次 + 业务对账</td>
+</tr>
+<tr>
+<td>发完消息、checkpoint 未更新</td>
+<td>重复扫一批</td>
+<td>消费方幂等</td>
+</tr>
+<tr>
+<td>消费异常</td>
+<td>只记日志，不自动重试</td>
+<td>业务重试 / 补偿</td>
+</tr>
+<tr>
+<td>扫表任务停摆</td>
+<td>数据延迟</td>
+<td>进度监控 + 告警</td>
+</tr>
+<tr>
+<td>同一表正反扫同时跑</td>
+<td>游标互相覆盖</td>
+<td>配置隔离 / 互斥</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 与其他方案的对比</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>实时性</th>
+<th>侵入性</th>
+<th>能力</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>basic-scanner</code></td>
+<td>分钟级</td>
+<td>低（只读库）</td>
+<td>按表/游标扫，正反扫</td>
+<td>业务事件、回填、补偿</td>
+</tr>
+<tr>
+<td>binlog / Canal</td>
+<td>秒级</td>
+<td>高（binlog 权限/运维）</td>
+<td>全量变更、before/after</td>
+<td>强实时 CDC</td>
+</tr>
+<tr>
+<td>业务双写</td>
+<td>实时</td>
+<td>高（改业务代码）</td>
+<td>精确事件</td>
+<td>核心交易</td>
+</tr>
+<tr>
+<td>定时全量对账</td>
+<td>小时/天级</td>
+<td>低</td>
+<td>发现差异</td>
+<td>兜底对账</td>
+</tr>
+</tbody></table></div>
+<p><strong>选型逻辑</strong></p>
 <ul>
-<li><code>ScannerSetting.column</code> 字段保留，但 <code>getListOfSetting()</code> 里 SQL 固定用 <code>id</code>；要支持其它主键需要改代码。</li>
-<li>正扫和倒扫共用 <code>current</code>，方向切换要小心。</li>
-<li>消息发送是 async + 重试，极端情况下可能重复 / 丢失；关键链路用 sync 或消费方对账。</li>
+<li>扫表器是&quot;够用 + 可控&quot;：权限低、配置简单、能回填；牺牲实时性。</li>
+<li>强实时/强一致场景不要靠扫表，要靠业务事件或 binlog。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
-<p><strong>&quot;扫表器怎么设计的？&quot;</strong></p>
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">8. 设计亮点总结</h2>
+<ol>
+<li><strong>配置驱动</strong>：一行 <code>ScannerSetting</code> = 一条扫描管道，新增表/场景只加配置。</li>
+<li><strong>游标 checkpoint</strong>：<code>current</code> 保进度，不依赖 Kafka offset；正扫增量、倒扫回填。</li>
+<li><strong>正反扫复用</strong>：同一模型支持增量和历史回填。</li>
+<li><strong>Kafka 事件总线</strong>：headers 带 action/trace/app/locale，消费方可还原上下文。</li>
+<li><strong>注解消费</strong>：<code>@ScannerMessage</code> + BeanPostProcessor，action → method 自动注册。</li>
+<li><strong>at-least-once + 消费幂等</strong>：明确语义，不假装 exactly-once。</li>
+<li><strong>独立服务</strong>：只读库、低侵入、不拖慢业务服务启动。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 边界 / 坑</h2>
+<ul>
+<li><code>ScannerSetting.column</code> 字段保留，但 <code>getListOfSetting()</code> 里 SQL 固定用 <code>id</code>；要支持其它主键需要改代码。</li>
+<li>正扫和倒扫共用 <code>current</code>，方向切换要小心。</li>
+<li>消息发送是 async + 重试，极端情况下可能重复 / 丢失；关键链路用 sync 或消费方对账。</li>
+<li>消费异常只记日志，没有内建 DLQ；业务侧要能重试/补偿。</li>
+<li>单游标、单实例扫描：多实例部署要加分布式锁/分片，否则同一张表会被重复扫。</li>
+<li>没有 schema 变更捕获：只按行扫，拿不到 update/delete 的 before/after。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">10. 面试怎么讲</h2>
+<p><strong>30 秒版</strong></p>
 <blockquote>
-<p>独立服务 + 只读库 + <code>scanner_setting</code> 配置：每张表一个游标 <code>current</code>，XXL-Job 定时按 <code>id &gt; current</code> 批量扫，发 Kafka；消息带 action / trace / locale，消费方用 <code>@ScannerMessage</code> 注解按 action 注册。正扫做增量，倒扫做回填。</p>
+<p><code>basic-scanner</code> 是配置驱动的准 CDC：一行 <code>scanner_setting</code> 定义一个表/场景，<code>current</code> 游标保进度，XXL-Job 定时按 <code>id &gt; current</code> 批量扫，发 Kafka；消息带 action/trace/locale，消费方用 <code>@ScannerMessage</code> 按 action 注册。正扫做增量，倒扫做回填，语义是 at-least-once，消费方幂等。</p>
 </blockquote>
-<p><strong>&quot;怎么保证不丢 / 不重？&quot;</strong></p>
+<p><strong>2 分钟版</strong></p>
 <blockquote>
-<p>不丢靠 checkpoint + 至少一次；不重靠消费方幂等——业务唯一键 / 表 id 去重。扫表器本身不保证 exactly-once，它保证 at-least-once，重复是消费方要处理的。</p>
+<p>我们把扫表独立成服务，用独立只读库降低业务服务依赖。配置模型是 <code>database/table/current/direction/batch_size/partition_key</code>，扫表器按游标批量取数，发 <code>basic-scanner</code> topic；消息头带 action/trace/app/locale，消费方通过 <code>@ScannerMessage</code> 注解注册 action → method，框架自动还原 Session。 checkpoint 在发送后更新，所以是 at-least-once，重复靠消费方业务键去重；正扫增量、倒扫回填。它适合业务事件、回填和补偿，不适合强实时 CDC。</p>
 </blockquote>
-<p><strong>&quot;为什么不用 binlog / Canal？&quot;</strong></p>
+<p><strong>追问：为什么不用 binlog/Canal？</strong></p>
 <blockquote>
-<p>扫表器更轻、对 DB 权限要求低、可以按表/场景配游标和批量；binlog 更实时但运维和权限成本高。我们选的是&quot;够用 + 可控&quot;，不是追求最强实时。</p>
+<p>扫表器权限低、配置简单、能回填、对业务库侵入小；binlog 更实时但运维和权限成本高。我们选&quot;够用 + 可控&quot;，强实时场景另走业务事件。</p>
 </blockquote>
-<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<p><strong>追问：这个设计有什么问题？</strong></p>
 <blockquote>
-<p>有延迟、会重复、<code>column</code> 字段没真正用起来、正反扫共用游标；关键链路要配合对账和幂等。</p>
+<p><code>column</code> 没真正用起来、正反扫共用游标、没有内建 DLQ、async 重试可能丢/重、单游标多实例要加锁；关键链路要 sync + 对账。</p>
 </blockquote>
 </section>
       </main>

@@ -418,7 +418,7 @@ const INTERVIEW_PAGES = [
     eyebrow: 'INTERVIEW / AI HIGHLIGHTS',
     breadcrumb: '001 / AI 落地 / 亮点',
     h1: 'AI 落地亮点',
-    tagline: 'WorkHub 里真正有技术含量的 7 个 AI 落地设计。',
+    tagline: 'WorkHub 里真正有技术含量的 8 个 AI 落地设计。',
     sourceHref: '../../content/ai-highlights.md',
     sourceName: 'ai-highlights.md',
   },

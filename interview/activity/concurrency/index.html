@@ -78,7 +78,10 @@
             <li><a href="#chapter-5">4. Redis 多实例 + Caffeine</a></li>
             <li><a href="#chapter-6">5. 事件驱动房间</a></li>
             <li><a href="#chapter-7">6. 峰值治理</a></li>
-            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+            <li><a href="#chapter-8">7. 失败模式</a></li>
+            <li><a href="#chapter-9">8. 设计亮点总结</a></li>
+            <li><a href="#chapter-10">9. 边界 / 坑</a></li>
+            <li><a href="#chapter-11">10. 面试怎么讲</a></li>
           </ol>
         </nav>
       </aside>
@@ -107,11 +110,17 @@
 <ul>
 <li>一个房间一条活鱼，用户送礼打鱼；鱼血归零后结算，溢出伤害继续打新鱼。</li>
 </ul>
+<p><strong>状态机</strong></p>
+<pre><code>ALIVE → (血量归零) → CAUGHT
+  ↑                    │
+  └── 刷新新鱼 ←───────┘
+</code></pre>
 <p><strong>并发点</strong></p>
 <ul>
 <li>多个用户同时打同一条鱼。</li>
 <li>鱼死瞬间多个请求同时触发结算。</li>
 <li>一条鱼死后，剩余伤害要打新鱼。</li>
+<li>新鱼刷新时多个请求同时插入。</li>
 </ul>
 <p><strong>解法</strong></p>
 <ul>
@@ -121,10 +130,24 @@
 <li>溢出：递归打新鱼，<code>orderNo</code> 加 <code>_depth</code> 后缀，保证多条鱼流水幂等。</li>
 <li>异步：血量变化 / 广播用 <code>CompletableFuture</code>，失败不影响主流程。</li>
 </ul>
-<p><strong>面试点</strong></p>
+<p><strong>为什么不用分布式锁</strong></p>
 <ul>
-<li>为什么不用分布式锁：条件更新 + 唯一索引已经够，锁增加失败点。</li>
+<li>条件更新 + 唯一索引已经够，锁增加失败点。</li>
 <li>死锁是预期：捕获后重查，不当作系统错误。</li>
+<li>数据库行锁在单行竞争下比 Redis 锁更直接。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>状态机用条件更新推进，天然防并发。</li>
+<li>唯一索引解决&quot;一房间多活鱼&quot;。</li>
+<li><code>orderNo_depth</code> 解决&quot;一笔流水打多条鱼&quot;的幂等。</li>
+<li>异步副作用不阻塞主流程。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>溢出递归深度要限制，避免一条超大神豪礼物打穿很多鱼。</li>
+<li>唯一索引冲突/死锁重查要有限制，避免活锁。</li>
+<li>异步消息失败只记录，重要广播要补偿。</li>
 </ul>
 <hr>
 </section>
@@ -143,10 +166,17 @@
 <li>核销 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 单行原子。</li>
 <li>发放在本地事务内：流水 + 券一起成功 / 失败。</li>
 </ul>
-<p><strong>面试点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
 <li>唯一键是幂等闸门，不是&quot;先查再写&quot;。</li>
 <li>状态机让失败可重试、成功不可重复。</li>
+<li>Redis 标记是快速防重，唯一键是最终事实。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>状态机要闭合：PENDING 不能永久停留。</li>
+<li>Redis 标记失败要删，否则永远补不了。</li>
+<li>多级 level 后缀要稳定。</li>
 </ul>
 <hr>
 </section>
@@ -159,11 +189,25 @@
 <li>获取失败：<code>failFast</code> 抛&quot;系统繁忙&quot;，否则降级直连 DB。</li>
 <li>释放判断 <code>isHeldByCurrentThread()</code>；过期 / 释放失败记指标。</li>
 <li>按 <code>biz + userId</code> 判断是否在锁范围，不是所有交易都加锁。</li>
+<li>指标：等待时长、获取失败原因、持有时长、过期次数。</li>
 </ul>
 <p><strong>为什么不是简单 <code>lock()</code></strong></p>
 <ul>
 <li>要控制等待时间、租约、降级、指标；否则一个慢查询能把线程池打满。</li>
 <li>锁范围要按业务判断，避免无谓串行。</li>
+<li>失败要能降级，不能因为 Redis 抖动整个支付不可用。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>注解 + AOP：业务代码只加注解，不侵入锁逻辑。</li>
+<li>wait/lease/看门狗/降级/指标：不是&quot;一把锁&quot;，是一套可运维的锁。</li>
+<li>锁范围可配：按 biz/userId 控制，避免全量串行。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>看门狗依赖 Redisson 客户端存活；进程假死可能续期失败。</li>
+<li>降级直连 DB 会失去互斥，要靠 DB 乐观锁/唯一键兜底。</li>
+<li>锁粒度太大（全局锁）会成瓶颈；太小（每笔交易）可能无意义。</li>
 </ul>
 <hr>
 </section>
@@ -173,6 +217,7 @@
 <ul>
 <li>在线状态 / 签名 / 房间 / 活动排行 / 活动通用分开。</li>
 <li>不同用途的可靠性 / 淘汰策略不同；一次大 Key / 内存打满不能同时影响多个业务。</li>
+<li>活动排行用独立实例，避免榜单 ZSet 影响房间在线。</li>
 </ul>
 <p><strong>Caffeine</strong></p>
 <ul>
@@ -180,10 +225,17 @@
 <li>减少 Redis 往返；本地缓存要接受短暂不一致。</li>
 <li>更新时删缓存 / 版本号 / 延迟双删。</li>
 </ul>
-<p><strong>面试点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
 <li>缓存分层：本地 → Redis → DB。</li>
+<li>按用途隔离 Redis，避免互相拖垮。</li>
+<li>本地缓存扛热点，Redis 做共享。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>本地缓存多实例不一致；关键读要回源 / 版本号。</li>
 <li>热点 Key / 大 Key 要拆、要限流、要降级。</li>
+<li>缓存击穿 / 雪崩：随机过期、互斥重建、兜底值。</li>
 </ul>
 <hr>
 </section>
@@ -195,10 +247,17 @@
 <li>庆典用 <code>@Timer(delay=3)</code> + KV 游标 + <code>limit 100</code> 增量扫描，多 worker 分工。</li>
 <li>状态变更和副作用（缓存清理、消息推送、结算）解耦。</li>
 </ul>
-<p><strong>面试点</strong></p>
+<p><strong>设计亮点</strong></p>
 <ul>
-<li>事件驱动不是&quot;全异步&quot;：核心状态仍同步写，副作用异步。</li>
+<li>核心状态同步写，副作用异步做；不牺牲正确性。</li>
+<li>事件解耦：新增副作用不用改主流程。</li>
 <li>游标 worker 避免全表扫描；多 worker 要防重。</li>
+</ul>
+<p><strong>坑</strong></p>
+<ul>
+<li>事件可能丢/重复：要幂等 / 补偿。</li>
+<li>异步失败只记录；重要副作用要重试。</li>
+<li>多 worker 并发扫描同一游标要加锁/分片。</li>
 </ul>
 <hr>
 </section>
@@ -221,25 +280,110 @@
 <li>复盘：峰值、瓶颈、故障、改进。</li>
 <li>对账：奖励 / 榜单 / 配置。</li>
 </ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>分层扛：入口限流 → 聚合并行 → 缓存 → 异步 → 降级。</li>
+<li>开关化：非核心功能随时关。</li>
+<li>可观测：RT/错误/线程池/Redis/Kafka 全看。</li>
+</ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
-<p><strong>&quot;活动峰值怎么扛？&quot;</strong></p>
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 失败模式</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>失败点</th>
+<th>后果</th>
+<th>兜底</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>捕鱼并发扣血</td>
+<td>重复击杀 / 超杀</td>
+<td>条件更新 + 唯一索引</td>
+</tr>
+<tr>
+<td>溢出递归过深</td>
+<td>打穿很多鱼 / 慢</td>
+<td>深度限制 + 异步</td>
+</tr>
+<tr>
+<td>宝箱多级结算重复</td>
+<td>重复发奖</td>
+<td><code>orderNo_level</code> + Redis 标记</td>
+</tr>
+<tr>
+<td>余额锁过期</td>
+<td>并发写余额</td>
+<td>看门狗 + DB 兜底</td>
+</tr>
+<tr>
+<td>缓存击穿</td>
+<td>DB 被打穿</td>
+<td>互斥重建 + 兜底</td>
+</tr>
+<tr>
+<td>事件重复消费</td>
+<td>重复副作用</td>
+<td>消费幂等</td>
+</tr>
+<tr>
+<td>线程池打满</td>
+<td>聚合接口超时</td>
+<td>隔离 + 限流 + 降级</td>
+</tr>
+<tr>
+<td>Kafka 积压</td>
+<td>结算延迟</td>
+<td>监控 lag + 扩容</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">8. 设计亮点总结</h2>
+<ol>
+<li><strong>状态机 + 条件更新</strong>：捕鱼 <code>ALIVE→CAUGHT</code>、核销 <code>ACTIVE→USED</code>，用影响行数抢处理权。</li>
+<li><strong>唯一索引</strong>：一房间一活鱼、一流水一次发放，数据库兜底。</li>
+<li><strong>多级幂等</strong>：<code>orderNo_level</code> 支持一笔流水跨多级。</li>
+<li><strong>可运维的锁</strong>：Redisson wait/lease/看门狗/降级/指标，不是裸 <code>lock()</code>。</li>
+<li><strong>缓存分层</strong>：Caffeine + Redis 多实例，按用途隔离。</li>
+<li><strong>事件驱动</strong>：核心同步、副作用异步，事件解耦。</li>
+<li><strong>峰值治理</strong>：限流、降级、开关、压测、监控。</li>
+<li><strong>失败可补偿</strong>：Redis 标记失败删、奖励回收队列、对账。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 边界 / 坑</h2>
+<ul>
+<li>锁 TTL / 看门狗 / 降级直连 DB 都有边界；不能把一致性全押在锁上。</li>
+<li>本地缓存多实例不一致；关键读要回源。</li>
+<li>热点 Key / 大 Key 要拆、限流、降级。</li>
+<li>事件可能丢/重复；消费方要幂等。</li>
+<li>线程池共享会互相拖垮；活动峰值要隔离。</li>
+<li>捕鱼溢出递归要限深；否则大额礼物打穿很多鱼。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">10. 面试怎么讲</h2>
+<p><strong>30 秒版</strong></p>
 <blockquote>
-<p>先容量评估 + 压测，再分层扛：聚合接口 Pipeline 并行 + 单模块故障隔离，热点数据本地缓存 + Redis 多实例，非核心功能降级、入口限流；活动前演练，活动后复盘。</p>
+<p>活动高并发靠组合：捕鱼用条件更新 + 唯一索引 + <code>orderNo_depth</code>，宝箱用唯一键 + 状态机 + Redis 标记，余额用 Redisson 单写者锁，缓存用 Caffeine + Redis 多实例，房间用事件驱动解耦；峰值再靠限流、降级、开关、压测。</p>
 </blockquote>
-<p><strong>&quot;捕鱼并发怎么处理？&quot;</strong></p>
+<p><strong>2 分钟版</strong></p>
 <blockquote>
-<p>条件更新抢处理权，唯一索引防重复刷鱼，溢出伤害用 <code>orderNo_depth</code> 保幂等，死锁 / 唯一键冲突重查兜底。</p>
+<p>捕鱼是状态机：扣血用 <code>WHERE status=&#39;ALIVE&#39;</code> 条件更新，捕捞再抢一次处理权，刷鱼靠唯一索引，溢出伤害用 <code>orderNo_depth</code> 保幂等，死锁重查。宝箱多级结算用 <code>orderNo_level</code> 和状态机，Redis 标记防重、失败删标记。余额变更用 Redisson 锁，wait/lease/看门狗，失败 fail-fast 或降级 DB。缓存本地 + Redis 多实例，按用途隔离。房间用领域事件解耦缓存清理/消息推送，庆典用游标 worker 增量结算。</p>
 </blockquote>
-<p><strong>&quot;余额变更怎么保证单写者？&quot;</strong></p>
+<p><strong>追问：为什么不用分布式锁？</strong></p>
 <blockquote>
-<p>Redisson 锁 + wait/lease/看门狗，失败 fail-fast 或降级 DB；按 biz+userId 控制锁范围，带指标。</p>
+<p>捕鱼用条件更新 + 唯一索引已经能抢处理权，锁增加失败点；余额才需要锁，因为要保护多步操作。</p>
 </blockquote>
-<p><strong>&quot;这个设计有什么风险？&quot;</strong></p>
+<p><strong>追问：这个设计有什么风险？</strong></p>
 <blockquote>
-<p>锁 TTL / 看门狗、缓存一致性、热点 Key、线程池隔离、Kafka 重复消费；都要有监控和兜底。</p>
+<p>锁 TTL/看门狗、缓存一致性、热点 Key、事件重复、线程池隔离、溢出递归深度；都要监控和兜底。</p>
 </blockquote>
 </section>
       </main>

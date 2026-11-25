@@ -72,13 +72,16 @@
           <p>本文目录</p>
           <ol>
             <li><a href="#chapter-1">一句话</a></li>
-            <li><a href="#chapter-2">1. 奖励状态机</a></li>
+            <li><a href="#chapter-2">1. 奖励状态机：先记账，再发奖</a></li>
             <li><a href="#chapter-3">2. GET / USE 双流水</a></li>
             <li><a href="#chapter-4">3. 宝箱多级结算：唯一键 + 状态机 + Redis 标记</a></li>
             <li><a href="#chapter-5">4. 捕鱼：条件更新 + 唯一索引 + 溢出伤害</a></li>
             <li><a href="#chapter-6">5. 奖励回收 / 补偿</a></li>
             <li><a href="#chapter-7">6. 对账与巡检</a></li>
-            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+            <li><a href="#chapter-8">7. 失败模式</a></li>
+            <li><a href="#chapter-9">8. 设计亮点总结</a></li>
+            <li><a href="#chapter-10">9. 边界 / 坑</a></li>
+            <li><a href="#chapter-11">10. 面试怎么讲</a></li>
           </ol>
         </nav>
       </aside>
@@ -102,11 +105,11 @@
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 奖励状态机</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 奖励状态机：先记账，再发奖</h2>
 <p>奖励从&quot;配置&quot;到&quot;到账&quot;要经过：</p>
-<pre><code>配置 → 触发 → 发放 → 到账
-              ↓
-            失败 → 重试 → 死信 / 人工补偿
+<pre><code>配置 → 触发 → 受理（PENDING） → 发放（SUCCESS / FAILED）
+                                      ↓
+                                 重试 / 死信 / 人工补偿
 </code></pre>
 <p><strong>关键原则</strong></p>
 <ul>
@@ -114,6 +117,7 @@
 <li>每次发放有唯一业务键：<code>order_no</code> / <code>trans_no</code>。</li>
 <li>失败可重试，重试不重复发。</li>
 <li>已发可回收：<code>canRevert</code> + 回收队列。</li>
+<li>状态机：<code>PENDING</code> 可重试，<code>SUCCESS</code> 不可重复，<code>FAILED</code> 进补偿。</li>
 </ul>
 <hr>
 </section>
@@ -137,6 +141,13 @@
 <li><code>trans_no</code> 唯一键是幂等闸门；<code>DuplicateKeyException</code> 直接按成功处理。</li>
 <li>发放在一个本地事务内：流水 + 用户券要么都成功，要么都回滚。</li>
 <li>核销用条件更新，不用&quot;先 select 再 update&quot;。</li>
+<li>配置缺失 / 奖池不匹配：飞书告警 + 队列标记失败，不静默吞掉。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>流水和状态分离：GET/USE 是事实，券状态是当前状态。</li>
+<li>幂等闸门是数据库唯一键，不是 Redis / 应用判断。</li>
+<li>事务边界清晰：发放一个事务，核销一个条件更新。</li>
 </ul>
 <hr>
 </section>
@@ -154,6 +165,13 @@
 <li>多级奖励：同一个 <code>orderNo</code> 要发多个等级，不能因为唯一键把后续等级挡掉 → 加 level 后缀。</li>
 <li>结算失败：不能把标记永久留着，否则永远补不了 → 失败删标记。</li>
 <li>状态机：<code>PENDING</code> 是&quot;已受理未完成&quot;，<code>FAILED</code> 可重试，<code>SUCCESS</code> 不可重复。</li>
+<li>并发结算：Redis 标记 + 唯一键双保险；标记是&quot;快速防重&quot;，唯一键是&quot;最终事实&quot;。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>先插记录再发奖：记录是幂等闸门；发奖失败更新状态，不重复插。</li>
+<li>Redis 标记 vs DB 唯一键：Redis 快，DB 稳；两者一起用。</li>
+<li>失败删标记 vs 人工重试：自动补偿优先，人工兜底。</li>
 </ul>
 <hr>
 </section>
@@ -165,11 +183,18 @@
 <li>捕捞成功：再用 <code>WHERE status=&#39;ALIVE&#39;</code> 抢&quot;捕捞处理权&quot;，防重复结算 / 重复发奖。</li>
 <li>刷鱼：唯一索引保证一个房间只有一条活鱼；<code>DuplicateKeyException</code> / <code>DeadlockLoserDataAccessException</code> 后重查。</li>
 <li>溢出伤害：一条鱼被打死，剩余伤害递归打新鱼；<code>orderNo</code> 加 <code>_depth</code> 后缀，保证每条鱼的榜单流水幂等。</li>
+<li>异步：血量变化 / 广播用 <code>CompletableFuture</code>，失败不影响主流程。</li>
 </ul>
 <p><strong>为什么不用分布式锁</strong></p>
 <ul>
 <li>条件更新 + 唯一索引已经能抢处理权；锁只增加复杂度和失败点。</li>
 <li>死锁 / 唯一键冲突是预期内的，捕获后重查即可。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>状态机 <code>ALIVE → CAUGHT</code> 用条件更新推进，天然防并发。</li>
+<li>溢出伤害用 <code>orderNo_depth</code> 解决&quot;一笔流水打多条鱼&quot;的幂等。</li>
+<li>唯一索引解决&quot;一房间多活鱼&quot;的并发插入。</li>
 </ul>
 <hr>
 </section>
@@ -192,6 +217,7 @@
 <li>回收是&quot;另一条链路&quot;，不要阻塞发奖。</li>
 <li>回收也要幂等：同一奖励不能回收两次。</li>
 <li>回收要有审计：谁、什么时候、为什么回收。</li>
+<li>回收和再发要区分：回收后重新发，要有新的业务流水号。</li>
 </ul>
 <hr>
 </section>
@@ -213,26 +239,111 @@
 <ul>
 <li>发放成功率、失败率、重试次数、回收次数。</li>
 <li>资损金额、差异条数、对账覆盖率。</li>
+<li>发奖延迟、PENDING 堆积、FAILED 堆积。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>配置 / 榜单 / 发奖记录三方对账，能定位&quot;该发没发 / 发错对象 / 重复发&quot;。</li>
+<li>巡检脚本化、定时化，活动阶段自动抽检。</li>
+<li>异常转单，人来决定补偿/回收。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
-<p><strong>&quot;奖励怎么防重？&quot;</strong></p>
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 失败模式</h2>
+<div class="ws-table-wrap"><table>
+<thead>
+<tr>
+<th>失败点</th>
+<th>后果</th>
+<th>兜底</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>重复消息 / 重复请求</td>
+<td>重复发奖</td>
+<td>唯一键 / 流水号</td>
+</tr>
+<tr>
+<td>发奖成功、状态更新失败</td>
+<td>状态不一致</td>
+<td>状态机 + 对账</td>
+</tr>
+<tr>
+<td>多级发奖中途失败</td>
+<td>部分等级漏发</td>
+<td><code>orderNo_level</code> + 重试</td>
+</tr>
+<tr>
+<td>回收失败</td>
+<td>该回收没回收</td>
+<td>回收队列 + 告警</td>
+</tr>
+<tr>
+<td>Redis 标记残留</td>
+<td>永远不能重试</td>
+<td>失败删标记</td>
+</tr>
+<tr>
+<td>配置缺失 / 奖池不匹配</td>
+<td>发错奖 / 发不出</td>
+<td>配置校验 + 飞书告警</td>
+</tr>
+<tr>
+<td>DB 事务回滚、Redis 已更新</td>
+<td>缓存不一致</td>
+<td>sync / 对账重建</td>
+</tr>
+</tbody></table></div>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">8. 设计亮点总结</h2>
+<ol>
+<li><strong>流水先行</strong>：先插流水再发奖，唯一键做幂等闸门。</li>
+<li><strong>GET/USE 双流水</strong>：发放、核销、余额三方可查。</li>
+<li><strong>状态机</strong>：PENDING/SUCCESS/FAILED，可重试、可补偿、不可重复。</li>
+<li><strong>条件更新</strong>：核销 / 捕鱼用 <code>WHERE status=...</code> 单行原子，防并发双消。</li>
+<li><strong>多级幂等</strong>：<code>orderNo + &quot;_&quot; + level</code> 支持一笔流水跨多级。</li>
+<li><strong>回收队列</strong>：发放/回收分离，不阻塞主链路。</li>
+<li><strong>三方对账</strong>：配置 / 榜单 / 发奖记录，能定位资损。</li>
+<li><strong>巡检闭环</strong>：脚本化、定时化、异常转单。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 边界 / 坑</h2>
+<ul>
+<li>唯一键粒度要设计好：<code>trans_no</code> 太粗会挡掉合法多次发放，太细会重复。</li>
+<li>状态机要闭合：PENDING 不能永久停留，要有超时 / 补偿。</li>
+<li>Redis 标记和 DB 唯一键要一致；只靠 Redis 会丢，只靠 DB 会慢。</li>
+<li>回收和再发要有新的流水号，不能复用旧 <code>trans_no</code>。</li>
+<li>配置变更 / 奖池调整要能对账；历史发奖记录不能被配置覆盖。</li>
+<li>多级奖励的 level 后缀要稳定；不能因为顺序变化导致幂等失效。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">10. 面试怎么讲</h2>
+<p><strong>30 秒版</strong></p>
 <blockquote>
-<p>先插流水，<code>trans_no</code> 唯一键做幂等闸门；<code>DuplicateKey</code> 就是已发放。核销用 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 条件更新，并发不会双消；失败走回收 / 补偿队列，定时对账。</p>
+<p>奖励一致性靠三件事：先插流水，<code>trans_no</code> 唯一键做幂等；核销用 <code>UPDATE ... WHERE status=&#39;ACTIVE&#39;</code> 条件更新；失败走回收/补偿队列，定时对账。多级奖励用 <code>orderNo_level</code> 保幂等，结算用 Redis 标记防重，失败删标记允许补偿。</p>
 </blockquote>
-<p><strong>&quot;多级奖励怎么防重？&quot;</strong></p>
+<p><strong>2 分钟版</strong></p>
 <blockquote>
-<p>唯一键加等级后缀，一笔流水跨多级也能幂等；状态机 PENDING/SUCCESS/FAILED，结算用 Redis 标记，失败删标记允许补偿。</p>
+<p>我们把奖励拆成&quot;流水 + 状态 + 动作&quot;：GET/USE 双流水记录发放和核销，唯一键做幂等闸门；发放在本地事务内，核销用条件更新；宝箱多级结算用 <code>orderNo_level</code> 和状态机，Redis 标记防重、失败删标记；捕鱼用条件更新抢处理权、唯一索引防重复刷鱼、溢出伤害用 <code>orderNo_depth</code>；回收走独立队列，最后用配置/榜单/发奖记录三方对账。</p>
 </blockquote>
-<p><strong>&quot;捕鱼并发怎么处理？&quot;</strong></p>
+<p><strong>追问：怎么防重复？</strong></p>
 <blockquote>
-<p>条件更新抢处理权，唯一索引防重复刷鱼，溢出伤害用 <code>orderNo_depth</code> 保幂等，死锁 / 唯一键冲突重查兜底。</p>
+<p>唯一键 + 流水号；先插流水再发奖，<code>DuplicateKey</code> 就是已发放。核销用条件更新，不用先查后写。</p>
 </blockquote>
-<p><strong>&quot;怎么定位资损？&quot;</strong></p>
+<p><strong>追问：怎么定位资损？</strong></p>
 <blockquote>
-<p>配置 / 榜单 / 发奖记录三方对账；先止血（关活动 / 关发奖），再按流水和 trace 定位，最后补偿 / 回收。</p>
+<p>配置 / 榜单 / 发奖记录三方对账；先止血（关活动/关发奖），再按流水和 trace 定位，最后补偿/回收。</p>
+</blockquote>
+<p><strong>追问：这个设计有什么问题？</strong></p>
+<blockquote>
+<p>唯一键粒度、状态机闭合、Redis 标记与 DB 一致、多级 level 稳定、回收与再发流水号，都是要治理的点。</p>
 </blockquote>
 </section>
       </main>

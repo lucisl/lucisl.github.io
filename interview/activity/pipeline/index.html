@@ -72,13 +72,16 @@
           <p>本文目录</p>
           <ol>
             <li><a href="#chapter-1">一句话</a></li>
-            <li><a href="#chapter-2">1. 活动 = 配置 + 组件 + Pipeline</a></li>
+            <li><a href="#chapter-2">1. 分层：为什么不是&quot;一个大 Service&quot;</a></li>
             <li><a href="#chapter-3">2. 配置模型：main.yaml + biz.yaml</a></li>
             <li><a href="#chapter-4">3. 模块注册：注解 + Provider</a></li>
             <li><a href="#chapter-5">4. Pipeline 执行：并行 + 故障隔离</a></li>
             <li><a href="#chapter-6">5. 零代码 / 低代码的边界</a></li>
-            <li><a href="#chapter-7">6. 迁移与取舍</a></li>
-            <li><a href="#chapter-8">7. 面试怎么讲</a></li>
+            <li><a href="#chapter-7">6. 配置治理：热更新、灰度、回滚</a></li>
+            <li><a href="#chapter-8">7. 迁移与取舍：active-main → active-v3</a></li>
+            <li><a href="#chapter-9">8. 设计亮点总结</a></li>
+            <li><a href="#chapter-10">9. 边界 / 坑</a></li>
+            <li><a href="#chapter-11">10. 面试怎么讲</a></li>
           </ol>
         </nav>
       </aside>
@@ -99,10 +102,11 @@
 
 <section class="ws-card ws-prose" id="chapter-1"><h2 id="chapter-1">一句话</h2>
 <p>活动不是&quot;一个活动写一套 Controller&quot;，而是 <strong>配置（模块 + Pipeline + 时间 + 大区 + 奖励）+ 组件</strong>；标准活动只配 YAML，复杂玩法才写组件。</p>
+<p>这套东西的本质是一个<strong>轻量活动 DSL + 运行时</strong>：YAML 是 DSL，Module 是积木，Pipeline 是编排，Engine 是执行器。</p>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 活动 = 配置 + 组件 + Pipeline</h2>
+<section class="ws-card ws-prose" id="chapter-2"><h2 id="chapter-2">1. 分层：为什么不是&quot;一个大 Service&quot;</h2>
 <p>以 active-v3 为例：</p>
 <pre><code>业务入口 → Business → Active → Module → Coordinator → 基础设施层
 </code></pre>
@@ -140,10 +144,17 @@
 <td>所有层可调用</td>
 </tr>
 </tbody></table></div>
-<p><strong>核心思想</strong></p>
+<p><strong>为什么这样分</strong></p>
 <ul>
-<li>活动 = 积木组合，不是复制粘贴。</li>
-<li>模块只依赖配置类和上下文，不直接依赖别的模块；跨模块走 Coordinator。</li>
+<li>活动之间隔离：一个活动的 Controller/Consumer/Cron 在自己的目录里，不互相干扰。</li>
+<li>模块可复用：Rank/PK/Task/Lottery 不绑死某个活动。</li>
+<li>依赖单向：Business → Active → Module → Coordinator，避免循环依赖。</li>
+<li>基础设施下沉：DB/Redis/Mapper 不散落在业务层。</li>
+</ul>
+<p><strong>代价</strong></p>
+<ul>
+<li>分层靠规范 + Review，不是框架强制；写错也能编译。</li>
+<li>活动多了以后，目录和配置治理是重点。</li>
 </ul>
 <hr>
 </section>
@@ -196,6 +207,13 @@ pipelines:
 <li><code>modules</code> 定义&quot;有哪些组件实例&quot;；<code>pipelines</code> 定义&quot;一次请求按什么顺序/组合执行&quot;。</li>
 <li>支持 <code>sameParameter</code> / <code>sameResponse</code> / <code>responseException</code>，控制 Pipeline 的参数和异常语义。</li>
 <li><code>debug</code> 支持时间偏移，做活动时间旅行。</li>
+<li><code>alias</code> 支持同一套活动配置按时间路由到不同 <code>biz</code>。</li>
+</ul>
+<p><strong>设计亮点</strong></p>
+<ul>
+<li>活动 = YAML 里的模块实例 + Pipeline，不是代码里的 if/else。</li>
+<li>标准活动零代码；复杂玩法只写组件，不写整条链路。</li>
+<li>配置可以热更新、灰度、回滚。</li>
 </ul>
 <hr>
 </section>
@@ -212,12 +230,20 @@ pipelines:
 <ul>
 <li><code>@Module</code> / <code>@ModuleEvent</code>，<code>ModuleProcessor</code> + <code>ModuleProvider</code>，同一套思路。</li>
 <li><code>@ActiveRequest</code> / <code>@ActiveConsumer</code> / <code>@ActiveCron</code> 分别注册 HTTP 请求、Kafka 消费、定时任务。</li>
+<li><code>ActiveRequestProcessor</code> 校验第一个参数必须是 <code>ActiveContext</code>，并处理 CGLIB 代理。</li>
 </ul>
 <p><strong>为什么用注解</strong></p>
 <ul>
 <li>组件作者只写&quot;配置类 + 事件方法&quot;，不关心注册表。</li>
 <li>新增组件不需要改引擎；Provider 自动发现。</li>
 <li>活动 YAML 只引用模块名/事件名，解耦。</li>
+<li>注解还能做签名校验：参数不对启动就报错，避免运行期才发现。</li>
+</ul>
+<p><strong>代价</strong></p>
+<ul>
+<li>注解是隐式契约：新人要理解 <code>@Module</code>/<code>@ModuleEvent</code> 的语义。</li>
+<li>反射注册启动有成本；模块多了要关注启动时间。</li>
+<li>模块名/事件名是字符串，YAML 写错只能运行期发现。</li>
 </ul>
 <hr>
 </section>
@@ -241,6 +267,14 @@ pipelines:
 <li>上下文透传：Session 是 ThreadLocal，线程池里要手动 set/clear。</li>
 <li>故障隔离：一个模块超时/异常不能拖垮整页。</li>
 <li>线程池隔离：活动之间最好分开，避免互相抢线程。</li>
+<li>超时：单个 module 没有独立超时，靠 Future/上层超时；慢模块会拖住整条 Pipeline。</li>
+<li>返回合并：<code>sameResponse</code> 时同 key 可能冲突；<code>responseException</code> 要按活动配置。</li>
+</ul>
+<p><strong>设计取舍</strong></p>
+<ul>
+<li>并行 vs 顺序：并行降 RT，但增加线程池和上下文管理复杂度。</li>
+<li>故障隔离 vs 一致性：单模块失败不整体失败，适合聚合查询；写链路要谨慎。</li>
+<li>线程池共享 vs 隔离：共享简单，隔离更稳；活动峰值要评估。</li>
 </ul>
 <hr>
 </section>
@@ -259,16 +293,46 @@ pipelines:
 <p><strong>不要夸大</strong></p>
 <ul>
 <li>不说&quot;所有活动零代码&quot;；说&quot;标准活动零代码，复杂活动组件化&quot;。</li>
+<li>零代码的代价是配置治理：YAML 写错、模块名写错、事件名写错，只有运行期才发现。</li>
 </ul>
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 迁移与取舍</h2>
-<p><strong>active-main → active-v3</strong></p>
+<section class="ws-card ws-prose" id="chapter-7"><h2 id="chapter-7">6. 配置治理：热更新、灰度、回滚</h2>
+<p><strong>热更新</strong></p>
 <ul>
-<li>active-main：一个活动一个目录，Controller / Consumer / Cron 堆在全局包，互相干扰。</li>
-<li>active-v3：五层分层，Controller / Consumer / 定时任务下沉到活动内部；57%、41→13。</li>
-<li>支持 GraalVM Native Image，活动峰值弹性伸缩。</li>
+<li><code>BusinessDispatcher</code> 监听 Nacos：<code>main.yaml</code> 变更清空所有缓存；<code>biz.yaml</code> 变更清空对应 biz 缓存。</li>
+<li>配置缓存 <code>businessConfigCache</code> / <code>cronMethodCache</code>；变更后重新加载。</li>
+<li><code>alias</code> 解析：按 main.yaml 声明，通过 Nacos 前缀搜索候选，按时间过滤唯一 biz；多个活动同时有效会抛错。</li>
+</ul>
+<p><strong>灰度 / 回滚</strong></p>
+<ul>
+<li><code>alias</code> + 大区 / 白名单灰度。</li>
+<li>配置版本 / Nacos 历史版本回滚。</li>
+<li>开关关闭非核心模块。</li>
+<li>上线前脚本化检查，上线后定时巡检。</li>
+</ul>
+<p><strong>难点</strong></p>
+<ul>
+<li>配置热更新要保证线程安全：<code>volatile mainConfig</code> + <code>ConcurrentHashMap</code> 缓存。</li>
+<li>别名时间重叠校验：防止同一别名命中多个活动。</li>
+<li>配置变更不能影响正在执行的活动；缓存失效后重新加载。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 迁移与取舍：active-main → active-v3</h2>
+<p><strong>active-main</strong></p>
+<ul>
+<li>一个活动一个目录，Controller / Consumer / Cron 堆在全局包，互相干扰。</li>
+<li>README 明确标注哪些包废弃，准备下沉到活动内部。</li>
+<li>1,000+ Java 文件、41 个 Controller。</li>
+</ul>
+<p><strong>active-v3</strong></p>
+<ul>
+<li>五层分层，Controller / Consumer / 定时任务下沉到活动内部。</li>
+<li>57%、41→13；支持 GraalVM Native Image。</li>
+<li>配置驱动 + 组件编排，标准活动零代码。</li>
 </ul>
 <p><strong>代价</strong></p>
 <ul>
@@ -279,22 +343,47 @@ pipelines:
 <hr>
 </section>
 
-<section class="ws-card ws-prose" id="chapter-8"><h2 id="chapter-8">7. 面试怎么讲</h2>
-<p><strong>&quot;活动系统怎么做的？&quot;</strong></p>
+<section class="ws-card ws-prose" id="chapter-9"><h2 id="chapter-9">8. 设计亮点总结</h2>
+<ol>
+<li><strong>活动 DSL</strong>：YAML 定义模块、Pipeline、时间、大区、奖励，活动是配置不是代码。</li>
+<li><strong>组件化</strong>：<code>@Module</code> / <code>@ModuleEvent</code> 自动注册，模块 = 配置类 + 事件方法。</li>
+<li><strong>Pipeline 编排</strong>：并行执行、单模块故障隔离、参数/返回值/异常策略可配。</li>
+<li><strong>分层约束</strong>：Business → Active → Module → Coordinator，单向依赖。</li>
+<li><strong>配置治理</strong>：Nacos 热更新、alias 路由、时间重叠校验、灰度/回滚。</li>
+<li><strong>零代码 / 低代码</strong>：标准活动零代码，复杂活动组件化。</li>
+<li><strong>可演进</strong>：active-main → active-v3，57%、41→13、GraalVM。</li>
+</ol>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-10"><h2 id="chapter-10">9. 边界 / 坑</h2>
+<ul>
+<li>分层靠规范，不是框架强制；写错也能编译。</li>
+<li>YAML 没有编译期校验；模块名/事件名写错运行期才发现。</li>
+<li>Pipeline 并行有线程池和上下文成本；慢模块会拖住整条链路。</li>
+<li>活动多了配置会膨胀；需要配置规范、模板、检查工具。</li>
+<li>双版本并行，线上流量归属要确认。</li>
+<li>零代码只覆盖标准活动；复杂玩法仍要写组件。</li>
+</ul>
+<hr>
+</section>
+
+<section class="ws-card ws-prose" id="chapter-11"><h2 id="chapter-11">10. 面试怎么讲</h2>
+<p><strong>30 秒版</strong></p>
 <blockquote>
 <p>我们把活动做成配置驱动 + 组件编排的运行时：Nacos YAML 定义模块、Pipeline、时间、大区、奖励；模块用注解自动注册；活动按 Pipeline 并行执行，单模块故障隔离。标准活动零代码，复杂玩法写组件。</p>
 </blockquote>
-<p><strong>&quot;组件怎么注册？&quot;</strong></p>
+<p><strong>2 分钟版</strong></p>
 <blockquote>
-<p><code>@DispatchModule</code> / <code>@ModuleEvent</code> 标在模块和事件方法上，<code>BeanPostProcessor</code> 扫描后注册到 Provider，维护 module → event → method；活动 YAML 只引用模块名和事件名。</p>
+<p>分层是 Business → Active → Module → Coordinator → 基础设施，依赖单向。配置在 Nacos：main.yaml 决定加载哪些活动，biz.yaml 定义模块实例和 Pipeline。模块用 <code>@Module</code> / <code>@ModuleEvent</code> 注册到 Provider，Pipeline 把 module+event 并行提交到线程池，MDC/Session 透传，单模块异常只影响自己。配置热更新、alias 路由、时间重叠校验都做了。active-main 到 v3 把 Controller/Consumer/Cron 下沉到活动内部，代码量降 57%、Controller 41→13。</p>
 </blockquote>
-<p><strong>&quot;Pipeline 怎么并行？&quot;</strong></p>
+<p><strong>追问：为什么不用工作流引擎？</strong></p>
 <blockquote>
-<p>每个 module+event 一个 Callable，64/128 线程池，Future 聚合；MDC/Session 透传，单模块异常只影响自己；<code>responseException</code> 控制是否整体失败。</p>
+<p>活动需要低延迟、强一致、和用户/房间/家族/CP 深度耦合；工作流适合长流程审批，规则引擎适合规则判断，都不适合高频活动请求。我们做的是轻量活动 DSL + 运行时。</p>
 </blockquote>
-<p><strong>&quot;这个设计有什么问题？&quot;</strong></p>
+<p><strong>追问：这个设计有什么问题？</strong></p>
 <blockquote>
-<p>分层靠规范约束、双版本并行、配置和代码边界要守；活动多了以后配置治理和可观测性是重点。</p>
+<p>YAML 没有编译期校验、分层靠规范、Pipeline 线程池共享、活动多了配置膨胀、双版本并行；这些是治理重点。</p>
 </blockquote>
 </section>
       </main>
